@@ -1,0 +1,190 @@
+
+DROP DATABASE IF EXISTS proyecto_vaqueras;
+CREATE DATABASE proyecto_vaqueras;
+USE proyecto_vaqueras;
+
+-- 1. MÓDULO DE CONFIGURACIÓN Y USUARIOS
+
+-- Configuración Global (Comisión)
+CREATE TABLE configuracion_sistema (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comision_global DECIMAL(5, 2) DEFAULT 15.00,
+    ultima_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Usuarios
+CREATE TABLE usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nickname VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    telefono VARCHAR(20),
+    pais VARCHAR(50),
+    avatar VARCHAR(255),
+    rol VARCHAR(10) NOT NULL, -- ENUM('ADMIN', 'EMPRESA', 'GAMER')
+    estado VARCHAR(10) DEFAULT 'ACTIVO', -- ENUM('ACTIVO', 'BLOQUEADO')
+    cartera_saldo DECIMAL(10, 2) DEFAULT 0.00,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Empresas
+CREATE TABLE empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    logo VARCHAR(255),
+    comision_especifica DECIMAL(5, 2) DEFAULT NULL, -- Si es NULL usa la global
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    permite_comentarios BOOLEAN DEFAULT TRUE -- Configuración extra visible en diagrama
+);
+
+-- Relación Usuario-Empresa (Staff)
+CREATE TABLE usuario_empresa (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_empresa INT NOT NULL,
+    rol_empresa VARCHAR(50) DEFAULT 'ADMIN', -- Admin o Empleado
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_empresa) REFERENCES empresa(id) ON DELETE CASCADE
+);
+
+-- 2. MÓDULO DE CATÁLOGO DE JUEGOS
+
+CREATE TABLE categoria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) UNIQUE NOT NULL,
+    descripcion TEXT
+);
+
+CREATE TABLE juego (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_empresa INT NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10, 2) NOT NULL,
+    recursos_minimos TEXT,
+    clasificacion CHAR(2) NOT NULL, -- ENUM('E', 'T', 'M') 
+    fecha_lanzamiento DATE,
+    estado_venta VARCHAR(15) DEFAULT 'ACTIVO', -- ENUM('ACTIVO', 'SUSPENDIDO', 'PENDIENTE_REVISION')
+    calificacion_promedio DECIMAL(3, 2) DEFAULT 0.00, -- Calculado
+    FOREIGN KEY (id_empresa) REFERENCES empresa(id)
+);
+
+CREATE TABLE imagen_juego (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_juego INT NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    atributo VARCHAR(50), -- Ej: 'PORTADA', 'GAMEPLAY', 'ARTE'
+    FOREIGN KEY (id_juego) REFERENCES juego(id) ON DELETE CASCADE
+);
+
+CREATE TABLE juego_categoria (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    id_juego INT NOT NULL,
+    id_categoria INT NOT NULL,
+    FOREIGN KEY (id_juego) REFERENCES juego(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id) ON DELETE CASCADE
+);
+
+CREATE TABLE banner (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_juego INT, 
+    orden INT DEFAULT 0,
+    estado BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (id_juego) REFERENCES juego(id)
+);
+
+-- 3. MÓDULO FINANCIERO (Ventas y Cartera)
+
+CREATE TABLE venta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_juego INT NOT NULL,
+    fecha_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
+    precio DECIMAL(10, 2) NOT NULL,
+    comision_aplicada DECIMAL(5, 2) NOT NULL,
+    monto_plataforma DECIMAL(10, 2) NOT NULL,
+    monto_empresa DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (id_juego) REFERENCES juego(id)
+);
+
+CREATE TABLE transaccion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    monto DECIMAL(10, 2) NOT NULL, -- + Recarga, - Compra
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    tipo VARCHAR(20) NOT NULL, -- ENUM('RECARGA', 'COMPRA')
+    id_venta INT NULL, -- NULLABLE: Clave para diferenciar recargas de compras
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (id_venta) REFERENCES venta(id)
+);
+
+-- 4. MÓDULO DE BIBLIOTECA Y SOCIAL
+
+CREATE TABLE biblioteca (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_juego INT NOT NULL,
+    fecha_adquisicion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    jugado_horas INT DEFAULT 0,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (id_juego) REFERENCES juego(id),
+    UNIQUE(id_usuario, id_juego) 
+);
+
+
+CREATE TABLE calificacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_juego INT NOT NULL,
+    calificacion INT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (id_juego) REFERENCES juego(id),
+    UNIQUE(id_usuario, id_juego) 
+);
+
+
+CREATE TABLE comentario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_juego INT NOT NULL,
+    id_comentario_padre INT NULL, -- NULL es comentario raíz, ID es respuesta
+    comentario TEXT NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado_comentario VARCHAR(20) DEFAULT 'VISIBLE', -- ENUM('VISIBLE', 'OCULTO', 'ELIMINADO'),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (id_juego) REFERENCES juego(id),
+    FOREIGN KEY (id_comentario_padre) REFERENCES comentario(id) ON DELETE CASCADE
+);
+
+-- 5. MÓDULO DE GRUPOS FAMILIARES
+
+CREATE TABLE grupo_familiar (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    id_creador INT NOT NULL,
+    FOREIGN KEY (id_creador) REFERENCES usuario(id)
+);
+
+CREATE TABLE grupo_usuario (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_grupo INT NOT NULL,
+    id_usuario INT NOT NULL,
+    FOREIGN KEY (id_grupo) REFERENCES grupo_familiar(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
+);
+
+CREATE TABLE prestamo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_beneficiario INT NOT NULL, -- Quien lo juega
+    id_juego INT NOT NULL,
+    id_dueno INT NOT NULL,        -- De quien es el juego
+    estado VARCHAR(15) DEFAULT 'NO_INSTALADO', -- ENUM('INSTALADO', 'NO_INSTALADO')
+    fecha DATETIME,
+    FOREIGN KEY (id_beneficiario) REFERENCES usuario(id),
+    FOREIGN KEY (id_juego) REFERENCES juego(id),
+    FOREIGN KEY (id_dueno) REFERENCES usuario(id)
+);
