@@ -1,4 +1,3 @@
-
 DROP DATABASE IF EXISTS proyecto_vaqueras;
 CREATE DATABASE proyecto_vaqueras;
 USE proyecto_vaqueras;
@@ -20,7 +19,7 @@ CREATE TABLE usuario (
     email VARCHAR(100) UNIQUE NOT NULL,
     fecha_nacimiento DATE NOT NULL,
     telefono VARCHAR(20),
-    pais VARCHAR(50),
+    pais VARCHAR(150),
     avatar VARCHAR(255),
     rol VARCHAR(10) NOT NULL, -- ENUM('ADMIN', 'EMPRESA', 'GAMER')
     estado VARCHAR(10) DEFAULT 'ACTIVO', -- ENUM('ACTIVO', 'BLOQUEADO')
@@ -139,7 +138,7 @@ CREATE TABLE calificacion (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_juego INT NOT NULL,
-    calificacion INT NOT NULL CHECK (calificacion BETWEEN 1 AND 5),
+    calificacion DECIMAL(2, 1) NOT NULL CHECK (calificacion >= 1.0 AND calificacion <= 5.0),
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_juego) REFERENCES juego(id),

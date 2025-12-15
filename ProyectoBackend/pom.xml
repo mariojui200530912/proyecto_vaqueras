@@ -10,6 +10,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jakartaee>11.0.0-M1</jakartaee>
+        <restapi>4.0.0-M4</restapi>
     </properties>
     
     <dependencies>
@@ -51,6 +52,11 @@
             <version>${restapi}</version>
         </dependency>
         <!-- -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.18.2</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
