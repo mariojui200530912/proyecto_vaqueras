@@ -206,6 +206,23 @@ public class UsuarioRepository {
         }
     }
 
+    public Integer obtenerIdEmpresaPorUsuario(Integer id_usuario){
+        String sql = "SELECT * FROM usuario_empresa WHERE id_usuario = ?";
+        try(Connection conn = DBConnection.getInstance().getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, id_usuario);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("id_empresa");
+            }
+            return null;
+
+        }catch (SQLException e){
+            throw new RuntimeException("Error al obtener ID Empresa por ID de usuario: " + id_usuario, e);
+        }
+    }
+
     public Usuario mapResultSetToUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id"));

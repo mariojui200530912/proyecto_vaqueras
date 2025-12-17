@@ -24,11 +24,10 @@ public enum EstadoUsuario {
     }
     
     public static EstadoUsuario fromString(String valor) {
-        for (EstadoUsuario estado : EstadoUsuario.values()) {
-            if (estado.valor.equalsIgnoreCase(valor)) {
-                return estado;
-            }
+        try{
+            return EstadoUsuario.valueOf(valor.toUpperCase());
+        }catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Estado de usuario desconocido: " + valor);
         }
-        throw new IllegalArgumentException("Estado de usuario desconocido: " + valor);
     }
 }

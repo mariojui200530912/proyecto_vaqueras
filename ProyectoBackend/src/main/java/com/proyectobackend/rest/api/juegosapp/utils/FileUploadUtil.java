@@ -45,11 +45,7 @@ public class FileUploadUtil {
         return subfolder + "/" + safeFileName;
     }
 
-    /**
-     * Elimina un archivo del servidor si existe.
-     *
-     * @param relativePath Ruta relativa como "/uploads/posters/archivo.jpg"
-     */
+    // Elimina archivo del servidor
     public static void deleteFile(String relativePath) {
         if (relativePath == null || relativePath.isEmpty()) {
             return;

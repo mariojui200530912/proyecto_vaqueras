@@ -30,7 +30,7 @@ CREATE TABLE usuario (
 -- Empresas
 CREATE TABLE empresa (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) UNIQUE NOT NULL,
     descripcion TEXT,
     logo VARCHAR(255),
     comision_especifica DECIMAL(5, 2) DEFAULT NULL, -- Si es NULL usa la global

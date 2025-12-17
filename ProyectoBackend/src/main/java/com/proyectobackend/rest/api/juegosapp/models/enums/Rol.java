@@ -24,11 +24,10 @@ public enum Rol {
     }
     
     public static Rol fromString(String valor) {
-        for (Rol rol : Rol.values()) {
-            if (rol.valor.equalsIgnoreCase(valor)) {
-                return rol;
-            }
+        try{
+            return Rol.valueOf(valor.toUpperCase());
+        }catch(IllegalArgumentException e){
+            throw new IllegalArgumentException("Rol desconocido: " + valor);
         }
-        throw new IllegalArgumentException("Tipo de usuario desconocido: " + valor);
     }
 }
