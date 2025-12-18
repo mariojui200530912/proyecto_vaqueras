@@ -20,7 +20,7 @@ CREATE TABLE usuario (
     fecha_nacimiento DATE NOT NULL,
     telefono VARCHAR(20),
     pais VARCHAR(150),
-    avatar VARCHAR(255),
+    avatar MEDIUMBLOB,
     rol VARCHAR(10) NOT NULL, -- ENUM('ADMIN', 'EMPRESA', 'GAMER')
     estado VARCHAR(10) DEFAULT 'ACTIVO', -- ENUM('ACTIVO', 'BLOQUEADO')
     cartera_saldo DECIMAL(10, 2) DEFAULT 0.00,
@@ -32,7 +32,7 @@ CREATE TABLE empresa (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) UNIQUE NOT NULL,
     descripcion TEXT,
-    logo VARCHAR(255),
+    logo MEDIUMBLOB,
     comision_especifica DECIMAL(5, 2) DEFAULT NULL, -- Si es NULL usa la global
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     permite_comentarios BOOLEAN DEFAULT TRUE -- Configuración extra visible en diagrama
@@ -73,7 +73,7 @@ CREATE TABLE juego (
 CREATE TABLE imagen_juego (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_juego INT NOT NULL,
-    url VARCHAR(255) NOT NULL,
+    imagen MEDIUMBLOB NOT NULL,
     atributo VARCHAR(50), -- Ej: 'PORTADA', 'GAMEPLAY', 'ARTE'
     FOREIGN KEY (id_juego) REFERENCES juego(id) ON DELETE CASCADE
 );

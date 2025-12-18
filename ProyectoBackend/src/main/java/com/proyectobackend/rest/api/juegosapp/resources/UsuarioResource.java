@@ -67,10 +67,6 @@ public class UsuarioResource {
     ) {
         String rutaFoto = null;
         try {
-            // Guardar imagen si se envía
-            if (avatarInput != null && fileDetail != null) {
-                rutaFoto = FileUploadUtil.saveFile(avatarInput, fileDetail.getFileName(), "usuarios");
-            }
 
             UsuarioRequest request = new UsuarioRequest();
             request.setNickname(nickname);
@@ -79,17 +75,19 @@ public class UsuarioResource {
             request.setFechaNacimiento(LocalDate.parse(fechaNacimiento));
             request.setTelefono(telefono);
             request.setPais(pais);
-            request.setAvatar(rutaFoto);
+
+            // Guardar imagen si se envía
+            if (avatarInput != null) {
+                request.setAvatar(FileUploadUtil.leerBytesDeInput(avatarInput));
+            }
+
             request.setRol(Rol.valueOf("GAMER"));
 
             UsuarioResponse usuario = usuarioService.registrarUsuario(request);
             return Response.status(Response.Status.CREATED).entity(usuario).build();
 
         } catch (Exception e) {
-            // Borrar foto si falla el registro
-            if (rutaFoto != null){
-                FileUploadUtil.deleteFile(rutaFoto);
-            }
+
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse("Error al registrar usuario: " + e.getMessage()))
                     .type(MediaType.APPLICATION_JSON)
@@ -141,16 +139,12 @@ public class UsuarioResource {
             @FormDataParam("avatar") FormDataContentDisposition fileDetail
     ) {
             Usuario usuarioActual = usuarioService.obtenerUsuarioPorId(id);
-            String rutaFoto = usuarioActual.getAvatar();
+
         try {
             if (usuarioActual == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity(new MensajeResponse("Usuario no encontrado."))
                         .build();
-            }
-            // Guardar nueva imagen solo si se envía
-            if (avatarInput != null && fileDetail != null && fileDetail.getFileName() != null && !fileDetail.getFileName().isEmpty()) {
-                rutaFoto = FileUploadUtil.saveFile(avatarInput, fileDetail.getFileName(), "usuarios");
             }
 
             // Convertir fecha (si se envía)
@@ -167,7 +161,10 @@ public class UsuarioResource {
             request.setFechaNacimiento(fechaNacimiento);
             request.setTelefono(telefono != null ? telefono : usuarioActual.getTelefono());
             request.setPais(pais != null ? pais : usuarioActual.getPais());
-            request.setAvatar(rutaFoto);
+            // Guardar nueva imagen solo si se envía
+            if (avatarInput != null && fileDetail != null && fileDetail.getFileName() != null && !fileDetail.getFileName().isEmpty()) {
+                request.setAvatar(FileUploadUtil.leerBytesDeInput(avatarInput));
+            }
 
             // Solo admin puede modificar tipo y estado; si no vienen, conservar
             if (rol != null && !rol.isEmpty()) {
@@ -187,10 +184,6 @@ public class UsuarioResource {
             return Response.ok(usuarioActualizado).build();
 
         } catch (Exception e) {
-            // Borrar foto si falla el registro
-            if (rutaFoto != null){
-                FileUploadUtil.deleteFile(rutaFoto);
-            }
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse("Error al actualizar perfil: " + e.getMessage()))
                     .type(MediaType.APPLICATION_JSON)

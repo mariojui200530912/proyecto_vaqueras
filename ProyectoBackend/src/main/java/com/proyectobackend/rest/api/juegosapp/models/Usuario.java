@@ -22,7 +22,7 @@ public class Usuario {
     private LocalDate fechaNacimiento;
     private String telefono;
     private String pais;
-    private String avatar;
+    private byte[] avatar;
     private Rol rol;
     private EstadoUsuario estado;
     private BigDecimal cartera_saldo;
@@ -84,11 +84,11 @@ public class Usuario {
         this.pais = pais;
     }
 
-    public String getAvatar() {
+    public byte[] getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
     }
 

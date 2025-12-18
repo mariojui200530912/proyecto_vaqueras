@@ -12,7 +12,10 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.proyectobackend.rest.api.juegosapp.models.enums.EstadoUsuario;
 import com.proyectobackend.rest.api.juegosapp.models.enums.Rol;
+
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -30,7 +33,7 @@ public class UsuarioRequest {
     private LocalDate fechaNacimiento;
     private String telefono;
     private String pais;
-    private String avatar;
+    private byte[] avatar;
     private Rol rol;
     private EstadoUsuario estado;
     private BigDecimal cartera_saldo;
@@ -92,11 +95,11 @@ public class UsuarioRequest {
         this.pais = pais;
     }
 
-    public String getAvatar() {
+    public byte[] getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
     }
 

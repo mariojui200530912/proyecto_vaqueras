@@ -111,7 +111,7 @@ public class UsuarioRepository {
             stmt.setDate(4, Date.valueOf(usuario.getFechaNacimiento()));
             stmt.setString(5, usuario.getTelefono());
             stmt.setString(6, usuario.getPais());
-            stmt.setString(7, usuario.getAvatar());
+            stmt.setBytes(7, usuario.getAvatar());
             stmt.setString(8, usuario.getRol().getValor());
             stmt.setString(9, usuario.getEstado().getValor());
             stmt.setBigDecimal(10, usuario.getCartera_saldo());
@@ -149,7 +149,7 @@ public class UsuarioRepository {
             stmt.setDate(4, Date.valueOf(usuario.getFechaNacimiento()));
             stmt.setString(5, usuario.getTelefono());
             stmt.setString(6, usuario.getPais());
-            stmt.setString(7, usuario.getAvatar());
+            stmt.setBytes(7, usuario.getAvatar());
             stmt.setString(8, usuario.getRol().getValor());
             stmt.setString(9, usuario.getEstado().getValor());
             stmt.setInt(10, usuario.getId());
@@ -232,7 +232,7 @@ public class UsuarioRepository {
         usuario.setFechaNacimiento(rs.getDate("fecha_nacimiento").toLocalDate());
         usuario.setTelefono(rs.getString("telefono"));
         usuario.setPais(rs.getString("pais"));
-        usuario.setAvatar(rs.getString("avatar"));
+        usuario.setAvatar(rs.getBytes("avatar"));
         usuario.setRol(Rol.valueOf(rs.getString("rol")));
         usuario.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
         usuario.setCartera_saldo(rs.getBigDecimal("cartera_saldo"));

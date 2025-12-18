@@ -8,7 +8,7 @@ public class Empresa {
     private int id;
     private String nombre;
     private String descripcion;
-    private String logo;
+    private byte[] logo;
     private BigDecimal comisionEspecifica;
     private LocalDateTime fecha_creacion;
     private Boolean permiteComentarios;
@@ -37,11 +37,11 @@ public class Empresa {
         this.descripcion = descripcion;
     }
 
-    public String getLogo() {
+    public byte[] getLogo() {
         return logo;
     }
 
-    public void setLogo(String logo) {
+    public void setLogo(byte[] logo) {
         this.logo = logo;
     }
 

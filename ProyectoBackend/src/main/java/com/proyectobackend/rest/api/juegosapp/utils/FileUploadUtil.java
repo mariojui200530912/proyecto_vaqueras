@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
  * @author Hp
  */
 public class FileUploadUtil {
-     private static final String BASE_UPLOAD_DIR = "C:\\Users\\Hp\\OneDrive\\Documentos\\Universidad\\Cursos\\IPC2\\EVProyecto\\Proyecto\\assets";
+    private static final String BASE_UPLOAD_DIR = "C:\\Users\\Hp\\OneDrive\\Documentos\\Universidad\\Cursos\\IPC2\\EVProyecto\\Proyecto\\assets";
 
     public static String saveFile(InputStream inputStream, String originalFileName, String subfolder) throws IOException {
         if (inputStream == null || originalFileName == null || originalFileName.isEmpty()) {
@@ -56,6 +56,15 @@ public class FileUploadUtil {
             Files.deleteIfExists(absolutePath);
         } catch (IOException e) {
             System.err.println("No se pudo eliminar el archivo: " + relativePath);
+        }
+    }
+
+    public static byte[] leerBytesDeInput(InputStream input) throws IOException {
+        try {
+            if (input == null) return null;
+            return input.readAllBytes();
+        } catch (Exception e) {
+            return null;
         }
     }
 }

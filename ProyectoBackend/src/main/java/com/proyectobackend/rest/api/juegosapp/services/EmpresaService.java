@@ -37,14 +37,13 @@ public class EmpresaService {
                 throw new EntityAlReadyExistException("El nombre de empresa ya está registrado.");
             }
 
-            if (logoInput != null && fileName != null && !fileName.isEmpty()) {
-                rutaLogo = FileUploadUtil.saveFile(logoInput, fileName, "empresas");
-            }
 
             Empresa empresa = new Empresa();
             empresa.setNombre(request.getNombre());
             empresa.setDescripcion(request.getDescripcion());
-            empresa.setLogo(rutaLogo);
+            if (logoInput != null && fileName != null && !fileName.isEmpty()) {
+                empresa.setLogo(FileUploadUtil.leerBytesDeInput(logoInput));
+            }
             empresa.setComisionEspecifica(request.getComisionEspecifica());
             empresa.setFecha_creacion(LocalDateTime.now());
             // Default a TRUE si viene null
@@ -53,10 +52,6 @@ public class EmpresaService {
             Empresa guardada = empresaRepository.crear(empresa);
             return mapToResponse(guardada);
         }catch (Exception e) {
-            // Borrar foto si falla el registro
-            if (rutaLogo != null){
-                FileUploadUtil.deleteFile(rutaLogo);
-            }
             throw e;
         }
     }
@@ -88,11 +83,11 @@ public class EmpresaService {
         if (request.getPermiteComentarios() != null) actual.setPermiteComentarios(request.getPermiteComentarios());
 
         // Manejo de Logo Nuevo
-        if (logoInput != null && fileName != null && !fileName.isEmpty()) {
-            if (actual.getLogo() != null) FileUploadUtil.deleteFile(actual.getLogo());
-
-            String nuevaRuta = FileUploadUtil.saveFile(logoInput, fileName, "empresas");
-            actual.setLogo(nuevaRuta);
+        if (logoInput != null) {
+            byte[] nuevoLogo = FileUploadUtil.leerBytesDeInput(logoInput);
+            if (nuevoLogo != null && nuevoLogo.length > 0) {
+                actual.setLogo(nuevoLogo);
+            }
         }
 
         boolean exito = empresaRepository.actualizar(actual);
@@ -112,7 +107,10 @@ public class EmpresaService {
         resp.setId(e.getId());
         resp.setNombre(e.getNombre());
         resp.setDescripcion(e.getDescripcion());
-        resp.setLogo(e.getLogo());
+        if (e.getLogo() != null && e.getLogo().length > 0) {
+            String base64 = java.util.Base64.getEncoder().encodeToString(e.getLogo());
+            resp.setLogo(base64);
+        }
         resp.setComisionEspecifica(e.getComisionEspecifica());
         resp.setFechaCreacion(e.getFecha_creacion());
         resp.setPermiteComentarios(e.getPermiteComentarios());

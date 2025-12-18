@@ -13,7 +13,7 @@ public class Juego {
     private String clasificacion;
     private LocalDate fechaLanzamiento;
     private String estadoVenta; // ACTIVO, SUSPENDIDO
-    private double calificacionPromedio;
+    private BigDecimal calificacionPromedio;
 
     public int getId() {
         return id;
@@ -87,11 +87,11 @@ public class Juego {
         this.estadoVenta = estadoVenta;
     }
 
-    public double getCalificacionPromedio() {
+    public BigDecimal getCalificacionPromedio() {
         return calificacionPromedio;
     }
 
-    public void setCalificacionPromedio(double calificacionPromedio) {
+    public void setCalificacionPromedio(BigDecimal calificacionPromedio) {
         this.calificacionPromedio = calificacionPromedio;
     }
 }

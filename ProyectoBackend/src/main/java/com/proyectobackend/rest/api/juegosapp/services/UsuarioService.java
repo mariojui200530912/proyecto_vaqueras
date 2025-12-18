@@ -98,10 +98,6 @@ public class UsuarioService {
         }
 
         Usuario usuario = usuarioRepository.findById(idUsuario);
-        // Eliminar foto anterior
-        if (usuario.getAvatar() != null){
-            FileUploadUtil.deleteFile(usuario.getAvatar());
-        }
 
         // Actualizar datos
         usuario.setNickname(request.getNickname());
@@ -199,7 +195,10 @@ public class UsuarioService {
         response.setFechaNacimiento(usuario.getFechaNacimiento());
         response.setTelefono(usuario.getTelefono());
         response.setPais(usuario.getPais());
-        response.setAvatar(usuario.getAvatar());
+        if (usuario.getAvatar() != null && usuario.getAvatar().length > 0) {
+            String base64 = java.util.Base64.getEncoder().encodeToString(usuario.getAvatar());
+            response.setAvatar("data:image/jpeg;base64," + base64); // Prefijo necesario para HTML
+        }
         response.setRol(usuario.getRol());
         response.setEstado(usuario.getEstado());
         response.setCartera_saldo(usuario.getCartera_saldo());

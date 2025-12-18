@@ -16,7 +16,11 @@ public class EmpresaRepository {
 
             ps.setString(1, empresa.getNombre());
             ps.setString(2, empresa.getDescripcion());
-            ps.setString(3, empresa.getLogo());
+            if (empresa.getLogo() != null) {
+                ps.setBytes(3, empresa.getLogo());
+            } else {
+                ps.setNull(3, Types.BLOB);
+            }
 
             // Manejo de Decimal Nulo
             if (empresa.getComisionEspecifica() != null) {
@@ -62,7 +66,11 @@ public class EmpresaRepository {
 
             ps.setString(1, empresa.getNombre());
             ps.setString(2, empresa.getDescripcion());
-            ps.setString(3, empresa.getLogo());
+            if (empresa.getLogo() != null) {
+                ps.setBytes(3, empresa.getLogo());
+            } else {
+                ps.setNull(3, Types.BLOB);
+            }
 
             if (empresa.getComisionEspecifica() != null) {
                 ps.setBigDecimal(4, empresa.getComisionEspecifica());
@@ -120,7 +128,7 @@ public class EmpresaRepository {
         e.setId(rs.getInt("id"));
         e.setNombre(rs.getString("nombre"));
         e.setDescripcion(rs.getString("descripcion"));
-        e.setLogo(rs.getString("logo"));
+        e.setLogo(rs.getBytes("logo"));
         e.setComisionEspecifica(rs.getBigDecimal("comision_especifica"));
         e.setPermiteComentarios(rs.getBoolean("permite_comentarios"));
         if (rs.getTimestamp("fecha_creacion") != null) {
