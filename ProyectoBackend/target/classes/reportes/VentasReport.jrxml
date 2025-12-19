@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="VentasReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4eedbb89-b4f6-4469-9ab6-f642a1688cf7">
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+
+    <parameter name="FECHA_INICIO" class="java.lang.String"/>
+    <parameter name="FECHA_FIN" class="java.lang.String"/>
+
+    <queryString>
+        <![CDATA[
+		SELECT
+			v.id as venta_id,
+			u.nickname as usuario_nombre,
+			j.titulo as juego_titulo,
+			v.fecha as fecha_venta,
+			v.total as monto_total
+		FROM venta v
+		INNER JOIN usuario u ON v.id_usuario = u.id
+		INNER JOIN juego j ON v.id_juego = j.id
+		WHERE v.fecha >= DATE($P{FECHA_INICIO})
+		AND v.fecha <= DATE($P{FECHA_FIN})
+		ORDER BY v.fecha DESC
+		]]>
+    </queryString>
+
+    <field name="venta_id" class="java.lang.Integer"/>
+    <field name="usuario_nombre" class="java.lang.String"/>
+    <field name="juego_titulo" class="java.lang.String"/>
+    <field name="fecha_venta" class="java.sql.Timestamp"/>
+    <field name="monto_total" class="java.math.BigDecimal"/>
+
+    <variable name="SUMA_TOTAL" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{monto_total}]]></variableExpression>
+    </variable>
+
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+
+    <title>
+        <band height="79" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="10" width="555" height="30" uuid="a0bf8498-5460-4648-8422-921319045763"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="22" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Reporte de Ventas - Videojuegos]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="50" width="555" height="20" uuid="e241761d-6161-4608-89c0-99427e527c13"/>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA["Desde: " + $P{FECHA_INICIO} + " Hasta: " + $P{FECHA_FIN}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="30" splitType="Stretch">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="60" height="30" backcolor="#E0E0E0" uuid="5df6b010-02e0-4357-9877-d42171c6f1b1"/>
+                <box><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[ID]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="60" y="0" width="130" height="30" backcolor="#E0E0E0" uuid="c241517c-2c25-46c9-9430-6644f77c3647"/>
+                <box><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Usuario]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="190" y="0" width="180" height="30" backcolor="#E0E0E0" uuid="16954388-37c7-4346-9538-232187214695"/>
+                <box><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Juego]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="370" y="0" width="100" height="30" backcolor="#E0E0E0" uuid="88523277-c917-4861-bb21-125028448698"/>
+                <box><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Fecha]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="470" y="0" width="85" height="30" backcolor="#E0E0E0" uuid="8a679133-3141-4777-a843-125637841369"/>
+                <box><topPen lineWidth="1.0"/><leftPen lineWidth="1.0"/><bottomPen lineWidth="1.0"/><rightPen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[Total (Q)]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="30" splitType="Stretch">
+            <textField>
+                <reportElement x="0" y="0" width="60" height="30" uuid="15873216-2226-4444-9686-228726588722"/>
+                <box leftPadding="5"><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{venta_id}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="60" y="0" width="130" height="30" uuid="b1238917-2156-4221-9956-654125895625"/>
+                <box leftPadding="5"><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{usuario_nombre}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="190" y="0" width="180" height="30" uuid="32156488-2541-4654-8854-326548975215"/>
+                <box leftPadding="5"><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{juego_titulo}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy">
+                <reportElement x="370" y="0" width="100" height="30" uuid="66542385-2365-4236-9654-212548963254"/>
+                <box leftPadding="5"><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{fecha_venta}]]></textFieldExpression>
+            </textField>
+            <textField pattern="Q #,##0.00">
+                <reportElement x="470" y="0" width="85" height="30" uuid="99856321-2541-4875-9658-365214587954"/>
+                <box rightPadding="5"><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <textFieldExpression><![CDATA[$F{monto_total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="42" splitType="Stretch">
+            <textField pattern="Q #,##0.00">
+                <reportElement x="470" y="10" width="85" height="30" uuid="77412563-2256-4445-8854-123654789521"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{SUMA_TOTAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="370" y="10" width="100" height="30" uuid="11254863-2256-4478-8541-365214895632"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font isBold="true"/>
+                </textElement>
+                <text><![CDATA[TOTAL VENTAS:]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>

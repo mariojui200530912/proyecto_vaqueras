@@ -1,0 +1,73 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="Top5Empresa" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="bbd5fa37-acc4-4077-afeb-5e754a3182fc">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="ID_EMPRESA" class="java.lang.Integer"/>
+	<parameter name="FECHA_INICIO" class="java.lang.String"/>
+	<parameter name="FECHA_FIN" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT
+			j.titulo,
+			j.precio,
+			c.nombre as categoria,
+			COUNT(v.id) as total_ventas
+		FROM venta v
+		INNER JOIN juego j ON v.id_juego = j.id
+		INNER JOIN juego_categoria jc ON j.id = jc.id_juego
+		INNER JOIN categoria c ON jc.id_categoria = c.id
+		WHERE j.id_empresa = $P{ID_EMPRESA}
+		AND v.fecha >= DATE($P{FECHA_INICIO}) AND v.fecha <= DATE($P{FECHA_FIN})
+		GROUP BY j.id
+		ORDER BY total_ventas DESC
+		LIMIT 5]]></query>
+	<field name="titulo" class="java.lang.String"/>
+	<field name="precio" class="java.math.BigDecimal"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="total_ventas" class="java.lang.Long"/>
+	<title height="60">
+		<element kind="staticText" uuid="8a31b388-cecb-4dac-bbe8-9f414aefdf19" x="0" y="10" width="555" height="30" fontSize="20.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[TOP 5: Mis Juegos Más Vendidos]]></text>
+		</element>
+	</title>
+	<columnHeader height="30">
+		<element kind="staticText" uuid="c6c7c329-5f72-465e-8ad8-15c7ce4e4537" mode="Opaque" x="0" y="0" width="200" height="30" backcolor="#F0F0F0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Juego]]></text>
+			<box leftPadding="5"/>
+		</element>
+		<element kind="staticText" uuid="24eed639-06c8-4123-b5da-034eff7b1d10" mode="Opaque" x="200" y="0" width="150" height="30" backcolor="#F0F0F0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Categoría]]></text>
+		</element>
+		<element kind="staticText" uuid="77a71886-f3e8-4dba-90a2-a90ee208bd8d" mode="Opaque" x="350" y="0" width="100" height="30" backcolor="#F0F0F0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Precio]]></text>
+		</element>
+		<element kind="staticText" uuid="cd2fd3db-8e54-44ad-8b4d-6bdb04e97967" mode="Opaque" x="450" y="0" width="100" height="30" backcolor="#F0F0F0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Ventas Totales]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="30">
+			<element kind="textField" uuid="6dbcdb5a-a3a1-4f1a-a660-8a21592fafc4" x="0" y="0" width="200" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{titulo}]]></expression>
+				<box leftPadding="5">
+					<bottomPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="9f631888-7005-4ed0-82b4-309c0a61d859" x="200" y="0" width="150" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{categoria}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="e5cb5be9-ec3d-455f-9ecb-c0c9ec551839" x="350" y="0" width="100" height="30" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{precio}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="ab7b8c5c-701d-4da2-80a2-dfb49eb48c35" x="450" y="0" width="100" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{total_ventas}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+</jasperReport>

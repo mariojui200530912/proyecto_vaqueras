@@ -15,16 +15,6 @@ import com.proyectobackend.rest.api.juegosapp.models.enums.EstadoUsuario;
 import com.proyectobackend.rest.api.juegosapp.models.enums.Rol;
 import com.proyectobackend.rest.api.juegosapp.services.UsuarioService;
 import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import com.proyectobackend.rest.api.juegosapp.utils.PasswordUtil;
-import jakarta.ejb.Local;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;

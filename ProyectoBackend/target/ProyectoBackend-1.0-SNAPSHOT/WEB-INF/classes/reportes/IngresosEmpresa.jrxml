@@ -1,0 +1,119 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="IngresosEmpresa" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="abc98765-4321-4321-4321-0987654321ab">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="FECHA_INICIO" class="java.lang.String"/>
+	<parameter name="FECHA_FIN" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT
+			e.nombre as empresa_nombre,
+			COUNT(v.id) as cantidad_ventas,
+			SUM(v.precio) as ventas_brutas,
+			SUM(v.monto_plataforma) as comision_plataforma,
+			(SUM(v.monto_empresa) as neto_a_pagar
+		FROM venta v
+		INNER JOIN juego j ON v.id_juego = j.id
+		INNER JOIN empresa e ON j.id_empresa = e.id
+		WHERE v.fecha_compra >= DATE($P{FECHA_INICIO})
+		AND v.fecha_compra <= DATE($P{FECHA_FIN})
+		GROUP BY e.id, e.nombre
+		ORDER BY ventas_brutas DESC]]></query>
+	<field name="empresa_nombre" class="java.lang.String"/>
+	<field name="cantidad_ventas" class="java.lang.Long"/>
+	<field name="ventas_brutas" class="java.math.BigDecimal"/>
+	<field name="comision_plataforma" class="java.math.BigDecimal"/>
+	<field name="neto_a_pagar" class="java.math.BigDecimal"/>
+	<variable name="SUM_VENTAS" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{ventas_brutas}]]></expression>
+	</variable>
+	<variable name="SUM_COMISION" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{comision_plataforma}]]></expression>
+	</variable>
+	<variable name="SUM_NETO" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{neto_a_pagar}]]></expression>
+	</variable>
+	<background splitType="Stretch"/>
+	<title height="80" splitType="Stretch">
+		<element kind="staticText" uuid="e28bc25e-7957-4da8-bc82-c1767cb1e497" x="0" y="10" width="555" height="30" forecolor="#2C3E50" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Reporte Financiero por Empresa]]></text>
+		</element>
+		<element kind="textField" uuid="ca1d084a-7712-4084-8b12-788f076c61f4" x="0" y="50" width="555" height="20" fontSize="12.0" hTextAlign="Center">
+			<expression><![CDATA["Periodo del reporte: " + $P{FECHA_INICIO} + " al " + $P{FECHA_FIN}]]></expression>
+		</element>
+		<element kind="line" uuid="89273042-1da1-4ad7-acd3-6d749b723fbf" x="20" y="75" width="515" height="1"/>
+	</title>
+	<columnHeader height="30" splitType="Stretch">
+		<element kind="staticText" uuid="fed0ec7c-d6f5-40a5-8ed0-c9ac47ea4948" mode="Opaque" x="0" y="0" width="180" height="30" forecolor="#FFFFFF" backcolor="#34495E" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Empresa]]></text>
+			<box leftPadding="5"/>
+		</element>
+		<element kind="staticText" uuid="626c019e-4d54-4601-a03c-fdccef72cfa1" mode="Opaque" x="180" y="0" width="70" height="30" forecolor="#FFFFFF" backcolor="#34495E" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Ventas (#)]]></text>
+		</element>
+		<element kind="staticText" uuid="3528c7c7-ed89-4cd7-b509-31d6b595b056" mode="Opaque" x="250" y="0" width="100" height="30" forecolor="#FFFFFF" backcolor="#34495E" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Ingreso Bruto]]></text>
+		</element>
+		<element kind="staticText" uuid="a39c0ebc-0f19-43ca-8cf1-5710b6f9da76" mode="Opaque" x="350" y="0" width="100" height="30" forecolor="#FFFFFF" backcolor="#34495E" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Retención (Com.)]]></text>
+		</element>
+		<element kind="staticText" uuid="02982730-ecbb-4802-a76a-1526fd5d2e21" mode="Opaque" x="450" y="0" width="105" height="30" forecolor="#FFFFFF" backcolor="#27AE60" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Neto a Pagar]]></text>
+			<box rightPadding="5"/>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<element kind="textField" uuid="c92fa922-cf6d-40d2-bee8-2a28c70f4536" x="0" y="0" width="180" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{empresa_nombre}]]></expression>
+				<box leftPadding="5">
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="786839e1-0ddb-46de-a1aa-2c4759d347ae" x="180" y="0" width="70" height="30" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{cantidad_ventas}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="db90b9c5-4653-4709-95f9-8a0cbed6fc95" x="250" y="0" width="100" height="30" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{ventas_brutas}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="106a1560-ecff-47c1-9132-ee1fc675c032" x="350" y="0" width="100" height="30" forecolor="#C0392B" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{comision_plataforma}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="dfb5d702-f2af-47fb-bed0-4ce3b01ec8dc" x="450" y="0" width="105" height="30" pattern="Q #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{neto_a_pagar}]]></expression>
+				<box rightPadding="5">
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+	<summary height="50" splitType="Stretch">
+		<element kind="staticText" uuid="5dee69ba-5939-4f3d-97d1-da8195aab1ee" x="150" y="10" width="100" height="30" fontSize="12.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[TOTALES:]]></text>
+		</element>
+		<element kind="textField" uuid="1de92abb-535b-464c-9dc9-3284183057c8" x="250" y="10" width="100" height="30" pattern="Q #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$V{SUM_VENTAS}]]></expression>
+			<box topPadding="3">
+				<topPen lineWidth="1.0" lineStyle="Solid"/>
+			</box>
+		</element>
+		<element kind="textField" uuid="6f6f7ec7-b41b-4254-acb0-42b777091318" x="350" y="10" width="100" height="30" forecolor="#C0392B" pattern="Q #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$V{SUM_COMISION}]]></expression>
+			<box topPadding="3">
+				<topPen lineWidth="1.0" lineStyle="Solid"/>
+			</box>
+		</element>
+		<element kind="textField" uuid="d4de9193-4cd0-4fd6-83e7-0f33b6994657" x="450" y="10" width="105" height="30" forecolor="#27AE60" fontSize="11.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$V{SUM_NETO}]]></expression>
+			<box topPadding="3">
+				<topPen lineWidth="1.0" lineStyle="Solid"/>
+			</box>
+		</element>
+	</summary>
+</jasperReport>
