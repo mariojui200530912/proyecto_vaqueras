@@ -22,10 +22,10 @@ public class TransaccionResource {
     @Path("/recarga")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response recargar(Integer idUsuario, RecargarRequest request) {
+    public Response recargar(RecargarRequest request) {
         try {
 
-            int idUsuarioLogueado = idUsuario;
+            int idUsuarioLogueado = request.getIdUsuario();
 
             MensajeResponse respuesta = transaccionService.recargarSaldo(idUsuarioLogueado, request);
             return Response.ok(respuesta).build();
@@ -36,9 +36,9 @@ public class TransaccionResource {
     }
 
     @GET
-    @Path("/historial")
+    @Path("/{id}/historial")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response verHistorial(Integer idUsuario) {
+    public Response verHistorial(@PathParam("id") Integer idUsuario) {
         try {
             int idUsuarioLogueado = idUsuario;
 

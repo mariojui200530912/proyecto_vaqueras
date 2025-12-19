@@ -12,7 +12,7 @@ import java.util.Set;
  * Configures Jakarta RESTful Web Services for the application.
  * @author Juneau
  */
-@ApplicationPath("/api/v1")
+@ApplicationPath("api/v1")
 public class JakartaRestConfiguration extends Application {
 
 }
