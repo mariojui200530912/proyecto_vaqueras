@@ -81,7 +81,7 @@ public class TransaccionRepository {
         return lista;
     }
 
-    // Método auxiliar para obtener el saldo actual (para devolverlo en la respuesta)
+    // Metodo para devolver saldo actual
     public BigDecimal obtenerSaldoActual(int idUsuario) throws SQLException {
         String sql = "SELECT cartera_saldo FROM usuario WHERE id = ?";
         try (Connection con = DBConnection.getInstance().getConnection();

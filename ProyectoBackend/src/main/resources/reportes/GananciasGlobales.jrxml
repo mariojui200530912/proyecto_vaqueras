@@ -1,0 +1,37 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="GananciasGlobales" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e4c2c0d6-3f3b-4a55-b8b4-2a9c4e9b7f12">
+	<parameter name="FECHA_INICIO" class="java.lang.String"/>
+	<parameter name="FECHA_FIN" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT SUM(v.precio) as total_bruto, SUM(v.monto_plataforma) as ganancia_plataforma, SUM(v.monto_empresa) as ganancia_empresas FROM venta v WHERE v.fecha_compra BETWEEN $P{FECHA_INICIO} AND $P{FECHA_FIN}]]></query>
+	<field name="total_bruto" class="java.math.BigDecimal"/>
+	<field name="ganancia_plataforma" class="java.math.BigDecimal"/>
+	<field name="ganancia_empresas" class="java.math.BigDecimal"/>
+	<title height="60">
+		<element kind="staticText" uuid="e0eaf058-9951-4552-893c-6fb892f0a719" x="0" y="10" width="555" height="30" fontSize="20.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Reporte de Ganancias Globales]]></text>
+		</element>
+	</title>
+	<detail>
+		<band height="200">
+			<element kind="staticText" uuid="ddf8986a-d1e6-4aa7-9295-f11df859cc47" x="20" y="20" width="200" height="30" fontSize="14.0">
+				<text><![CDATA[Ingreso Bruto Total:]]></text>
+			</element>
+			<element kind="textField" uuid="8152f7d5-d50c-4e8f-b751-d1703bc2a8aa" x="250" y="20" width="200" height="30" fontSize="14.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$F{total_bruto}]]></expression>
+			</element>
+			<element kind="staticText" uuid="7f44e2d1-c7e1-473f-b124-7f74bdc8a4c8" x="20" y="60" width="200" height="30" forecolor="#009900" fontSize="14.0">
+				<text><![CDATA[Ganancia Neta (Plataforma):]]></text>
+			</element>
+			<element kind="textField" uuid="8d1b7d43-6ee5-4734-8691-2a7cc62c6dec" x="250" y="60" width="200" height="30" forecolor="#009900" fontSize="14.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$F{ganancia_plataforma}]]></expression>
+			</element>
+			<element kind="staticText" uuid="adcd760b-f98f-4bfd-aad5-ee8d25107e16" x="20" y="100" width="200" height="30" forecolor="#0000FF" fontSize="14.0">
+				<text><![CDATA[A pagar a Empresas:]]></text>
+			</element>
+			<element kind="textField" uuid="5af03952-4331-47d7-b5b4-604a4d679e53" x="250" y="100" width="200" height="30" forecolor="#0000FF" fontSize="14.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$F{ganancia_empresas}]]></expression>
+			</element>
+			<element kind="line" uuid="d31f50be-a397-4829-9295-c83ec09c7e41" x="0" y="150" width="555" height="1"/>
+		</band>
+	</detail>
+</jasperReport>

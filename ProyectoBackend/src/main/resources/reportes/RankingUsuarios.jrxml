@@ -1,0 +1,114 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="RankingUsuarios" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1a2b3c4d-5e6f-7890-1234-567890abcdef">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<query language="sql"><![CDATA[SELECT
+			u.nickname,
+			u.pais,
+			u.email,
+			(SELECT COUNT(*) FROM biblioteca b WHERE b.id_usuario = u.id) as total_compras,
+			(SELECT COUNT(*) FROM comentario c WHERE c.id_usuario = u.id) as total_resenas
+		FROM usuario u
+		HAVING total_compras > 0 OR total_resenas > 0
+		ORDER BY total_compras DESC, total_resenas DESC
+		LIMIT 50]]></query>
+	<field name="nickname" class="java.lang.String"/>
+	<field name="pais" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="total_compras" class="java.lang.Long"/>
+	<field name="total_resenas" class="java.lang.Long"/>
+	<background splitType="Stretch"/>
+	<title height="80" splitType="Stretch">
+		<element kind="staticText" uuid="bcec321a-10d7-4ffb-8783-5b899c529778" x="0" y="10" width="555" height="30" forecolor="#8E44AD" fontSize="22.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Ranking de Usuarios Top]]></text>
+		</element>
+		<element kind="staticText" uuid="6dd55580-cd43-4682-a16c-ff42faa28205" x="0" y="45" width="555" height="20" fontSize="12.0" hTextAlign="Center">
+			<text><![CDATA[Clientes con mayor actividad y compras en la plataforma]]></text>
+		</element>
+	</title>
+	<columnHeader height="30" splitType="Stretch">
+		<element kind="staticText" uuid="27e99b1f-b528-4111-a0c7-be11ffcba922" mode="Opaque" x="0" y="0" width="40" height="30" backcolor="#F0F0F0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[#]]></text>
+			<box>
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="80f46595-6bea-4b37-8e99-1a5fc5ecca21" mode="Opaque" x="40" y="0" width="140" height="30" backcolor="#F0F0F0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Usuario]]></text>
+			<box leftPadding="5">
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="e9c41bf5-561b-4b3b-92a4-1815669c0ae0" mode="Opaque" x="180" y="0" width="100" height="30" backcolor="#F0F0F0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[País]]></text>
+			<box>
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="a590ad4d-42af-448a-992c-1ded44817a3e" mode="Opaque" x="280" y="0" width="170" height="30" backcolor="#F0F0F0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Email]]></text>
+			<box>
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="ca838be7-c1b4-4910-88af-d2f440c14f12" mode="Opaque" x="450" y="0" width="60" height="30" backcolor="#D1F2EB" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Compras]]></text>
+			<box>
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="feb0e795-7b58-411c-a3b8-34af9181e74c" mode="Opaque" x="510" y="0" width="45" height="30" backcolor="#FCF3CF" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Reseñas]]></text>
+			<box>
+				<bottomPen lineWidth="1.0"/>
+			</box>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<element kind="textField" uuid="193fffda-2218-40d8-a50e-008a0389a2f3" x="0" y="0" width="40" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$V{REPORT_COUNT}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="73742493-7a45-463b-b7ce-803967843cb4" x="40" y="0" width="140" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{nickname}]]></expression>
+				<box leftPadding="5">
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="03831047-8a60-4dac-a0f4-e7e85a5fd191" x="180" y="0" width="100" height="30" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{pais}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="5743b1d7-045f-4920-8259-384fe9d613e7" x="280" y="0" width="170" height="30" markup="none" fontSize="9.0" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{email}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="822dd398-d395-4611-9bc9-00abd394339c" x="450" y="0" width="60" height="30" fontSize="11.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{total_compras}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="a46e7030-4448-4f37-9fe1-089c82044466" x="510" y="0" width="45" height="30" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{total_resenas}]]></expression>
+				<box>
+					<bottomPen lineWidth="0.5" lineColor="#CCCCCC"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="30">
+		<element kind="textField" uuid="bcc3bc61-835c-47b4-974d-7b05bc7941dd" x="430" y="0" width="100" height="30" hTextAlign="Right">
+			<expression><![CDATA["Página " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="da18ff21-8f51-41f5-8034-477e0c0be4f5" x="0" y="0" width="150" height="30" pattern="MMMMM dd, yyyy">
+			<expression><![CDATA[new java.util.Date()]]></expression>
+		</element>
+	</pageFooter>
+</jasperReport>

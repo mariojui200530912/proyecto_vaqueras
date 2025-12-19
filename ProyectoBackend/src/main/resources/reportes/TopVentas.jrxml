@@ -1,0 +1,146 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="TopVentas" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f1e2d3c4-b5a6-7890-1234-567890abcdef">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="FECHA_INICIO" class="java.lang.String"/>
+	<parameter name="FECHA_FIN" class="java.lang.String"/>
+	<parameter name="ID_CATEGORIA" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<query language="sql"><![CDATA[SELECT
+			j.titulo,
+			c.nombre as categoria,
+			j.calificacion_promedio,
+			COUNT(v.id) as cantidad_ventas,
+			SUM(v.precio) as dinero_generado
+		FROM venta v
+		INNER JOIN juego j ON v.id_juego = j.id
+		INNER JOIN juego_categoria jc ON j.id = jc.id_juego
+		INNER JOIN categoria c ON jc.id_categoria = c.id
+		WHERE v.fecha_compra >= DATE($P{FECHA_INICIO})
+		AND v.fecha_compra <= DATE($P{FECHA_FIN})
+		AND ($P{ID_CATEGORIA} IS NULL OR c.id = $P{ID_CATEGORIA})
+		GROUP BY j.id
+		ORDER BY cantidad_ventas DESC
+		LIMIT 20]]></query>
+	<field name="titulo" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="calificacion_promedio" class="java.lang.Double"/>
+	<field name="cantidad_ventas" class="java.lang.Long"/>
+	<field name="dinero_generado" class="java.math.BigDecimal"/>
+	<background splitType="Stretch"/>
+	<title height="85" splitType="Stretch">
+		<element kind="staticText" uuid="fdfa6616-8e29-464b-beda-8c9523d0e09f" x="0" y="0" width="555" height="30" fontSize="20.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Top Ventas y Calidad de Juegos]]></text>
+		</element>
+		<element kind="textField" uuid="51e77dd6-81cd-46c2-809e-36a376484cb4" x="0" y="40" width="555" height="20" hTextAlign="Center">
+			<expression><![CDATA["Periodo: " + $P{FECHA_INICIO} + " al " + $P{FECHA_FIN}]]></expression>
+		</element>
+		<element kind="staticText" uuid="6439fbb8-8f0b-47da-8ef1-ef1e26226f5e" x="0" y="60" width="555" height="20" forecolor="#666666" fontSize="10.0" italic="true" hTextAlign="Center">
+			<text><![CDATA[Ordenado por volumen de ventas]]></text>
+		</element>
+	</title>
+	<columnHeader height="30" splitType="Stretch">
+		<element kind="staticText" uuid="8f580651-e598-4a55-a6fe-2a4dcdcd24b9" mode="Opaque" x="0" y="0" width="180" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Juego]]></text>
+			<box>
+				<topPen lineWidth="1.0"/>
+				<leftPen lineWidth="1.0"/>
+				<bottomPen lineWidth="1.0"/>
+				<rightPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="31be6479-813a-4e77-bdcd-4b170e07a138" mode="Opaque" x="180" y="0" width="100" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Categoría]]></text>
+			<box>
+				<topPen lineWidth="1.0"/>
+				<leftPen lineWidth="1.0"/>
+				<bottomPen lineWidth="1.0"/>
+				<rightPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="569fb876-647e-412c-894a-76771f8854ff" mode="Opaque" x="280" y="0" width="70" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Ventas]]></text>
+			<box>
+				<topPen lineWidth="1.0"/>
+				<leftPen lineWidth="1.0"/>
+				<bottomPen lineWidth="1.0"/>
+				<rightPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="9b6b9622-374a-4ae7-8386-9e4f990a64ce" mode="Opaque" x="350" y="0" width="110" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Ingresos Totales]]></text>
+			<box>
+				<topPen lineWidth="1.0"/>
+				<leftPen lineWidth="1.0"/>
+				<bottomPen lineWidth="1.0"/>
+				<rightPen lineWidth="1.0"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="7901544c-6e0f-4a31-8f2f-c9fa36b61d42" mode="Opaque" x="460" y="0" width="95" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Calidad (0-5)]]></text>
+			<box>
+				<topPen lineWidth="1.0"/>
+				<leftPen lineWidth="1.0"/>
+				<bottomPen lineWidth="1.0"/>
+				<rightPen lineWidth="1.0"/>
+			</box>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<element kind="textField" uuid="262b0a6c-9c7c-482d-85dd-3f88b42c5c18" x="0" y="0" width="180" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{titulo}]]></expression>
+				<box leftPadding="5">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="a09debf3-9fc1-42e5-b9dc-cc9d2568b0f7" x="180" y="0" width="100" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{categoria}]]></expression>
+				<box leftPadding="5">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="a26f5345-0066-4764-923f-794e8bbcaa7c" x="280" y="0" width="70" height="30" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{cantidad_ventas}]]></expression>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="9e260dcc-8140-4b30-94b7-605c3b110c79" x="350" y="0" width="110" height="30" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{dinero_generado}]]></expression>
+				<box rightPadding="5">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="dfcdb34b-4338-4f92-9360-c53d2111df34" x="460" y="0" width="95" height="30" bold="false" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{calificacion_promedio} + " ★"]]></expression>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</element>
+		</band>
+	</detail>
+	<pageFooter height="30">
+		<element kind="textField" uuid="e5d9b275-60b6-46c1-99af-6ba2eb536168" x="455" y="0" width="100" height="30" hTextAlign="Right">
+			<expression><![CDATA["Pág " + $V{PAGE_NUMBER}]]></expression>
+		</element>
+		<element kind="textField" uuid="25742c9b-96f2-46df-a51d-877dc947d4b7" x="0" y="0" width="150" height="30" pattern="MMMMM dd, yyyy">
+			<expression><![CDATA[new java.util.Date()]]></expression>
+		</element>
+	</pageFooter>
+</jasperReport>

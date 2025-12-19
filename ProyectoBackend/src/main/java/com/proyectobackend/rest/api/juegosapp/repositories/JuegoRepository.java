@@ -19,83 +19,81 @@ public class JuegoRepository {
         String sql = SQL_CREATE_GAME;
         String sqlCat = SQL_CREATE_GAME_CATEGORY;
         String sqlImg = SQL_CREATE_GAME_IMAGES;
-        Connection conn = DBConnection.getInstance().getConnection();
         Integer idJuego;
 
-        try (
-             PreparedStatement psJuego = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement psCategoria = conn.prepareStatement(sqlCat);
-             PreparedStatement psImg = conn.prepareStatement(sqlImg)) {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
             // 1. INICIAR TRANSACCIÓN (Desactivar guardado automático)
             conn.setAutoCommit(false);
+            try (PreparedStatement psJuego = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement psCategoria = conn.prepareStatement(sqlCat);
+                 PreparedStatement psImg = conn.prepareStatement(sqlImg)) {
+                // PASO A: Insertar Juego
+                psJuego.setInt(1, juego.getIdEmpresa()); // ID de la empresa del usuario logueado
+                psJuego.setString(2, juego.getTitulo());
+                psJuego.setString(3, juego.getDescripcion());
+                psJuego.setBigDecimal(4, juego.getPrecio());
+                psJuego.setString(5, juego.getRecursosMinimos());
+                psJuego.setString(6, juego.getClasificacion());
+                psJuego.executeUpdate();
 
-            // PASO A: Insertar Juego
-            psJuego.setInt(1, juego.getIdEmpresa()); // ID de la empresa del usuario logueado
-            psJuego.setString(2, juego.getTitulo());
-            psJuego.setString(3, juego.getDescripcion());
-            psJuego.setBigDecimal(4, juego.getPrecio());
-            psJuego.setString(5, juego.getRecursosMinimos());
-            psJuego.setString(6, juego.getClasificacion());
-            psJuego.executeUpdate();
-
-            // Obtener ID generado
-            try (ResultSet generatedKeys = psJuego.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    idJuego = generatedKeys.getInt(1);
-                    juego.setId(idJuego);
-                } else {
-                    throw new SQLException("No se puede obtener el ID del juego.");
+                // Obtener ID generado
+                try (ResultSet generatedKeys = psJuego.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        idJuego = generatedKeys.getInt(1);
+                        juego.setId(idJuego);
+                    } else {
+                        throw new SQLException("No se puede obtener el ID del juego.");
+                    }
                 }
-            }
 
-            // PASO B: Insertar Categorías
-            if (categoriasIds != null && !categoriasIds.isEmpty()) {
-                for (Integer idCat : categoriasIds) {
-                    psCategoria.setInt(1, idJuego);
-                    psCategoria.setInt(2, idCat);
-                    psCategoria.addBatch(); // Agregamos al lote
+                // PASO B: Insertar Categorías
+                if (categoriasIds != null && !categoriasIds.isEmpty()) {
+                    for (Integer idCat : categoriasIds) {
+                        psCategoria.setInt(1, idJuego);
+                        psCategoria.setInt(2, idCat);
+                        psCategoria.addBatch(); // Agregamos al lote
+                    }
+                    psCategoria.executeBatch(); // Ejecutamos todas juntas
                 }
-                psCategoria.executeBatch(); // Ejecutamos todas juntas
-            }
 
-            // PASO C: Insertar Imágenes
-            // 1. Insertar Portada
-            if (portadaBytes != null) {
-                psImg.setInt(1, idJuego);
-                psImg.setBytes(2, portadaBytes);
-                psImg.setString(3, "PORTADA");
-                psImg.executeUpdate();
-            }
-
-            // 2. Insertar Galería (Gameplay)
-            if (galeriaBytes != null) {
-                for (byte[] imagen : galeriaBytes) {
+                // PASO C: Insertar Imágenes
+                // 1. Insertar Portada
+                if (portadaBytes != null) {
                     psImg.setInt(1, idJuego);
-                    psImg.setBytes(2, imagen);
-                    psImg.setString(3, "GAMEPLAY");
-                    psImg.addBatch();
+                    psImg.setBytes(2, portadaBytes);
+                    psImg.setString(3, "PORTADA");
+                    psImg.executeUpdate();
                 }
-                psImg.executeBatch();
-            }
 
-            // 3. CONFIRMAR TRANSACCIÓN (COMMIT)
-            conn.commit();
-            return juego;
+                // 2. Insertar Galería (Gameplay)
+                if (galeriaBytes != null) {
+                    for (byte[] imagen : galeriaBytes) {
+                        psImg.setInt(1, idJuego);
+                        psImg.setBytes(2, imagen);
+                        psImg.setString(3, "GAMEPLAY");
+                        psImg.addBatch();
+                    }
+                    psImg.executeBatch();
+                }
 
-        } catch (SQLException e) {
-            // SI ALGO FALLA, DESHACER TODO (ROLLBACK)
-            if (conn != null) {
-                try {
-                    System.err.println("Rollback por error: " + e.getMessage());
-                    conn.rollback();
-                } catch (SQLException ex) { ex.printStackTrace(); }
+                // 3. CONFIRMAR TRANSACCIÓN (COMMIT)
+                conn.commit();
+                return juego;
+
+            } catch (SQLException e) {
+                // SI ALGO FALLA, DESHACER TODO (ROLLBACK)
+                if (conn != null) {
+                    try {
+                        System.err.println("Rollback por error: " + e.getMessage());
+                        conn.rollback();
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                throw e;
             }
+        } catch (Exception e) {
             throw e;
-        } finally {
-            // Restaurar estado y cerrar
-            if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
-            }
         }
     }
 
