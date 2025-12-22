@@ -45,7 +45,8 @@ CREATE TABLE usuario_empresa (
     id_empresa INT NOT NULL,
     rol_empresa VARCHAR(50) DEFAULT 'ADMIN', -- Admin o Empleado
     FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_empresa) REFERENCES empresa(id) ON DELETE CASCADE
+    FOREIGN KEY (id_empresa) REFERENCES empresa(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_relacion (id_usuario, id_empresa)
 );
 
 -- 2. MÓDULO DE CATÁLOGO DE JUEGOS

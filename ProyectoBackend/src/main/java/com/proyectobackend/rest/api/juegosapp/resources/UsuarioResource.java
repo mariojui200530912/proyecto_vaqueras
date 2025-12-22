@@ -55,7 +55,6 @@ public class UsuarioResource {
             @FormDataParam("avatar") InputStream avatarInput,
             @FormDataParam("avatar") FormDataContentDisposition fileDetail
     ) {
-        String rutaFoto = null;
         try {
 
             UsuarioRequest request = new UsuarioRequest();

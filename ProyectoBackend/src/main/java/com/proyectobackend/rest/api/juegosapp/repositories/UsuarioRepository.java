@@ -223,6 +223,17 @@ public class UsuarioRepository {
         }
     }
 
+    public void cambiarRol(Connection conn, Integer id_usario, Rol rol) {
+        String sql = "UPDATE usuario SET rol = ? WHERE id_usuario = ?";
+        try(PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setString(1, rol.getValor());
+            ps.setInt(2, id_usario);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al cambiar rol del usuario: " + e.getMessage());
+        }
+    }
+
     public Usuario mapResultSetToUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario();
         usuario.setId(rs.getInt("id"));

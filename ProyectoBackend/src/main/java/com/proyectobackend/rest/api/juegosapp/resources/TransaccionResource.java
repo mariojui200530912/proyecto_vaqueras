@@ -2,6 +2,7 @@ package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.billetera.RecargarRequest;
+import com.proyectobackend.rest.api.juegosapp.dtos.billetera.TransaccionResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Transaccion;
 import com.proyectobackend.rest.api.juegosapp.services.TransaccionService;
 import jakarta.ws.rs.*;
@@ -42,7 +43,7 @@ public class TransaccionResource {
         try {
             int idUsuarioLogueado = idUsuario;
 
-            List<Transaccion> historial = transaccionService.obtenerHistorial(idUsuarioLogueado);
+            List<TransaccionResponse> historial = transaccionService.obtenerHistorial(idUsuarioLogueado);
             return Response.ok(historial).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

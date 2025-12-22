@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.empresa.EmpresaRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.empresa.EmpresaResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.empresa.UsuarioEmpresa;
 import com.proyectobackend.rest.api.juegosapp.services.EmpresaService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -12,6 +13,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path("/empresa")
@@ -92,6 +94,31 @@ public class EmpresaResource {
         }
     }
 
+    @PATCH // PATCH se usa para actualizaciones parciales
+    @Path("/{id}/comision")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED) // O JSON si prefieres
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response cambiarComision(
+            @PathParam("id") Integer idEmpresa,
+            @FormParam("comision") BigDecimal nuevaComision
+    ) {
+        try {
+            if (nuevaComision == null) {
+                throw new Exception("Debe enviar el valor de la comisión.");
+            }
+
+            empresaService.actualizarComisionEmpresa(idEmpresa, nuevaComision);
+
+            return Response.ok(new MensajeResponse("Comisión de la empresa actualizada correctamente."))
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage())) // El mensaje dirá "no puede ser mayor..."
+                    .build();
+        }
+    }
+
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -102,6 +129,66 @@ public class EmpresaResource {
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse("Error: " + e.getMessage())).build();
+        }
+    }
+
+    // Vincular usuarios a empresa
+    @POST
+    @Path("/{id}/usuarios")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response agregarUsuario(
+            @PathParam("id") Integer idEmpresa,
+            @FormParam("idUsuario") Integer idUsuario,
+            @FormParam("rol") String rol
+    ) {
+        try {
+            if (idUsuario == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new MensajeResponse("El ID del usuario es obligatorio."))
+                        .build();
+            }
+            empresaService.vincularUsuario(idEmpresa, idUsuario, rol);
+            return Response.ok(new MensajeResponse("Usuario vinculado a la empresa exitosamente."))
+                    .build();
+
+        } catch (Exception e) {
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/{id}/usuarios")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listarUsuariosEmpresa(@PathParam("id") Integer idEmpresa) {
+        try {
+            List<UsuarioEmpresa> empleados = empresaService.obtenerEmpleados(idEmpresa);
+            return Response.ok(empleados).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error: " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}/usuarios/{idUsuario}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response eliminarUsuarioDeEmpresa(
+            @PathParam("id") Integer idEmpresa,
+            @PathParam("idUsuario") Integer idUsuario
+    ) {
+        try {
+            empresaService.eliminarEmpleado(idEmpresa, idUsuario);
+            return Response.ok(new MensajeResponse("Usuario desvinculado de la empresa correctamente."))
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage()))
+                    .build();
         }
     }
 }

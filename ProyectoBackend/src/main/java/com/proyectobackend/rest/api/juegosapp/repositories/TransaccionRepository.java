@@ -1,5 +1,6 @@
 package com.proyectobackend.rest.api.juegosapp.repositories;
 
+import com.proyectobackend.rest.api.juegosapp.dtos.billetera.TransaccionResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Transaccion;
 
 import java.math.BigDecimal;
@@ -53,8 +54,8 @@ public class TransaccionRepository {
         }
     }
 
-    public List<Transaccion> listarPorUsuario(int idUsuario) throws SQLException {
-        List<Transaccion> lista = new ArrayList<>();
+    public List<TransaccionResponse> listarPorUsuario(int idUsuario) throws SQLException {
+        List<TransaccionResponse> lista = new ArrayList<>();
         String sql = "SELECT * FROM transaccion WHERE id_usuario = ? ORDER BY fecha DESC";
 
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -63,7 +64,7 @@ public class TransaccionRepository {
             ps.setInt(1, idUsuario);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Transaccion t = new Transaccion();
+                    TransaccionResponse t = new TransaccionResponse();
                     t.setId(rs.getInt("id"));
                     t.setIdUsuario(rs.getInt("id_usuario"));
                     t.setMonto(rs.getBigDecimal("monto"));

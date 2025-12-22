@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoRequest;
+import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Juego;
 import com.proyectobackend.rest.api.juegosapp.services.JuegoService;
+import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -14,6 +16,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path("/juego")
@@ -62,4 +65,143 @@ public class JuegoResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("/buscar")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response buscarJuegos(
+            @QueryParam("titulo") String titulo,
+            @QueryParam("categoria") Integer idCategoria,
+            @QueryParam("min") BigDecimal minPrecio,
+            @QueryParam("max") BigDecimal maxPrecio
+    ) {
+        try {
+            List<JuegoResponse> resultados = juegoService.buscarJuegos(titulo, idCategoria, minPrecio, maxPrecio);
+
+            return Response.ok(resultados).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse(e.getMessage()))
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/{idJuego}/actualizar")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response actualizarJuego(
+            @PathParam("idJuego") Integer idJuego,
+            @FormDataParam("idUsuario") Integer idUsuario,
+            @FormDataParam("datos") String jsonDatos
+            ) {
+
+        //Validar Usuario
+        Integer idUsuarioLogueado = idUsuario;
+        try {
+            //Convertir JSON
+            JuegoRequest request = objectMapper.readValue(jsonDatos, JuegoRequest.class);
+            //Llamar al servicio
+            juegoService.actualizarJuego(idJuego, request);
+            return Response.status(Response.Status.CREATED).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al publicar juego: " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/{idJuego}/categoria/{idCategoria}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response categoriaJuego(
+            @PathParam("idJuego") Integer idJuego,
+            @PathParam("idCategoria") Integer idCategoria
+    ){
+        try{
+            juegoService.insertarCategoriaJuego(idJuego, idCategoria);
+            return Response.ok(new MensajeResponse("Categoria ingresada a juego correctamente")).build();
+        } catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al ingresar categoria: " + e.getMessage()))
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+
+    @DELETE
+    @Path("/{idJuego}/categoria")
+    public Response eliminarCategoria(@PathParam("idJuego") Integer idJuego, @QueryParam("idCategoria") Integer idCategoria) {
+        try{
+            juegoService.eliminarCategoriaJuego(idJuego, idCategoria);
+            return Response.ok(new MensajeResponse("Categoria eliminada del juego correctamente")).build();
+        }catch(Exception e){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al eliminar la categoria del juego: " + e.getMessage()))
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/{idJuego}/actualizar/imagen")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response actualizarImagenJuegoPortada(@PathParam("idJuego") Integer idJuego, @FormDataParam("portada") InputStream imgPortada){
+        try{
+            juegoService.actualizarImagenPortada(idJuego, imgPortada);
+            return Response.ok(new MensajeResponse("Imagen de portada de juego actualizada correctamente")).build();
+        } catch (Exception e){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al actualizar imagen de portada: " + e.getMessage()))
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/{idJuego}/galeria")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response agregarImagenesGaleria(
+            @PathParam("idJuego") Integer idJuego,
+            @FormDataParam("imagenes") List<FormDataBodyPart> bodyParts
+    ) {
+        try {
+            if (bodyParts == null || bodyParts.isEmpty()) {
+                throw new Exception("No se han enviado imágenes.");
+            }
+            juegoService.agregarImagenesGaleria(idJuego, bodyParts);
+            return Response.ok(new MensajeResponse("Imágenes agregadas a la galería exitosamente")).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al agregar imágenes: " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{idJuego}/galeria/{idImagen}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response eliminarImagenGaleria(
+            @PathParam("idJuego") Integer idJuego,
+            @PathParam("idImagen") Integer idImagen
+    ) {
+        try {
+            juegoService.eliminarImagenGaleria(idJuego, idImagen);
+
+            return Response.ok(new MensajeResponse("Imagen eliminada correctamente")).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al eliminar imagen: " + e.getMessage()))
+                    .build();
+        }
+    }
+
 }

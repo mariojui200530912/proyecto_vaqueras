@@ -15,6 +15,10 @@ public class EmpresaRequest {
                 && comisionEspecifica != null;
     }
 
+    public boolean isValidComisionEspecifica() {
+        return comisionEspecifica.compareTo(BigDecimal.ZERO) < 0;
+    }
+
     public String getNombre() {
         return nombre;
     }

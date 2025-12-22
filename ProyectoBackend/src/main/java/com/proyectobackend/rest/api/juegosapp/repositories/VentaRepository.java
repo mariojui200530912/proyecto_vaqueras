@@ -3,16 +3,11 @@ package com.proyectobackend.rest.api.juegosapp.repositories;
 import com.proyectobackend.rest.api.juegosapp.dtos.venta.VentaResponse;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class VentaRepository {
 
-    // ====================================================================
-    // 1. TRANSACCIÓN DE COMPRA (ACID)
-    // ====================================================================
+    // TRANSACCIÓN DE COMPRA (ACID)
     public boolean procesarCompra(int idUsuario, int idJuego, BigDecimal precio, BigDecimal porcentajeAplicado, BigDecimal comision, BigDecimal gananciaEmpresa) throws SQLException {
         String sqlSaldo = "UPDATE usuario SET cartera_saldo = cartera_saldo - ? WHERE id = ?";
         String sqlVenta = "INSERT INTO venta (id_usuario, id_juego, fecha_compra, precio, comision_aplicada, monto_plataforma, monto_empresa) VALUES (?, ?, NOW(), ?, ?, ?, ?)";
@@ -20,17 +15,17 @@ public class VentaRepository {
         String sqlLib = "INSERT INTO biblioteca (id_usuario, id_juego, fecha_adquisicion) VALUES (?, ?, CURRENT_DATE)";
 
         try (Connection conn = DBConnection.getInstance().getConnection()) {
-            conn.setAutoCommit(false); // 🛑 INICIO DE TRANSACCIÓN
+            conn.setAutoCommit(false); // INICIO DE TRANSACCIÓN
             try (PreparedStatement psSaldo = conn.prepareStatement(sqlSaldo);
-                PreparedStatement psVenta = conn.prepareStatement(sqlVenta);
-                PreparedStatement psTrans = conn.prepareStatement(sqlTrans);
-                PreparedStatement psLib = conn.prepareStatement(sqlLib)) {
-                // PASO A: Descontar saldo al Usuario
+                 PreparedStatement psVenta = conn.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement psTrans = conn.prepareStatement(sqlTrans);
+                 PreparedStatement psLib = conn.prepareStatement(sqlLib)) {
+                // Descontar saldo al Usuario
                 psSaldo.setBigDecimal(1, precio);
                 psSaldo.setInt(2, idUsuario);
                 if (psSaldo.executeUpdate() == 0) throw new SQLException("Error al descontar saldo.");
 
-                // PASO B: Registrar la Venta (Histórico)
+                // Registrar la Venta (Histórico)
                 psVenta.setInt(1, idUsuario);
                 psVenta.setInt(2, idJuego);
                 psVenta.setBigDecimal(3, precio);
@@ -44,13 +39,13 @@ public class VentaRepository {
                     if (rs.next()) idVenta = rs.getInt(1);
                 }
 
-                // PASO C: Registrar Transacción (Para el historial de billetera)
+                // Registrar Transacción (Para el historial de billetera)
                 psTrans.setInt(1, idUsuario);
                 psTrans.setBigDecimal(2, precio); // Se registra como positivo, el tipo define si resta
                 psTrans.setInt(3, idVenta);
                 psTrans.executeUpdate();
 
-                // PASO D: Agregar a Biblioteca (Entregar el producto)
+                // Agregar a Biblioteca (Entregar el producto)
                 psLib.setInt(1, idUsuario);
                 psLib.setInt(2, idJuego);
                 psLib.executeUpdate();

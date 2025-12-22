@@ -16,11 +16,12 @@ public class BibliotecaResource {
         this.bibliotecaService = new BibliotecaService();
     }
     @GET
+    @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response verMiBiblioteca() {
+    public Response verMiBiblioteca(@PathParam("id") Integer id) {
         try {
-            // TODO: Obtener ID real del Token
-            int idUsuarioLogueado = 4;
+
+            int idUsuarioLogueado = id;
 
             List<JuegoResponse> misJuegos = bibliotecaService.obtenerMisJuegos(idUsuarioLogueado);
             return Response.ok(misJuegos).build();

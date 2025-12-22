@@ -124,7 +124,7 @@ public class UsuarioService {
             throw new RuntimeException("Usuario no encontrado");
         }
         // Verificar contraseña
-        if (!PasswordUtil.checkPassword(request.getNuevaPassword(), usuario.getPassword())) {
+        if (!PasswordUtil.checkPassword(request.getPasswordActual(), usuario.getPassword())) {
             throw new RuntimeException("Credenciales inválidas");
         }
 

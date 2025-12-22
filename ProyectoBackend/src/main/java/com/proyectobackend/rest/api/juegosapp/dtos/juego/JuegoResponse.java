@@ -1,5 +1,9 @@
 package com.proyectobackend.rest.api.juegosapp.dtos.juego;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +16,8 @@ public class JuegoResponse {
     private BigDecimal precio;
     private String recursosMinimos;
     private String clasificacion; // E, T, M
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate fecha_lanzamiento;
     private String estado_venta;
     private BigDecimal calificacion_promedio;

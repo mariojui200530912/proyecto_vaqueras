@@ -11,9 +11,7 @@ import java.util.Base64;
 import java.util.List;
 
 public class BibliotecaRepository {
-    // ====================================================================
-    // 2. VERIFICAR SI YA TIENE EL JUEGO
-    // ====================================================================
+
     public boolean usuarioTieneJuego(int idUsuario, int idJuego) throws SQLException {
         String sql = "SELECT COUNT(*) FROM biblioteca WHERE id_usuario = ? AND id_juego = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
@@ -27,14 +25,11 @@ public class BibliotecaRepository {
         return false;
     }
 
-    // ====================================================================
-    // 3. OBTENER BIBLIOTECA (Con Portada Base64)
-    // ====================================================================
     public List<JuegoResponse> obtenerBibliotecaUsuario(int idUsuario) throws SQLException {
         List<JuegoResponse> lista = new ArrayList<>();
 
         // JOIN Triple: Juego -> Biblioteca -> Imagen (Solo Portada)
-        String sql = "SELECT j.id, j.titulo, j.descripcion, j.clasificacion, img.datos as portada_blob " +
+        String sql = "SELECT j.id, j.titulo, j.descripcion, j.clasificacion, img.imagen as portada_blob " +
                 "FROM juego j " +
                 "INNER JOIN biblioteca b ON j.id = b.id_juego " +
                 "LEFT JOIN imagen_juego img ON j.id = img.id_juego AND img.atributo = 'PORTADA' " +

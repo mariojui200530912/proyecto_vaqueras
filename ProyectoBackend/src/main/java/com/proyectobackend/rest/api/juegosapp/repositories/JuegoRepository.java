@@ -1,6 +1,7 @@
 package com.proyectobackend.rest.api.juegosapp.repositories;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +23,11 @@ public class JuegoRepository {
         Integer idJuego;
 
         try (Connection conn = DBConnection.getInstance().getConnection()) {
-            // 1. INICIAR TRANSACCIÓN (Desactivar guardado automático)
             conn.setAutoCommit(false);
             try (PreparedStatement psJuego = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                  PreparedStatement psCategoria = conn.prepareStatement(sqlCat);
                  PreparedStatement psImg = conn.prepareStatement(sqlImg)) {
-                // PASO A: Insertar Juego
+                // Insertar Juego
                 psJuego.setInt(1, juego.getIdEmpresa()); // ID de la empresa del usuario logueado
                 psJuego.setString(2, juego.getTitulo());
                 psJuego.setString(3, juego.getDescripcion());
@@ -46,7 +46,7 @@ public class JuegoRepository {
                     }
                 }
 
-                // PASO B: Insertar Categorías
+                // Insertar Categorías
                 if (categoriasIds != null && !categoriasIds.isEmpty()) {
                     for (Integer idCat : categoriasIds) {
                         psCategoria.setInt(1, idJuego);
@@ -56,8 +56,8 @@ public class JuegoRepository {
                     psCategoria.executeBatch(); // Ejecutamos todas juntas
                 }
 
-                // PASO C: Insertar Imágenes
-                // 1. Insertar Portada
+                // Insertar Imágenes
+                // Insertar Portada
                 if (portadaBytes != null) {
                     psImg.setInt(1, idJuego);
                     psImg.setBytes(2, portadaBytes);
@@ -65,7 +65,7 @@ public class JuegoRepository {
                     psImg.executeUpdate();
                 }
 
-                // 2. Insertar Galería (Gameplay)
+                // Insertar Galería (Gameplay)
                 if (galeriaBytes != null) {
                     for (byte[] imagen : galeriaBytes) {
                         psImg.setInt(1, idJuego);
@@ -76,12 +76,12 @@ public class JuegoRepository {
                     psImg.executeBatch();
                 }
 
-                // 3. CONFIRMAR TRANSACCIÓN (COMMIT)
+                //CONFIRMAR TRANSACCIÓN (COMMIT)
                 conn.commit();
                 return juego;
 
             } catch (SQLException e) {
-                // SI ALGO FALLA, DESHACER TODO (ROLLBACK)
+                // SI ALGO FALLA DESHACER
                 if (conn != null) {
                     try {
                         System.err.println("Rollback por error: " + e.getMessage());
@@ -102,9 +102,7 @@ public class JuegoRepository {
 
         try (Connection con = DBConnection.getInstance().getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setInt(1, id);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(mapearJuego(rs));
@@ -136,6 +134,8 @@ public class JuegoRepository {
                     lista.add(c);
                 }
             }
+        } catch (Exception e){
+            throw e;
         }
         return lista;
     }
@@ -158,6 +158,121 @@ public class JuegoRepository {
             }
         }
         return lista;
+    }
+
+    public List<Juego> buscarConFiltros(String titulo, Integer idCategoria, BigDecimal minPrecio, BigDecimal maxPrecio) {
+        List<Juego> lista = new ArrayList<>();
+        List<Object> parametros = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("SELECT j.* FROM juego j LEFT JOIN juego_categoria jc ON j.id = jc.id_juego WHERE 1=1 ");
+
+        if (titulo != null && !titulo.trim().isEmpty()) {
+            sql.append("AND j.titulo LIKE ? ");
+            parametros.add("%" + titulo + "%"); // Búsqueda parcial
+        }
+
+        if (idCategoria != null && idCategoria > 0) {
+            sql.append("AND jc.id_categoria = ? ");
+            parametros.add(idCategoria);
+        }
+
+        if (minPrecio != null) {
+            sql.append("AND j.precio >= ? ");
+            parametros.add(minPrecio);
+        }
+
+        if (maxPrecio != null) {
+            sql.append("AND j.precio <= ? ");
+            parametros.add(maxPrecio);
+        }
+
+        // Evitar duplicados por el JOIN de categorías
+        sql.append("GROUP BY j.id ");
+
+        try (Connection con = DBConnection.getInstance().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < parametros.size(); i++) {
+                ps.setObject(i + 1, parametros.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearJuego(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    //Actualiza los datos basicos del juego
+    public void actualizarDatosBasicosJuego(Connection conn, Juego juego) throws SQLException {
+        String sql = "UPDATE juego SET titulo=?, descripcion=?, precio=?, recursos_minimos=?, clasificacion=?, estado_venta=? WHERE id=?";
+        try (Connection con = DBConnection.getInstance().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, juego.getTitulo());
+            ps.setString(2, juego.getDescripcion());
+            ps.setBigDecimal(3, juego.getPrecio());
+            ps.setString(4, juego.getRecursosMinimos());
+            ps.setString(5, juego.getClasificacion());
+            ps.setString(6, juego.getEstadoVenta());
+            ps.setInt(7, juego.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    //Gestionar Categorias de Juego
+    public void elimnarCategoriasJuego(Connection conn, Integer idJuego, Integer idCategoria) throws SQLException {
+        String sql = "DELETE FROM juego_categoria WHERE id_juego = ? AND id_categoria = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idJuego);
+            ps.setInt(2, idCategoria);
+            ps.executeUpdate();
+        }
+    }
+
+    public void insertarCategoriaJuego(Connection conn, Integer idJuego, Integer idCategoria) throws SQLException {
+        String sql = "INSERT INTO juego_categoria (id_juego, id_categoria) VALUES (?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idJuego);
+            ps.setInt(2, idCategoria);
+            ps.executeUpdate();
+        }
+    }
+
+    //Gestionar Imagenes
+    public void actualizarPortada(Connection conn, Integer idJuego, byte[] nuevaPortada) throws SQLException {
+        String sql = "UPDATE imagen_juego SET imagen = ? WHERE id_juego = ? AND atributo = 'PORTADA'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setBytes(1, nuevaPortada);
+            ps.setInt(2, idJuego);
+            ps.executeUpdate();
+        }
+    }
+
+    public void agregarImagenGaleria(Connection conn, Integer idJuego, byte[] imagen) throws SQLException {
+        String sql = "INSERT INTO imagen_juego (id_juego, imagen, atributo) VALUES (?, ?, 'GAMEPLAY')";
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idJuego);
+            ps.setBytes(2, imagen);
+            ps.executeUpdate();
+        }
+    }
+
+    public void eliminarImagenPorId(Connection conn, int idJuego, int idImagen) throws SQLException {
+        String sql = "DELETE FROM imagen_juego WHERE id = ? AND id_juego = ? AND atributo = 'GAMEPLAY'";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idImagen);
+            ps.setInt(2, idJuego);
+
+            int filasAfectadas = ps.executeUpdate();
+            if (filasAfectadas == 0) {
+                throw new SQLException("No se encontró la imagen o no pertenece a este juego.");
+            }
+        }
     }
 
     private Juego mapearJuego(ResultSet rs) throws SQLException {
