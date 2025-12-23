@@ -87,6 +87,28 @@ public class JuegoResource {
         }
     }
 
+    @GET
+    @Path("/{id}/empresa")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response verCatalogoEmpresa(
+            @PathParam("id") Integer idEmpresa,
+            @QueryParam("rol") String rol
+    ) {
+        try {
+
+            boolean esAdmin = "EMPRESA".equalsIgnoreCase(rol);
+
+            List<JuegoResponse> catalogo = juegoService.obtenerCatalogoEmpresa(idEmpresa, esAdmin);
+
+            return Response.ok(catalogo).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al obtener catalogo de empresa: " + e.getMessage()))
+                    .build();
+        }
+    }
+
     @POST
     @Path("/{idJuego}/actualizar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)

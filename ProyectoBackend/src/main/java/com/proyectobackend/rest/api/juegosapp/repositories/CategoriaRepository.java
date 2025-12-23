@@ -63,7 +63,7 @@ public class CategoriaRepository {
         return Optional.empty();
     }
 
-    // Método extra para evitar duplicados
+    // Metodo extra para evitar duplicados
     public boolean existeNombre(String nombre) throws SQLException {
         String sql = "SELECT COUNT(*) FROM categoria WHERE nombre = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();

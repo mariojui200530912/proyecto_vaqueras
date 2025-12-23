@@ -129,6 +129,7 @@ CREATE TABLE biblioteca (
     id_juego INT NOT NULL,
     fecha_adquisicion DATETIME DEFAULT CURRENT_TIMESTAMP,
     jugado_horas INT DEFAULT 0,
+    estado VARCHAR(45) NOT NULL DEFAULT "NO INSTALADO",
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_juego) REFERENCES juego(id),
     UNIQUE(id_usuario, id_juego) 

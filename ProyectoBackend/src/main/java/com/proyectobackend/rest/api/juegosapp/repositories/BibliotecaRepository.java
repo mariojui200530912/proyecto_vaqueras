@@ -12,10 +12,9 @@ import java.util.List;
 
 public class BibliotecaRepository {
 
-    public boolean usuarioTieneJuego(int idUsuario, int idJuego) throws SQLException {
+    public boolean usuarioTieneJuego(Connection conn, int idUsuario, int idJuego) throws SQLException {
         String sql = "SELECT COUNT(*) FROM biblioteca WHERE id_usuario = ? AND id_juego = ?";
-        try (Connection conn = DBConnection.getInstance().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             ps.setInt(2, idJuego);
             try (ResultSet rs = ps.executeQuery()) {
@@ -60,4 +59,5 @@ public class BibliotecaRepository {
         }
         return lista;
     }
+
 }

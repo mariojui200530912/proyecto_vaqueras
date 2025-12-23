@@ -172,6 +172,34 @@ public class JuegoService {
         }
     }
 
+    public List<JuegoResponse> obtenerCatalogoEmpresa(int idEmpresa, boolean vistaAdmin) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+
+            // 1. Obtener la lista base de juegos
+            // Si es vistaAdmin (Rol empresa), ve obtiene todos los juegos. Si es publico, solo activos.
+            List<Juego> juegos = juegoRepository.listarPorEmpresa(conn, idEmpresa, !vistaAdmin);
+
+            List<JuegoResponse> respuesta = new ArrayList<>();
+
+            // 2. Enriquecer cada juego (Categorías + Imágenes)
+            for (Juego j : juegos) {
+                // Reutilizamos tus repositorios existentes
+                List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
+
+                // Optimización: Traer solo PORTADA para el catálogo (menos pesado)
+                List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
+
+                // 3. Convertir a DTO usando tu metodo helper existente
+                JuegoResponse dto = construirResponse(j, categorias, imagenes);
+                respuesta.add(dto);
+            }
+
+            return respuesta;
+        } catch (Exception e) {
+            throw new Exception("Error al cargar el catálogo: " + e.getMessage());
+        }
+    }
+
     private JuegoResponse construirResponse(Juego j, List<Categoria> categorias, List<ImagenJuego> imagenesBlob) {
         JuegoResponse resp = new JuegoResponse();
 

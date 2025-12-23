@@ -11,6 +11,7 @@ public class BibliotecaService {
     public BibliotecaService() {
         this.bibliotecaRepository = new BibliotecaRepository();
     }
+
     public List<JuegoResponse> obtenerMisJuegos(int idUsuario) throws Exception {
         return bibliotecaRepository.obtenerBibliotecaUsuario(idUsuario);
     }

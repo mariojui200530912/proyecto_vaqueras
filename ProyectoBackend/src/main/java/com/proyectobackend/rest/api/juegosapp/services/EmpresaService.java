@@ -189,6 +189,26 @@ public class EmpresaService {
         }
     }
 
+    public void configurarComentarios(int idEmpresa, boolean permitir) throws Exception {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getInstance().getConnection();
+            conn.setAutoCommit(false); // Transacción
+
+            empresaRepository.actualizarPermisoComentarios(conn, idEmpresa, permitir);
+
+            conn.commit();
+        } catch (Exception e) {
+            if (conn != null) conn.rollback();
+            throw new Exception("Error al actualizar configuración: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
     private EmpresaResponse mapToResponse(Empresa e) {
         EmpresaResponse resp = new EmpresaResponse();
         resp.setId(e.getId());

@@ -184,6 +184,34 @@ public class EmpresaRepository {
         }
     }
 
+    public void actualizarPermisoComentarios(Connection conn, int idEmpresa, boolean permitir) throws SQLException {
+        String sql = "UPDATE empresa SET permite_comentarios = ? WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, permitir); // JDBC traduce true/false a 1/0
+            ps.setInt(2, idEmpresa);
+
+            int filas = ps.executeUpdate();
+            if (filas == 0) {
+                throw new SQLException("Empresa no encontrada.");
+            }
+        }
+    }
+
+    public boolean permiteComentarios(Connection conn, int idJuego) throws SQLException {
+        String sql = "SELECT e.permite_comentarios FROM empresa e INNER JOIN juego j ON e.id = j.id_empresa WHERE j.id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idJuego);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("permite_comentarios");
+                }
+            }
+        }
+        return false;
+    }
+
     private Empresa mapearEmpresa(ResultSet rs) throws SQLException {
         Empresa e = new Empresa();
         e.setId(rs.getInt("id"));

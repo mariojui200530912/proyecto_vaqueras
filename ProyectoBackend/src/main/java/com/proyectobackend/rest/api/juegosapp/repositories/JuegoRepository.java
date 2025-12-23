@@ -275,6 +275,60 @@ public class JuegoRepository {
         }
     }
 
+    public void actualizarPromedioCalificacion(Connection conn, int idJuego, BigDecimal calificacionPromedio) throws SQLException {
+        String sql = "UPDATE juego SET calificacion_promedio = ? WHERE id_juego = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setBigDecimal(1, calificacionPromedio);
+            ps.setInt(2, idJuego);
+            ps.executeUpdate();
+        }
+    }
+
+    public int obtenerIdEmpresaDelJuego(Connection conn, int idJuego) throws SQLException {
+        String sql = "SELECT id_empresa_creadora FROM juego WHERE id = ?"; // Ajusta el nombre de tu columna FK
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idJuego);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    public List<Juego> listarPorEmpresa(Connection conn, int idEmpresa, boolean soloActivos) throws SQLException {
+        List<Juego> lista = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM juego WHERE id_empresa = ?");
+
+        if (soloActivos) {
+            sql.append(" AND estado_venta = 'ACTIVO'"); // O el estado que uses para 'visible'
+        }
+
+        // Ordenar por fecha de lanzamiento, los más nuevos primero
+        sql.append(" ORDER BY fecha_lanzamiento DESC");
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setInt(1, idEmpresa);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Juego j = new Juego();
+                    j.setId(rs.getInt("id"));
+                    j.setTitulo(rs.getString("titulo"));
+                    j.setDescripcion(rs.getString("descripcion"));
+                    j.setPrecio(rs.getBigDecimal("precio"));
+                    j.setClasificacion(rs.getString("clasificacion"));
+                    j.setEstadoVenta(rs.getString("estado_venta")); // Importante para el admin
+                    j.setFechaLanzamiento(rs.getDate("fecha_lanzamiento").toLocalDate());
+                    // ... mapear resto de campos ...
+
+                    lista.add(j);
+                }
+            }
+        }
+        return lista;
+    }
+
     private Juego mapearJuego(ResultSet rs) throws SQLException {
         Juego j = new Juego();
         j.setId(rs.getInt("id"));
