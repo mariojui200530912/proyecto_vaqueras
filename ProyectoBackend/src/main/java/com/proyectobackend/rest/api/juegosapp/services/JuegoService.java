@@ -72,12 +72,16 @@ public class JuegoService {
     }
 
     public JuegoResponse obtenerJuegoPorId(int id) throws Exception {
-        Juego juego = juegoRepository.buscarPorId(id).orElseThrow(() -> new Exception("Juego no existe"));
-        List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(juego.getId());
-        // Recuperar imágenes de la BD
-        List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(id);
+        try(Connection conn = DBConnection.getInstance().getConnection()) {
+            Juego juego = juegoRepository.buscarPorId(conn, id).orElseThrow(() -> new Exception("Juego no existe"));
+            List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(juego.getId());
+            // Recuperar imágenes de la BD
+            List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(id);
 
-        return construirResponse(juego, categorias, imagenes);
+            return construirResponse(juego, categorias, imagenes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<JuegoResponse> buscarJuegos(String titulo, Integer idCategoria, BigDecimal min, BigDecimal max) {
@@ -100,14 +104,14 @@ public class JuegoService {
                 respuesta.add(dto);
             }
             return respuesta;
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Error al mapear juegos en BD: " + e.getMessage());
         }
     }
 
     public void actualizarJuego(int idJuego, JuegoRequest request) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
-            Juego juegoActual = juegoRepository.buscarPorId(idJuego).orElseThrow(() -> new Exception("Juego no existe"));
+            Juego juegoActual = juegoRepository.buscarPorId(conn, idJuego).orElseThrow(() -> new Exception("Juego no existe"));
 
             // Actualizar Datos Básicos
             Juego juegoUpdate = new Juego();
@@ -136,8 +140,8 @@ public class JuegoService {
         }
     }
 
-    public void actualizarImagenPortada(int idJuego, InputStream nuevaPortada) throws Exception{
-        try (Connection conn = DBConnection.getInstance().getConnection()){
+    public void actualizarImagenPortada(int idJuego, InputStream nuevaPortada) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
             byte[] nuevaPortadaBytes = Files.readAllBytes(Paths.get(nuevaPortada.toString()));
             juegoRepository.actualizarPortada(conn, idJuego, nuevaPortadaBytes);
         }
@@ -175,13 +179,13 @@ public class JuegoService {
     public List<JuegoResponse> obtenerCatalogoEmpresa(int idEmpresa, boolean vistaAdmin) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
 
-            // 1. Obtener la lista base de juegos
+            // Obtener la lista base de juegos
             // Si es vistaAdmin (Rol empresa), ve obtiene todos los juegos. Si es publico, solo activos.
             List<Juego> juegos = juegoRepository.listarPorEmpresa(conn, idEmpresa, !vistaAdmin);
 
             List<JuegoResponse> respuesta = new ArrayList<>();
 
-            // 2. Enriquecer cada juego (Categorías + Imágenes)
+            // Enriquecer cada juego (Categorías + Imágenes)
             for (Juego j : juegos) {
                 // Reutilizamos tus repositorios existentes
                 List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
@@ -189,7 +193,7 @@ public class JuegoService {
                 // Optimización: Traer solo PORTADA para el catálogo (menos pesado)
                 List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
 
-                // 3. Convertir a DTO usando tu metodo helper existente
+                // Convertir a DTO usando tu metodo helper existente
                 JuegoResponse dto = construirResponse(j, categorias, imagenes);
                 respuesta.add(dto);
             }
@@ -197,6 +201,30 @@ public class JuegoService {
             return respuesta;
         } catch (Exception e) {
             throw new Exception("Error al cargar el catálogo: " + e.getMessage());
+        }
+    }
+
+    public void subirImagenBanner(int idJuego, InputStream imagenInputStream) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            conn.setAutoCommit(false); // Inicio Transacción
+            try {
+                // Convertir el Stream a Bytes
+                byte[] bytes = FileUploadUtil.leerBytesDeInput(imagenInputStream);
+
+                if (bytes == null || bytes.length == 0) {
+                    throw new Exception("El archivo de imagen está vacío.");
+                }
+
+                // Guardar en BD
+                juegoRepository.guardarImagenBanner(conn, idJuego, bytes);
+                conn.commit(); // Guardar cambios
+
+            } catch (Exception e) {
+                if (conn != null) conn.rollback();
+                throw new Exception("Error en transacciones al subir banner: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            throw new Exception("Error al subir banner: " + e.getMessage());
         }
     }
 

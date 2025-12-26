@@ -40,7 +40,7 @@
 		</element>
 	</title>
 	<columnHeader height="30" splitType="Stretch">
-		<element kind="staticText" uuid="8f580651-e598-4a55-a6fe-2a4dcdcd24b9" mode="Opaque" x="0" y="0" width="180" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+		<element kind="staticText" uuid="7b23d58d-fe5b-4eff-836c-b526eb1a7adc" mode="Opaque" x="0" y="0" width="180" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[Juego]]></text>
 			<box>
 				<topPen lineWidth="1.0"/>

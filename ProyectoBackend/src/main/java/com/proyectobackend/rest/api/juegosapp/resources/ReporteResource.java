@@ -91,4 +91,49 @@ public class ReporteResource {
                 .header("Content-Disposition", "inline; filename=" + nombreArchivo)
                 .build();
     }
+
+    @GET
+    @Path("/usuario/gastos")
+    public Response getGastosUsuario(@QueryParam("idUsuario") Integer idUsuario) {
+        try {
+            if (idUsuario == null) return Response.status(400).entity("ID Usuario requerido").build();
+
+            return construirRespuestaPDF(
+                    reporteService.reporteGastosUsuario(idUsuario),
+                    "historial_gastos.pdf"
+            );
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/usuario/biblioteca")
+    public Response getBibliotecaUsuario(@QueryParam("idUsuario") Integer idUsuario) {
+        try {
+            if (idUsuario == null) return Response.status(400).entity("ID Usuario requerido").build();
+
+            return construirRespuestaPDF(
+                    reporteService.reporteBibliotecaUsuario(idUsuario),
+                    "analisis_biblioteca.pdf"
+            );
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("/usuario/prestamos")
+    public Response getPrestamosUsuario(@QueryParam("idUsuario") Integer idUsuario) {
+        try {
+            if (idUsuario == null) return Response.status(400).entity("ID Usuario requerido").build();
+
+            return construirRespuestaPDF(
+                    reporteService.reportePrestamosUsuario(idUsuario),
+                    "historial_prestamos.pdf"
+            );
+        } catch (Exception e) {
+            return Response.status(500).entity(e.getMessage()).build();
+        }
+    }
 }

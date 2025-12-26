@@ -97,11 +97,9 @@ public class JuegoRepository {
         }
     }
 
-    public Optional<Juego> buscarPorId(int id) throws SQLException {
+    public Optional<Juego> buscarPorId(Connection conn, int id) throws SQLException {
         String sql = "SELECT * FROM juego WHERE id = ?";
-
-        try (Connection con = DBConnection.getInstance().getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -327,6 +325,23 @@ public class JuegoRepository {
             }
         }
         return lista;
+    }
+
+    public void guardarImagenBanner(Connection conn, int idJuego, byte[] imagenBytes) throws SQLException {
+        // Limpieza: Borrar si ya existía un banner previo para este juego
+        String sqlDelete = "DELETE FROM imagen_juego WHERE id_juego = ? AND atributo = 'BANNER'";
+        try (PreparedStatement ps = conn.prepareStatement(sqlDelete)) {
+            ps.setInt(1, idJuego);
+            ps.executeUpdate();
+        }
+
+        // Inserción: Guardar la nueva imagen con la etiqueta correcta
+        String sqlInsert = "INSERT INTO imagen_juego (id_juego, imagen, atributo) VALUES (?, ?, 'BANNER')";
+        try (PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
+            ps.setInt(1, idJuego);
+            ps.setBytes(2, imagenBytes);
+            ps.executeUpdate();
+        }
     }
 
     private Juego mapearJuego(ResultSet rs) throws SQLException {

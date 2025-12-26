@@ -226,4 +226,33 @@ public class JuegoResource {
         }
     }
 
+    @PUT
+    @Path("/{id}/imagenes/banner")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response subirBanner(
+            @PathParam("id") Integer idJuego,
+            @FormDataParam("imagen") InputStream imagenStream,
+            @FormDataParam("imagen") FormDataContentDisposition fileDetail
+    ) {
+        try {
+            // Validar que venga el archivo
+            if (imagenStream == null || fileDetail == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new MensajeResponse("Debe seleccionar un archivo de imagen."))
+                        .build();
+            }
+
+            juegoService.subirImagenBanner(idJuego, imagenStream);
+
+            return Response.ok(new MensajeResponse("Imagen de Banner actualizada correctamente."))
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage()))
+                    .build();
+        }
+    }
+
 }

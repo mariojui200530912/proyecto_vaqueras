@@ -73,7 +73,38 @@ public class ReporteService {
         return generarPDF("Top5Empresa.jasper", params);
     }
 
-    // Método Genérico Privado para evitar repetir código
+    // REPORTES USUARIO
+    // 1. Historial de Gastos
+    public byte[] reporteGastosUsuario(int idUsuario) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID_USUARIO", idUsuario);
+        params.put("TITULO_REPORTE", "Historial de Gastos");
+        params.put("NOMBRE_USUARIO", "ID: " + idUsuario); // O busca el nombre real si prefieres
+
+        return generarPDF("HistorialGastos.jasper", params);
+    }
+
+    // 2. Análisis de Biblioteca (Ratings Comunidad vs Personal)
+    public byte[] reporteBibliotecaUsuario(int idUsuario) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID_USUARIO", idUsuario);
+        params.put("TITULO_REPORTE", "Análisis de Biblioteca");
+        params.put("NOMBRE_USUARIO", "ID: " + idUsuario);
+
+        return generarPDF("AnalisisBiblioteca.jasper", params);
+    }
+
+    // 3. Historial de Préstamos Familiares
+    public byte[] reportePrestamosUsuario(int idUsuario) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID_USUARIO", idUsuario);
+        params.put("TITULO_REPORTE", "Historial de Préstamos");
+        params.put("NOMBRE_USUARIO", "ID: " + idUsuario);
+
+        return generarPDF("HistorialPrestamos.jasper", params);
+    }
+
+    // Metodo Genérico Privado para evitar repetir código
     private byte[] generarPDF(String nombreArchivoJasper, Map<String, Object> params) throws Exception {
         try(Connection conn = DBConnection.getInstance().getConnection()) {
             InputStream reportStream = getClass().getResourceAsStream("/reportes/" + nombreArchivoJasper);

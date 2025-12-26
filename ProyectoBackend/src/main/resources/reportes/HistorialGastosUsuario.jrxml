@@ -1,0 +1,64 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="HistorialGastosSQL" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="729deb97-d278-4e7a-bb4a-82e61d65f43a">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="proyecto_vaqueras"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="ID_USUARIO" class="java.lang.Integer"/>
+	<parameter name="TITULO_REPORTE" class="java.lang.String"/>
+	<parameter name="NOMBRE_USUARIO" class="java.lang.String"/>
+	<query language="sql"><![CDATA[SELECT v.fecha_compra, v.precio, j.titulo
+        FROM venta v
+        INNER JOIN juego j ON v.id_juego = j.id
+        WHERE v.id_usuario = $P{ID_USUARIO}
+        ORDER BY v.fecha_compra DESC]]></query>
+	<field name="fecha_compra" class="java.sql.Timestamp"/>
+	<field name="precio" class="java.math.BigDecimal"/>
+	<field name="titulo" class="java.lang.String"/>
+	<variable name="SUMA_TOTAL" calculation="Sum" class="java.math.BigDecimal">
+		<expression><![CDATA[$F{precio}]]></expression>
+	</variable>
+	<background splitType="Stretch"/>
+	<title height="79" splitType="Stretch">
+		<element kind="rectangle" uuid="7bcbadfb-8eb5-45de-82c5-bfe90904f815" x="-20" y="0" width="595" height="79" backcolor="#336699">
+			<pen lineWidth="0.0"/>
+		</element>
+		<element kind="textField" uuid="441f3d7d-9c43-4221-8dd7-4e1dd7ee2686" x="0" y="10" width="555" height="30" forecolor="#FFFFFF" fontSize="22.0" bold="true">
+			<expression><![CDATA[$P{TITULO_REPORTE}]]></expression>
+		</element>
+		<element kind="textField" uuid="42d1bc04-2493-4365-bd4e-4f218d8851f5" x="0" y="45" width="555" height="20" forecolor="#E0E0E0" fontSize="14.0">
+			<expression><![CDATA["Cliente: " + $P{NOMBRE_USUARIO}]]></expression>
+		</element>
+	</title>
+	<columnHeader height="30">
+		<element kind="staticText" uuid="c5a9dfb3-7237-4a71-8bcf-062b4ef3a18f" x="0" y="0" width="120" height="30" fontSize="12.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Fecha]]></text>
+		</element>
+		<element kind="staticText" uuid="80deb28d-ae72-4f5d-a158-e38a29af1c0b" x="130" y="0" width="300" height="30" fontSize="12.0" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Juego]]></text>
+		</element>
+		<element kind="staticText" uuid="ca0888ee-5762-428d-be3e-d1d60267eeb7" x="440" y="0" width="110" height="30" fontSize="12.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Precio]]></text>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="30">
+			<element kind="textField" uuid="3d38dbe3-4e94-4eb0-83c0-7700ccff8777" x="0" y="0" width="120" height="30" pattern="dd/MM/yyyy HH:mm" vTextAlign="Middle">
+				<expression><![CDATA[$F{fecha_compra}]]></expression>
+			</element>
+			<element kind="textField" uuid="d3f99f8a-d2d5-4d50-b7c3-6407166c4b12" x="130" y="0" width="300" height="30" vTextAlign="Middle">
+				<expression><![CDATA[$F{titulo}]]></expression>
+			</element>
+			<element kind="textField" uuid="837715f3-9f7e-4658-9aa4-ac1fdc3f79a4" x="440" y="0" width="110" height="30" pattern="¤#,##0.00" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{precio}]]></expression>
+			</element>
+		</band>
+	</detail>
+	<summary height="50">
+		<element kind="line" uuid="ba1e710a-587a-4499-8dc8-92214aa2eecc" x="0" y="5" width="555" height="1"/>
+		<element kind="staticText" uuid="afb72fc0-3a77-49a3-9634-cbf958b86b70" x="300" y="10" width="130" height="30" fontSize="14.0" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[TOTAL GASTADO:]]></text>
+		</element>
+		<element kind="textField" uuid="cd3d8348-7459-45b9-aab2-2f7f7fdd1e1d" x="440" y="10" width="110" height="30" forecolor="#006600" fontSize="14.0" pattern="¤#,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<expression><![CDATA[$V{SUMA_TOTAL}]]></expression>
+		</element>
+	</summary>
+</jasperReport>
