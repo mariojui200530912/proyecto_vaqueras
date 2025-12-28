@@ -13,14 +13,15 @@ public class JuegoResponse {
     private int id;
     private String titulo;
     private String descripcion;
+    private String nombreEmpresa;
     private BigDecimal precio;
     private String recursosMinimos;
     private String clasificacion; // E, T, M
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
-    private LocalDate fecha_lanzamiento;
-    private String estado_venta;
-    private BigDecimal calificacion_promedio;
+    private LocalDate fechaLanzamiento;
+    private String estadoVenta;
+    private BigDecimal calificacionPromedio;
     private List<String> categorias;
     //Imagenes
     private String portada;
@@ -98,27 +99,35 @@ public class JuegoResponse {
         this.galeria = galeria;
     }
 
-    public LocalDate getFecha_lanzamiento() {
-        return fecha_lanzamiento;
+    public LocalDate getFechaLanzamiento() {
+        return fechaLanzamiento;
     }
 
-    public void setFecha_lanzamiento(LocalDate fecha_lanzamiento) {
-        this.fecha_lanzamiento = fecha_lanzamiento;
+    public void setFechaLanzamiento(LocalDate fechaLanzamiento) {
+        this.fechaLanzamiento = fechaLanzamiento;
     }
 
-    public String getEstado_venta() {
-        return estado_venta;
+    public String getEstadoVenta() {
+        return estadoVenta;
     }
 
-    public void setEstado_venta(String estado_venta) {
-        this.estado_venta = estado_venta;
+    public void setEstadoVenta(String estadoVenta) {
+        this.estadoVenta = estadoVenta;
     }
 
-    public BigDecimal getCalificacion_promedio() {
-        return calificacion_promedio;
+    public BigDecimal getCalificacionPromedio() {
+        return calificacionPromedio;
     }
 
-    public void setCalificacion_promedio(BigDecimal calificacion_promedio) {
-        this.calificacion_promedio = calificacion_promedio;
+    public void setCalificacionPromedio(BigDecimal calificacionPromedio) {
+        this.calificacionPromedio = calificacionPromedio;
+    }
+
+    public String getNombreEmpresa() {
+        return nombreEmpresa;
+    }
+
+    public void setNombreEmpresa(String nombreEmpresa) {
+        this.nombreEmpresa = nombreEmpresa;
     }
 }

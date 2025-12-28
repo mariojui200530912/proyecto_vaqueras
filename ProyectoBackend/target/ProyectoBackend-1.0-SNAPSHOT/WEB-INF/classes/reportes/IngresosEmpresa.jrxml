@@ -8,12 +8,12 @@
 			COUNT(v.id) as cantidad_ventas,
 			SUM(v.precio) as ventas_brutas,
 			SUM(v.monto_plataforma) as comision_plataforma,
-			(SUM(v.monto_empresa) as neto_a_pagar
+			SUM(v.monto_empresa) as neto_a_pagar
 		FROM venta v
 		INNER JOIN juego j ON v.id_juego = j.id
 		INNER JOIN empresa e ON j.id_empresa = e.id
-		WHERE v.fecha_compra >= DATE($P{FECHA_INICIO})
-		AND v.fecha_compra <= DATE($P{FECHA_FIN})
+		WHERE v.fecha_compra 
+		BETWEEN DATE($P{FECHA_INICIO}) AND DATE($P{FECHA_FIN})
 		GROUP BY e.id, e.nombre
 		ORDER BY ventas_brutas DESC]]></query>
 	<field name="empresa_nombre" class="java.lang.String"/>

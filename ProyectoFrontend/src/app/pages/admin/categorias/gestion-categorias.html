@@ -1,0 +1,87 @@
+<div class="container py-4">
+  <h2 class="fw-bold mb-4"><i class="bi bi-tags-fill"></i> Gestión de Categorías</h2>
+
+  <div class="row">
+    
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Listado</h5>
+          <button class="btn btn-success btn-sm" (click)="iniciarCreacion()">
+            <i class="bi bi-plus-lg"></i> Nueva
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cat of categoriaService.categorias(); track cat.id) {
+                <tr>
+                  <td>{{ cat.id }}</td>
+                  <td>
+                    <span class="fw-bold">{{ cat.nombre }}</span><br>
+                    <small class="text-muted">{{ cat.descripcion }}</small>
+                  </td>
+                  <td>
+                    <button class="btn btn-outline-primary btn-sm me-2" (click)="editar(cat)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="eliminar(cat.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="3" class="text-center py-3">No hay categorías registradas.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      @if (modoEdicion) {
+        <div class="card shadow border-primary">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              {{ categoriaForm.id === 0 ? 'Crear Categoría' : 'Editar Categoría' }}
+            </h5>
+          </div>
+          <div class="card-body">
+            <form (ngSubmit)="guardar()">
+              
+              <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" [(ngModel)]="categoriaForm.nombre" name="nombre" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" rows="3" [(ngModel)]="categoriaForm.descripcion" name="desc"></textarea>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      } @else {
+        <div class="alert alert-light text-center border border-dashed text-muted py-5">
+          <i class="bi bi-arrow-left-circle fs-1"></i>
+          <p class="mt-2">Selecciona "Nueva" o edita una existente para ver el formulario.</p>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

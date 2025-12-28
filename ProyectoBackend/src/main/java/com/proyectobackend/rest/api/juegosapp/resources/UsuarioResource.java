@@ -68,6 +68,8 @@ public class UsuarioResource {
             // Guardar imagen si se envía
             if (avatarInput != null) {
                 request.setAvatar(FileUploadUtil.leerBytesDeInput(avatarInput));
+            }else{
+                request.setAvatar(FileUploadUtil.leerBytesDeInput(getClass().getResourceAsStream("/images/default_avatar.png")));
             }
 
             request.setRol(Rol.valueOf("GAMER"));

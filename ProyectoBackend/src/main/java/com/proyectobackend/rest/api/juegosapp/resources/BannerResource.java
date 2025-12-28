@@ -14,7 +14,6 @@ public class BannerResource {
     private final BannerService bannerService = new BannerService();
 
     @GET
-    @Path("/banner")
     @Produces(MediaType.APPLICATION_JSON)
     public Response obtenerBanner() {
         try {

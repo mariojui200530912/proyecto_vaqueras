@@ -1,5 +1,7 @@
 <!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
 <jasperReport name="GananciasGlobales" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e4c2c0d6-3f3b-4a55-b8b4-2a9c4e9b7f12">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="proyecto_vaqueras"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="FECHA_INICIO" class="java.lang.String"/>
 	<parameter name="FECHA_FIN" class="java.lang.String"/>
 	<query language="sql"><![CDATA[SELECT SUM(v.precio) as total_bruto, SUM(v.monto_plataforma) as ganancia_plataforma, SUM(v.monto_empresa) as ganancia_empresas FROM venta v WHERE v.fecha_compra BETWEEN $P{FECHA_INICIO} AND $P{FECHA_FIN}]]></query>
@@ -22,7 +24,7 @@
 			<element kind="staticText" uuid="7f44e2d1-c7e1-473f-b124-7f74bdc8a4c8" x="20" y="60" width="200" height="30" forecolor="#009900" fontSize="14.0">
 				<text><![CDATA[Ganancia Neta (Plataforma):]]></text>
 			</element>
-			<element kind="textField" uuid="8d1b7d43-6ee5-4734-8691-2a7cc62c6dec" x="250" y="60" width="200" height="30" forecolor="#009900" fontSize="14.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right">
+			<element kind="textField" uuid="2c30b7a4-67d5-4957-97c1-75e918320b16" x="250" y="60" width="200" height="30" forecolor="#009900" fontSize="14.0" pattern="Q #,##0.00" bold="true" hTextAlign="Right">
 				<expression><![CDATA[$F{ganancia_plataforma}]]></expression>
 			</element>
 			<element kind="staticText" uuid="adcd760b-f98f-4bfd-aad5-ee8d25107e16" x="20" y="100" width="200" height="30" forecolor="#0000FF" fontSize="14.0">

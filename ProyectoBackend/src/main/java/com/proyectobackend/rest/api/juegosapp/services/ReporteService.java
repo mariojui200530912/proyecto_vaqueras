@@ -23,13 +23,17 @@ public class ReporteService {
     }
 
     // 2. Top Ventas (Con filtro opcional de categoría)
-    public byte[] reporteTopVentas(String fechaInicio, String fechaFin, Integer idCategoria) throws Exception {
+    public byte[] reporteTopVentas(String fechaInicio, String fechaFin, Integer idCategoria, String clasificacion) throws Exception {
+
         Map<String, Object> params = new HashMap<>();
+        // Parámetros obligatorios
         params.put("FECHA_INICIO", fechaInicio);
         params.put("FECHA_FIN", fechaFin);
-        // Jasper maneja nulls en SQL si la query está bien hecha
-        params.put("ID_CATEGORIA", idCategoria);
-        return generarPDF("TopVentas.jasper", params);
+        // Parámetros opcionales (Jasper maneja nulls en SQL con la lógica que pusimos)
+        params.put("ID_CATEGORIA", idCategoria); // Puede ser null
+        params.put("CLASIFICACION", clasificacion); // Puede ser null (ej: "M", "T", "E")
+
+        return generarPDF("top_balanceado.jasper", params);
     }
 
     // 3. Ingresos por Empresa

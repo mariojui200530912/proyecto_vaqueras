@@ -1,0 +1,167 @@
+<div class="container d-flex justify-content-center align-items-center py-5 min-vh-100">
+  <div class="card shadow-lg p-4" style="max-width: 500px; width: 100%;">
+    
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-success">Únete a VaquerasGames</h2>
+      <p class="text-muted">Crea tu cuenta y empieza a jugar</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-danger fade show">
+        <i class="bi bi-exclamation-circle-fill"></i> {{ errorMessage }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #regForm="ngForm" novalidate>
+      
+      <div class="mb-3">
+        <label class="form-label">Nickname</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+            
+            <input type="text" 
+                   class="form-control" 
+                   name="nickname" 
+                   [(ngModel)]="datos.nickname" 
+                   required 
+                   minlength="3"
+                   maxlength="20"
+                   #nick="ngModel"
+                   [class.is-invalid]="nick.invalid && (nick.touched || nick.dirty)">
+            
+            <div class="invalid-feedback">
+              @if (nick.errors?.['required']) { El nickname es obligatorio. }
+              @if (nick.errors?.['minlength']) { Mínimo 3 caracteres. }
+            </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Correo Electrónico</label>
+        <div class="input-group has-validation">
+            <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+            
+            <input type="email" 
+                   class="form-control" 
+                   name="email" 
+                   [(ngModel)]="datos.email" 
+                   required 
+                   email
+                   #mail="ngModel"
+                   [class.is-invalid]="mail.invalid && (mail.touched || mail.dirty)">
+            
+            <div class="invalid-feedback">
+              @if (mail.errors?.['required']) { El correo es obligatorio. }
+              @if (mail.errors?.['email']) { Ingresa un correo válido (ej: hola@x.com). }
+            </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Contraseña</label>
+          <input type="password" 
+                 class="form-control" 
+                 name="pass" 
+                 [(ngModel)]="datos.password" 
+                 required 
+                 minlength="6"
+                 #pass="ngModel"
+                 [class.is-invalid]="pass.invalid && (pass.touched || pass.dirty)">
+          
+          <div class="invalid-feedback">
+             @if (pass.errors?.['required']) { Requerida. }
+             @if (pass.errors?.['minlength']) { Mínimo 6 caracteres. }
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Confirmar</label>
+          <input type="password" 
+                 class="form-control" 
+                 name="confirm" 
+                 [(ngModel)]="confirmPassword" 
+                 required
+                 #confirm="ngModel"
+                 [class.is-invalid]="(confirm.touched && confirm.invalid) || (confirm.touched && confirmPassword !== datos.password)">
+          
+          <div class="invalid-feedback">
+            @if (confirm.errors?.['required']) { Confirma tu contraseña. }
+            @else if (confirmPassword !== datos.password) { Las contraseñas no coinciden. }
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Fecha de Nacimiento</label>
+        <input type="date" 
+               class="form-control" 
+               name="fecha" 
+               [(ngModel)]="datos.fechaNacimiento" 
+               required
+               #fecha="ngModel"
+               [class.is-invalid]="fecha.invalid && fecha.touched">
+        <div class="invalid-feedback">Selecciona tu fecha de nacimiento.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+            <input 
+                type="tel" 
+                class="form-control" 
+                name="telefono" 
+                [(ngModel)]="datos.telefono" 
+                placeholder="+502 1234 5678"
+                required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">País</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-geo-alt-fill"></i></span>
+            <select class="form-select" name="pais" [(ngModel)]="datos.pais" required>
+                <option value="" disabled selected>Selecciona tu país</option>
+                <option value="Guatemala">Guatemala</option>
+                <option value="Mexico">México</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Espana">España</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Avatar</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-camera-fill"></i></span>
+            <input 
+              type="file" 
+              class="form-control" 
+              (change)="onFileSelected($event)" 
+              accept="image/*"> 
+        </div>
+        <div class="form-text">Sube una imagen para tu perfil.</div>
+      </div>
+
+      <div class="d-grid gap-2 mt-3">
+        <button type="submit" 
+                class="btn btn-success btn-lg" 
+                [disabled]="regForm.invalid || (datos.password !== confirmPassword) || isLoading">
+          
+          @if(isLoading){ <span class="spinner-border spinner-border-sm"></span> }
+          Registrarse
+        </button>
+      </div>
+
+    </form>
+
+    <div class="text-center mt-3">
+      <small>¿Ya tienes cuenta? <a routerLink="/login" class="text-decoration-none fw-bold">Inicia Sesión</a></small>
+    </div>
+
+  </div>
+</div>

@@ -11,7 +11,7 @@ public class ReporteResource {
     public ReporteResource() {
         this.reporteService = new ReporteService();
     }
-
+    // REPORTES ADMIN
     @GET
     @Path("/ganancias")
     public Response getGanancias(@QueryParam("inicio") String inicio, @QueryParam("fin") String fin) {
@@ -23,14 +23,25 @@ public class ReporteResource {
     }
 
     @GET
-    @Path("/top-ventas")
-    public Response getTopVentas(
+    @Path("/top-calidad")
+    @Produces("application/pdf")
+    public Response getTopVentasCalidad(
             @QueryParam("inicio") String inicio,
             @QueryParam("fin") String fin,
-            @QueryParam("categoria") Integer idCategoria // Opcional
+            @QueryParam("categoria") Integer idCategoria, // Opcional
+            @QueryParam("clasificacion") String clasificacion // Opcional
     ) {
         try {
-            return construirRespuestaPDF(reporteService.reporteTopVentas(inicio, fin, idCategoria), "top_ventas.pdf");
+            // Validar fechas obligatorias
+            if (inicio == null || fin == null) {
+                return Response.status(400).entity("Fechas requeridas").build();
+            }
+
+            byte[] pdf = reporteService.reporteTopVentas(inicio, fin, idCategoria, clasificacion);
+
+            return Response.ok(pdf)
+                    .header("Content-Disposition", "inline; filename=top_ventas_calidad.pdf")
+                    .build();
         } catch (Exception e) {
             return Response.status(500).entity(e.getMessage()).build();
         }
@@ -55,7 +66,7 @@ public class ReporteResource {
             return Response.status(500).entity(e.getMessage()).build();
         }
     }
-
+    // REPORTES EMPRESAS
     @GET
     @Path("/empresa/ventas")
     public Response getVentasPropias(
@@ -91,7 +102,7 @@ public class ReporteResource {
                 .header("Content-Disposition", "inline; filename=" + nombreArchivo)
                 .build();
     }
-
+    // REPORTES USUARIO
     @GET
     @Path("/usuario/gastos")
     public Response getGastosUsuario(@QueryParam("idUsuario") Integer idUsuario) {

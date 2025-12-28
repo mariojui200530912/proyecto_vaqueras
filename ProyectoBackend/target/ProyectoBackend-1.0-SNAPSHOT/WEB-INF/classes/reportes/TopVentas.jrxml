@@ -1,146 +1,90 @@
 <!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
-<jasperReport name="TopVentas" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f1e2d3c4-b5a6-7890-1234-567890abcdef">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+<jasperReport name="TopVentasCalidad" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="549b857c-5fd3-4056-a120-ac49157c628a">
 	<parameter name="FECHA_INICIO" class="java.lang.String"/>
 	<parameter name="FECHA_FIN" class="java.lang.String"/>
-	<parameter name="ID_CATEGORIA" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
-	</parameter>
+	<parameter name="ID_CATEGORIA" class="java.lang.Integer"/>
+	<parameter name="CLASIFICACION" class="java.lang.String"/>
 	<query language="sql"><![CDATA[SELECT
-			j.titulo,
-			c.nombre as categoria,
-			j.calificacion_promedio,
-			COUNT(v.id) as cantidad_ventas,
-			SUM(v.precio) as dinero_generado
-		FROM venta v
-		INNER JOIN juego j ON v.id_juego = j.id
-		INNER JOIN juego_categoria jc ON j.id = jc.id_juego
-		INNER JOIN categoria c ON jc.id_categoria = c.id
-		WHERE v.fecha_compra >= DATE($P{FECHA_INICIO})
-		AND v.fecha_compra <= DATE($P{FECHA_FIN})
-		AND ($P{ID_CATEGORIA} IS NULL OR c.id = $P{ID_CATEGORIA})
-		GROUP BY j.id
-		ORDER BY cantidad_ventas DESC
-		LIMIT 20]]></query>
+            j.titulo,
+            e.nombre AS empresa,
+            j.clasificacion,
+            j.precio,
+            COUNT(DISTINCT v.id) as total_ventas,
+            j.calificacion_promedio,
+            -- ALGORITMO DE BALANCE (Promedio Bayesiano)
+            -- m=5 (mínimo ventas), C=3.0 (media global)
+            ( (COUNT(DISTINCT v.id) / (COUNT(DISTINCT v.id) + 5.0)) * j.calificacion_promedio ) +
+            ( (5.0 / (COUNT(DISTINCT v.id) + 5.0)) * 3.0 ) AS score_balance
+        FROM juego j
+        INNER JOIN empresa e ON j.id_empresa_creadora = e.id
+        INNER JOIN venta v ON j.id = v.id_juego
+        LEFT JOIN juego_categoria jc ON j.id = jc.id_juego
+        WHERE
+            v.fecha_compra BETWEEN $P{FECHA_INICIO} AND $P{FECHA_FIN}
+            -- Filtro dinámico: Si el parámetro es NULL, ignora el filtro
+            AND ($P{ID_CATEGORIA} IS NULL OR jc.id_categoria = $P{ID_CATEGORIA})
+            AND ($P{CLASIFICACION} IS NULL OR j.clasificacion = $P{CLASIFICACION})
+        GROUP BY j.id
+        ORDER BY score_balance DESC
+        LIMIT 20]]></query>
 	<field name="titulo" class="java.lang.String"/>
-	<field name="categoria" class="java.lang.String"/>
+	<field name="empresa" class="java.lang.String"/>
+	<field name="clasificacion" class="java.lang.String"/>
+	<field name="total_ventas" class="java.lang.Long"/>
 	<field name="calificacion_promedio" class="java.lang.Double"/>
-	<field name="cantidad_ventas" class="java.lang.Long"/>
-	<field name="dinero_generado" class="java.math.BigDecimal"/>
+	<field name="score_balance" class="java.lang.Double"/>
 	<background splitType="Stretch"/>
-	<title height="85" splitType="Stretch">
-		<element kind="staticText" uuid="fdfa6616-8e29-464b-beda-8c9523d0e09f" x="0" y="0" width="555" height="30" fontSize="20.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Top Ventas y Calidad de Juegos]]></text>
+	<title height="85">
+		<element kind="rectangle" uuid="20a89d63-bc7e-4e08-8650-27cb165afc6d" x="-20" y="0" width="595" height="85" backcolor="#1A237E">
+			<pen lineWidth="0.0"/>
 		</element>
-		<element kind="textField" uuid="51e77dd6-81cd-46c2-809e-36a376484cb4" x="0" y="40" width="555" height="20" hTextAlign="Center">
-			<expression><![CDATA["Periodo: " + $P{FECHA_INICIO} + " al " + $P{FECHA_FIN}]]></expression>
+		<element kind="staticText" uuid="efd837fe-4a92-4401-8555-3e6751fb9d35" x="0" y="10" width="555" height="30" forecolor="#FFFFFF" fontSize="22.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[Top Juegos: Ventas & Calidad]]></text>
 		</element>
-		<element kind="staticText" uuid="6439fbb8-8f0b-47da-8ef1-ef1e26226f5e" x="0" y="60" width="555" height="20" forecolor="#666666" fontSize="10.0" italic="true" hTextAlign="Center">
-			<text><![CDATA[Ordenado por volumen de ventas]]></text>
+		<element kind="textField" uuid="525e3822-1da1-4a72-9363-7b67af68e738" x="0" y="45" width="555" height="20" forecolor="#C5CAE9" hTextAlign="Center">
+			<expression><![CDATA["Del " + $P{FECHA_INICIO} + " al " + $P{FECHA_FIN}]]></expression>
+		</element>
+		<element kind="textField" uuid="3894788b-892d-4688-8a6d-f45d274d13b1" x="0" y="65" width="555" height="15" forecolor="#9FA8DA" fontSize="9.0" italic="true" hTextAlign="Center">
+			<expression><![CDATA[($P{ID_CATEGORIA} != null ? "Filtro Categ. ID: " + $P{ID_CATEGORIA} + " | " : "") + ($P{CLASIFICACION} != null ? "Clasificación: " + $P{CLASIFICACION} : "")]]></expression>
 		</element>
 	</title>
-	<columnHeader height="30" splitType="Stretch">
-		<element kind="staticText" uuid="8f580651-e598-4a55-a6fe-2a4dcdcd24b9" mode="Opaque" x="0" y="0" width="180" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Juego]]></text>
-			<box>
-				<topPen lineWidth="1.0"/>
-				<leftPen lineWidth="1.0"/>
-				<bottomPen lineWidth="1.0"/>
-				<rightPen lineWidth="1.0"/>
-			</box>
+	<columnHeader height="30">
+		<element kind="staticText" uuid="2a26fc00-f23c-4bf3-a9d9-6e91e3a33ee4" x="0" y="0" width="180" height="30" bold="true" vTextAlign="Middle">
+			<text><![CDATA[Juego / Empresa]]></text>
 		</element>
-		<element kind="staticText" uuid="31be6479-813a-4e77-bdcd-4b170e07a138" mode="Opaque" x="180" y="0" width="100" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Categoría]]></text>
-			<box>
-				<topPen lineWidth="1.0"/>
-				<leftPen lineWidth="1.0"/>
-				<bottomPen lineWidth="1.0"/>
-				<rightPen lineWidth="1.0"/>
-			</box>
+		<element kind="staticText" uuid="720b0e17-e801-4a1c-bcab-2d9cc48cb004" x="180" y="0" width="60" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Clasif.]]></text>
 		</element>
-		<element kind="staticText" uuid="569fb876-647e-412c-894a-76771f8854ff" mode="Opaque" x="280" y="0" width="70" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
+		<element kind="staticText" uuid="b76082b6-fc49-4831-9e37-90934ee5a5d9" x="240" y="0" width="70" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[Ventas]]></text>
-			<box>
-				<topPen lineWidth="1.0"/>
-				<leftPen lineWidth="1.0"/>
-				<bottomPen lineWidth="1.0"/>
-				<rightPen lineWidth="1.0"/>
-			</box>
 		</element>
-		<element kind="staticText" uuid="9b6b9622-374a-4ae7-8386-9e4f990a64ce" mode="Opaque" x="350" y="0" width="110" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Ingresos Totales]]></text>
-			<box>
-				<topPen lineWidth="1.0"/>
-				<leftPen lineWidth="1.0"/>
-				<bottomPen lineWidth="1.0"/>
-				<rightPen lineWidth="1.0"/>
-			</box>
+		<element kind="staticText" uuid="ebed65f8-583c-4f2b-a536-0035f128c870" x="310" y="0" width="80" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Rating Real]]></text>
 		</element>
-		<element kind="staticText" uuid="7901544c-6e0f-4a31-8f2f-c9fa36b61d42" mode="Opaque" x="460" y="0" width="95" height="30" backcolor="#D6D6D6" bold="true" hTextAlign="Center" vTextAlign="Middle">
-			<text><![CDATA[Calidad (0-5)]]></text>
-			<box>
-				<topPen lineWidth="1.0"/>
-				<leftPen lineWidth="1.0"/>
-				<bottomPen lineWidth="1.0"/>
-				<rightPen lineWidth="1.0"/>
-			</box>
+		<element kind="staticText" uuid="2c4a8f5d-903f-44c1-a3a7-44ec9f59c986" x="390" y="0" width="165" height="30" bold="true" hTextAlign="Right" vTextAlign="Middle">
+			<text><![CDATA[Puntaje Balanceado (Score)]]></text>
 		</element>
 	</columnHeader>
 	<detail>
-		<band height="30" splitType="Stretch">
-			<element kind="textField" uuid="262b0a6c-9c7c-482d-85dd-3f88b42c5c18" x="0" y="0" width="180" height="30" vTextAlign="Middle">
+		<band height="40">
+			<element kind="textField" uuid="ff97ca11-1dc7-4d23-82d5-a6349b298db0" x="0" y="0" width="180" height="20" bold="true">
 				<expression><![CDATA[$F{titulo}]]></expression>
-				<box leftPadding="5">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
 			</element>
-			<element kind="textField" uuid="a09debf3-9fc1-42e5-b9dc-cc9d2568b0f7" x="180" y="0" width="100" height="30" vTextAlign="Middle">
-				<expression><![CDATA[$F{categoria}]]></expression>
-				<box leftPadding="5">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
+			<element kind="textField" uuid="ac9cc995-d3cd-446f-9cb7-ee9d6fed6e24" x="0" y="20" width="180" height="15" forecolor="#666666" fontSize="9.0">
+				<expression><![CDATA[$F{empresa}]]></expression>
 			</element>
-			<element kind="textField" uuid="a26f5345-0066-4764-923f-794e8bbcaa7c" x="280" y="0" width="70" height="30" hTextAlign="Center" vTextAlign="Middle">
-				<expression><![CDATA[$F{cantidad_ventas}]]></expression>
-				<box>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
+			<element kind="textField" uuid="dcb5d216-09ed-417e-b219-8c28e1e13cc7" x="180" y="0" width="60" height="35" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{clasificacion}]]></expression>
 			</element>
-			<element kind="textField" uuid="9e260dcc-8140-4b30-94b7-605c3b110c79" x="350" y="0" width="110" height="30" pattern="Q #,##0.00" hTextAlign="Right" vTextAlign="Middle">
-				<expression><![CDATA[$F{dinero_generado}]]></expression>
-				<box rightPadding="5">
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
+			<element kind="textField" uuid="c65616cb-6a09-4d44-8a1e-9cbeb4bc1424" x="240" y="0" width="70" height="35" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[$F{total_ventas}]]></expression>
 			</element>
-			<element kind="textField" uuid="dfcdb34b-4338-4f92-9360-c53d2111df34" x="460" y="0" width="95" height="30" bold="false" hTextAlign="Center" vTextAlign="Middle">
+			<element kind="textField" uuid="784e98e5-55c6-4ad4-beef-28f584cf0859" x="310" y="0" width="80" height="35" forecolor="#F9A825" bold="true" hTextAlign="Center" vTextAlign="Middle">
 				<expression><![CDATA[$F{calificacion_promedio} + " ★"]]></expression>
-				<box>
-					<topPen lineWidth="0.5"/>
-					<leftPen lineWidth="0.5"/>
-					<bottomPen lineWidth="0.5"/>
-					<rightPen lineWidth="0.5"/>
-				</box>
+			</element>
+			<element kind="textField" uuid="f4411418-e005-415b-b701-a2c18b84ec27" x="390" y="0" width="165" height="35" forecolor="#2E7D32" fontSize="14.0" pattern="#,##0.00" bold="true" hTextAlign="Right" vTextAlign="Middle">
+				<expression><![CDATA[$F{score_balance}]]></expression>
 			</element>
 		</band>
 	</detail>
-	<pageFooter height="30">
-		<element kind="textField" uuid="e5d9b275-60b6-46c1-99af-6ba2eb536168" x="455" y="0" width="100" height="30" hTextAlign="Right">
-			<expression><![CDATA["Pág " + $V{PAGE_NUMBER}]]></expression>
-		</element>
-		<element kind="textField" uuid="25742c9b-96f2-46df-a51d-877dc947d4b7" x="0" y="0" width="150" height="30" pattern="MMMMM dd, yyyy">
-			<expression><![CDATA[new java.util.Date()]]></expression>
-		</element>
-	</pageFooter>
 </jasperReport>

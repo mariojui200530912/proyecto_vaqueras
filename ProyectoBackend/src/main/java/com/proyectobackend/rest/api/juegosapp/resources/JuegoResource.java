@@ -88,7 +88,21 @@ public class JuegoResource {
     }
 
     @GET
-    @Path("/{id}/empresa")
+    @Path("/catalogo")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listarJuegos() {
+        try {
+            List<JuegoResponse> juegos = juegoService.obtenerCatalogoCompleto();
+            return Response.ok(juegos).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error al obtener el catalogo: " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/catalogo/{id}/empresa")
     @Produces(MediaType.APPLICATION_JSON)
     public Response verCatalogoEmpresa(
             @PathParam("id") Integer idEmpresa,
@@ -106,6 +120,18 @@ public class JuegoResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse("Error al obtener catalogo de empresa: " + e.getMessage()))
                     .build();
+        }
+    }
+
+    @GET
+    @Path("/destacados")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerJuegosDestacados() {
+        try {
+            List<JuegoResponse> destacados = juegoService.obtenerDestacados();
+            return Response.ok(destacados).build();
+        } catch (Exception e) {
+            return Response.status(500).entity(new MensajeResponse(e.getMessage())).build();
         }
     }
 

@@ -1,0 +1,211 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center mb-4">
+    <h2 class="fw-bold me-2"><i class="bi bi-printer"></i> Centro de Reportes</h2>
+    @if (authService.currentUser(); as user) {
+      <span class="badge" 
+            [ngClass]="{
+              'bg-danger': user.rol === 'ADMIN',
+              'bg-primary': user.rol === 'EMPRESA',
+              'bg-success': user.rol === 'GAMER'
+            }">
+        {{ user.rol }}
+      </span>
+    }
+  </div>
+
+  @if (authService.currentUser()?.rol !== 'GAMER') {
+    <div class="card shadow-sm mb-4 border-0 bg-light">
+      <div class="card-body">
+        <h6 class="text-muted text-uppercase fw-bold mb-3"><i class="bi bi-calendar3"></i> Periodo de Análisis</h6>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Desde</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaInicio">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold">Hasta</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaFin">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+             <div class="text-muted small fst-italic">
+               * Necesario para reportes financieros
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+    @if (authService.currentUser()?.rol === 'ADMIN') {
+      
+      <div class="col">
+        <div class="card h-100 border-start border-4 border-success shadow-sm">
+          <div class="card-body">
+            <h5 class="fw-bold text-success">Ganancias Globales</h5>
+            <p class="small text-muted">Ingresos totales de la plataforma.</p>
+            <button class="btn btn-outline-success w-100" [disabled]="fechasInvalidas" (click)="adminGanancias()">
+              <i class="bi bi-download"></i> Descargar PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 border-start border-4 border-warning shadow-sm">
+          <div class="card-body">
+            
+            <h5 class="fw-bold text-warning">Top Ventas & Calidad</h5>
+            <p class="small text-muted mb-3">Ranking balanceado por ventas y rating.</p>
+            
+            <div class="mb-2">
+                <label class="form-label small fw-bold mb-0">Categoría</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filtroCategoria">
+                    <option [ngValue]="undefined">Todas</option>
+                    @for (cat of categoriaService.categorias(); track cat.id) {
+                        <option [ngValue]="cat.id">{{ cat.nombre }}</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold mb-0">Clasificación</label>
+                <select class="form-select form-select-sm" [(ngModel)]="filtroClasificacion">
+                    <option [ngValue]="undefined">Todas</option>
+                    @for (clas of listaClasificaciones; track $index) {
+                        <option [value]="clas">{{ clas }}</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-outline-warning w-100" 
+                    [disabled]="fechasInvalidas" 
+                    (click)="adminTopVentas()">
+              <i class="bi bi-download"></i> Descargar PDF
+            </button>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 border-start border-4 border-primary shadow-sm">
+          <div class="card-body">
+            <h5 class="fw-bold text-primary">Ingresos Empresas</h5>
+            <p class="small text-muted">Ventas por desarrollador.</p>
+            <button class="btn btn-outline-primary w-100" [disabled]="fechasInvalidas" (click)="adminEmpresas()">
+              <i class="bi bi-download"></i> Descargar PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 border-start border-4 border-dark shadow-sm">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Ranking Gamers</h5>
+            <p class="small text-muted">Usuarios con más compras (Histórico).</p>
+            <button class="btn btn-outline-dark w-100" (click)="adminRanking()">
+              <i class="bi bi-download"></i> Descargar PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (authService.currentUser()?.rol === 'EMPRESA') {
+      
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-cash-stack fs-1 text-primary"></i>
+            <h5 class="fw-bold mt-2">Mis Ventas</h5>
+            <p class="small text-muted">Reporte financiero de mis juegos.</p>
+            <button class="btn btn-primary w-100" [disabled]="fechasInvalidas" (click)="empresaVentas()">
+              Descargar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-trophy-fill fs-1 text-warning"></i>
+            <h5 class="fw-bold mt-2">Mi Top 5</h5>
+            <p class="small text-muted">Mis juegos más exitosos.</p>
+            <button class="btn btn-warning w-100" [disabled]="fechasInvalidas" (click)="empresaTop5()">
+              Descargar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-chat-heart-fill fs-1 text-danger"></i>
+            <h5 class="fw-bold mt-2">Feedback & Calidad</h5>
+            <p class="small text-muted">Comentarios y valoraciones.</p>
+            <button class="btn btn-danger w-100" (click)="empresaFeedback()">
+              Descargar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (authService.currentUser()?.rol === 'GAMER') {
+      
+      <div class="col">
+        <div class="card h-100 bg-light border-0 shadow-sm hover-up">
+          <div class="card-body d-flex align-items-center">
+            <div class="bg-white p-3 rounded-circle shadow-sm me-3 text-success">
+              <i class="bi bi-receipt fs-3"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1">Historial de Gastos</h6>
+              <button class="btn btn-sm btn-link p-0 text-decoration-none" (click)="gamerGastos()">
+                Descargar PDF &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 bg-light border-0 shadow-sm hover-up">
+          <div class="card-body d-flex align-items-center">
+            <div class="bg-white p-3 rounded-circle shadow-sm me-3 text-primary">
+              <i class="bi bi-pie-chart-fill fs-3"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1">Análisis Biblioteca</h6>
+              <button class="btn btn-sm btn-link p-0 text-decoration-none" (click)="gamerBiblioteca()">
+                Descargar PDF &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 bg-light border-0 shadow-sm hover-up">
+          <div class="card-body d-flex align-items-center">
+            <div class="bg-white p-3 rounded-circle shadow-sm me-3 text-info">
+              <i class="bi bi-people-fill fs-3"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1">Historial Préstamos</h6>
+              <button class="btn btn-sm btn-link p-0 text-decoration-none" (click)="gamerPrestamos()">
+                Descargar PDF &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

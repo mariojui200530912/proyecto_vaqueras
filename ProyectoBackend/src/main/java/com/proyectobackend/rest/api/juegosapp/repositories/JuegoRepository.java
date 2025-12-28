@@ -327,6 +327,47 @@ public class JuegoRepository {
         return lista;
     }
 
+    public List<Juego> listarJuegosPublicos(Connection conn) throws SQLException {
+        List<Juego> lista = new ArrayList<>();
+        String sql = "SELECT * FROM juego WHERE estado_venta = 'ACTIVO' ORDER BY fecha_lanzamiento DESC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                lista.add(mapearJuego(rs));
+            }
+        }
+        return lista;
+    }
+
+    public List<Juego> obtenerJuegosMejorBalance(Connection conn, int limit) throws SQLException {
+        List<Juego> lista = new ArrayList<>();
+
+        // SQL
+        // m = 10 (constante de amortiguación)
+        // C = 3.0 (promedio global estimado)
+        String sql =
+                "SELECT j.*, " +
+                        "       COUNT(v.id) as total_ventas, " +
+                        "       ( (COUNT(v.id) / (COUNT(v.id) + 10.0)) * j.calificacion_promedio ) + " +
+                        "       ( (10.0 / (COUNT(v.id) + 10.0)) * 3.0 ) AS score_balance " +
+                        "FROM juego j " +
+                        "LEFT JOIN venta v ON j.id = v.id_juego WHERE j.estado_venta = 'ACTIVO' " +
+                        "GROUP BY j.id ORDER BY score_balance DESC " + // Ordenamos por la fórmula
+                        "LIMIT ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearJuego(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public void guardarImagenBanner(Connection conn, int idJuego, byte[] imagenBytes) throws SQLException {
         // Limpieza: Borrar si ya existía un banner previo para este juego
         String sqlDelete = "DELETE FROM imagen_juego WHERE id_juego = ? AND atributo = 'BANNER'";

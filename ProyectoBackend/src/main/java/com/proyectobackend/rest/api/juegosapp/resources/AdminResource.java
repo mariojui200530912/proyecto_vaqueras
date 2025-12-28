@@ -1,6 +1,7 @@
 package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.services.AdminService;
 import com.proyectobackend.rest.api.juegosapp.services.ConfiguracionService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,10 +12,13 @@ import java.math.BigDecimal;
 @Path("/admin")
 public class AdminResource {
     private final ConfiguracionService configService;
+    private final AdminService adminService;
 
     public AdminResource() {
         this.configService = new ConfiguracionService();
+        this.adminService = new AdminService();
     }
+
     @POST
     @Path("/comision-global")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -33,6 +37,17 @@ public class AdminResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse(e.getMessage()))
                     .build();
+        }
+    }
+
+    @GET
+    @Path("/stats")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashboardStats() {
+        try {
+            return Response.ok(adminService.getStats()).build();
+        } catch (Exception e) {
+            return Response.serverError().build();
         }
     }
 }

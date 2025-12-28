@@ -1,0 +1,127 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+  <div class="container">
+    
+    <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+      <i class="bi bi-controller fs-4 text-warning"></i> 
+      <span class="fw-bold">VaquerasGames</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <i class="bi bi-house-door"></i> Inicio
+          </a>
+        </li>
+
+        @if (authService.currentUser(); as user) {
+          
+          @if (user.rol === 'ADMIN') {
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/admin/dashboard" routerLinkActive="active">
+                <i class="bi bi-speedometer2"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/admin/reportes" routerLinkActive="active">
+                <i class="bi bi-file-earmark-bar-graph"></i> Reportes
+              </a>
+            </li>
+          }
+
+          @if (user.rol === 'EMPRESA') {
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/empresa/dashboard" routerLinkActive="active">
+                <i class="bi bi-joystick"></i> Mis Juegos
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/empresa/nuevo-juego" routerLinkActive="active">
+                <i class="bi bi-plus-circle"></i> Publicar
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/empresa/reportes" routerLinkActive="active">
+                <i class="bi bi-file-earmark-bar-graph"></i> Reportes
+              </a>
+            </li>
+          }
+
+          @if (user.rol === 'GAMER') {
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/biblioteca" routerLinkActive="active">
+                <i class="bi bi-collection-play"></i> Mi Biblioteca
+              </a>
+            </li>
+          }
+
+        }
+
+        @if (authService.currentUser(); as user) {
+          <li class="nav-item dropdown ms-lg-3">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+              
+              <img [src]="user.avatar" 
+                   class="rounded-circle border border-secondary" 
+                   style="width: 35px; height: 35px; object-fit: cover;"
+                   alt="Avatar">
+              
+              <div class="d-flex flex-column lh-1 text-start">
+                  <span class="small fw-bold">{{ user.nickname }}</span>
+                  <span class="source-code-pro text-warning" style="font-size: 0.75rem;">
+                      {{ user.rol }}
+                  </span>
+              </div>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li>
+                  <div class="dropdown-header text-center">
+                    <small>Saldo Disponible</small><br>
+                    <span class="fw-bold text-success fs-5">{{ user.carteraSaldo || 0 | currency }}</span>
+                  </div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              
+              <li><a class="dropdown-item" routerLink="/perfil"><i class="bi bi-person-gear"></i> Mi Perfil</a></li>
+              
+              @if(user.rol === 'GAMER'){
+                <li><a class="dropdown-item" routerLink="/historial-compras"><i class="bi bi-receipt"></i> Compras</a></li>
+              }
+
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <button class="dropdown-item text-danger" (click)="authService.logout()">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+              </li>
+            </ul>
+          </li>
+        } @else {
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
+            <a class="btn btn-warning btn-sm" routerLink="/registro">Regístrate</a>
+          </li>
+        }
+
+        @if (!authService.currentUser() || authService.currentUser()?.rol === 'GAMER') {
+          <li class="nav-item ms-2">
+            <a class="btn btn-primary position-relative" routerLink="/carrito">
+              <i class="bi bi-cart-fill"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                0
+                <span class="visually-hidden">juegos en carrito</span>
+              </span>
+            </a>
+          </li>
+        }
+
+      </ul>
+    </div>
+  </div>
+</nav>

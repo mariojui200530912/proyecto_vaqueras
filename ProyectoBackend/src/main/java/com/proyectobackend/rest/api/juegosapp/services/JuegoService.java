@@ -3,9 +3,11 @@ package com.proyectobackend.rest.api.juegosapp.services;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Categoria;
+import com.proyectobackend.rest.api.juegosapp.models.Empresa;
 import com.proyectobackend.rest.api.juegosapp.models.ImagenJuego;
 import com.proyectobackend.rest.api.juegosapp.models.Juego;
 import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
+import com.proyectobackend.rest.api.juegosapp.repositories.EmpresaRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.JuegoRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.UsuarioRepository;
 import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
@@ -19,15 +21,18 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class JuegoService {
     private final JuegoRepository juegoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
 
     public JuegoService() {
         this.juegoRepository = new JuegoRepository();
         this.usuarioRepository = new UsuarioRepository();
+        this.empresaRepository = new EmpresaRepository();
     }
 
     public Juego publicarJuego(JuegoRequest request,
@@ -74,11 +79,12 @@ public class JuegoService {
     public JuegoResponse obtenerJuegoPorId(int id) throws Exception {
         try(Connection conn = DBConnection.getInstance().getConnection()) {
             Juego juego = juegoRepository.buscarPorId(conn, id).orElseThrow(() -> new Exception("Juego no existe"));
+            Optional<Empresa> empresa = empresaRepository.buscarPorId(juego.getIdEmpresa());
             List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(juego.getId());
             // Recuperar imágenes de la BD
             List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(id);
 
-            return construirResponse(juego, categorias, imagenes);
+            return construirResponse(juego, categorias, imagenes, empresa);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -93,13 +99,13 @@ public class JuegoService {
 
             // Iterar para convertir cada juego
             for (Juego j : juegosEntidad) {
-
+                Optional<Empresa> empresa = empresaRepository.buscarPorId(j.getIdEmpresa());
                 // Buscar sus categorías
                 List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
 
                 List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
 
-                JuegoResponse dto = construirResponse(j, categorias, imagenes);
+                JuegoResponse dto = construirResponse(j, categorias, imagenes, empresa);
 
                 respuesta.add(dto);
             }
@@ -187,6 +193,7 @@ public class JuegoService {
 
             // Enriquecer cada juego (Categorías + Imágenes)
             for (Juego j : juegos) {
+                Optional<Empresa> empresa = empresaRepository.buscarPorId(j.getIdEmpresa());
                 // Reutilizamos tus repositorios existentes
                 List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
 
@@ -194,13 +201,60 @@ public class JuegoService {
                 List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
 
                 // Convertir a DTO usando tu metodo helper existente
-                JuegoResponse dto = construirResponse(j, categorias, imagenes);
+                JuegoResponse dto = construirResponse(j, categorias, imagenes, empresa);
                 respuesta.add(dto);
             }
 
             return respuesta;
         } catch (Exception e) {
             throw new Exception("Error al cargar el catálogo: " + e.getMessage());
+        }
+    }
+
+    public List<JuegoResponse> obtenerCatalogoCompleto() throws Exception {
+        List<JuegoResponse> respuesta = new ArrayList<>();
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            List<Juego> juegosEntidad = juegoRepository.listarJuegosPublicos(conn);
+            // Iterar para convertir cada juego
+            for (Juego j : juegosEntidad) {
+                Optional<Empresa> empresa = empresaRepository.buscarPorId(j.getIdEmpresa());
+                // Buscar sus categorías
+                List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
+
+                List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
+
+                JuegoResponse dto = construirResponse(j, categorias, imagenes, empresa);
+
+                respuesta.add(dto);
+            }
+            return respuesta;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al cargar el catálogo de juegos: " + e.getMessage());
+        }
+    }
+
+    public List<JuegoResponse> obtenerDestacados() throws Exception {
+        List<JuegoResponse> respuesta = new ArrayList<>();
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            // Traemos el Top 5 de "Mejor Balance"
+            List<Juego> juegosEntidad = juegoRepository.obtenerJuegosMejorBalance(conn, 5);
+            // Iterar para convertir cada juego
+            for (Juego j : juegosEntidad) {
+                Optional<Empresa> empresa = empresaRepository.buscarPorId(j.getIdEmpresa());
+                // Buscar sus categorías
+                List<Categoria> categorias = juegoRepository.obtenerCategoriasPorJuego(j.getId());
+
+                List<ImagenJuego> imagenes = juegoRepository.obtenerImagenesPorJuego(j.getId());
+
+                JuegoResponse dto = construirResponse(j, categorias, imagenes, empresa);
+
+                respuesta.add(dto);
+            }
+            return respuesta;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Error al calcular juegos destacados.");
         }
     }
 
@@ -228,7 +282,7 @@ public class JuegoService {
         }
     }
 
-    private JuegoResponse construirResponse(Juego j, List<Categoria> categorias, List<ImagenJuego> imagenesBlob) {
+    private JuegoResponse construirResponse(Juego j, List<Categoria> categorias, List<ImagenJuego> imagenesBlob, Optional<Empresa> empresa) {
         JuegoResponse resp = new JuegoResponse();
 
         // Mapeo de Datos Básicos
@@ -238,9 +292,13 @@ public class JuegoService {
         resp.setPrecio(j.getPrecio());
         resp.setRecursosMinimos(j.getRecursosMinimos());
         resp.setClasificacion(j.getClasificacion());
-        resp.setFecha_lanzamiento(j.getFechaLanzamiento());
-        resp.setEstado_venta(j.getEstadoVenta());
-        resp.setCalificacion_promedio(j.getCalificacionPromedio());
+        resp.setFechaLanzamiento(j.getFechaLanzamiento());
+        resp.setEstadoVenta(j.getEstadoVenta());
+        resp.setCalificacionPromedio(j.getCalificacionPromedio());
+
+        if (empresa.isPresent()) {
+            resp.setNombreEmpresa(empresa.get().getNombre());
+        }
 
         // Mapeo de Categorías (De Objetos a Lista de Nombres String)
         if (categorias != null) {

@@ -1,6 +1,7 @@
-package com.proyectobackend.rest.api.juegosapp.services;
+package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.services.CalificacionService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

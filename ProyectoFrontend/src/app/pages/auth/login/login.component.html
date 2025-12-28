@@ -1,0 +1,66 @@
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+    
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-primary">VaquerasGames</h2>
+      <p class="text-muted">Inicia sesión para continuar</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>{{ errorMessage }}</div>
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="email" 
+            name="email"
+            [(ngModel)]="loginData.email" 
+            required
+            placeholder="Ingresa tu correo electrónico">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input 
+            type="password" 
+            class="form-control" 
+            id="password" 
+            name="password"
+            [(ngModel)]="loginData.password" 
+            required
+            placeholder="********">
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || isLoading">
+          @if (isLoading) {
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Ingresando...
+          } @else {
+            Ingresar
+          }
+        </button>
+      </div>
+
+    </form>
+
+    <div class="text-center mt-3">
+      <small>¿No tienes cuenta? <a routerLink="/registro" class="text-decoration-none">Regístrate aquí</a></small>
+    </div>
+
+  </div>
+</div>

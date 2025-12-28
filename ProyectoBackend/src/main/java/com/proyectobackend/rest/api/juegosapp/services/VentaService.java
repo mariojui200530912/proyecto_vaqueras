@@ -11,6 +11,7 @@ import com.proyectobackend.rest.api.juegosapp.models.Usuario;
 import com.proyectobackend.rest.api.juegosapp.repositories.*;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -36,64 +37,68 @@ public class VentaService {
     }
 
     public MensajeResponse comprarJuego(int idUsuario, int idJuego) throws Exception {
-        // Validar si el juego existe
-        Juego juego = juegoRepository.buscarPorId(idJuego)
-                .orElseThrow(() -> new Exception("El juego no existe."));
-        if (juego.getEstadoVenta() == "SUSPENDIDO"){
-            throw new Exception("El juego esta suspendido para venta no puede ser comprado");
-        }
+        try(Connection conn = DBConnection.getInstance().getConnection()) {
+            // Validar si el juego existe
+            Juego juego = juegoRepository.buscarPorId(conn, idJuego)
+                    .orElseThrow(() -> new Exception("El juego no existe."));
+            if (juego.getEstadoVenta() == "SUSPENDIDO") {
+                throw new Exception("El juego esta suspendido para venta no puede ser comprado");
+            }
 
-        Usuario usuario = usuarioRepository.findById(idUsuario);
-        if (usuario.getFechaNacimiento() == null) {
-            throw new Exception("Debes actualizar tu perfil con tu fecha de nacimiento para comprar.");
-        }
+            Usuario usuario = usuarioRepository.findById(idUsuario);
+            if (usuario.getFechaNacimiento() == null) {
+                throw new Exception("Debes actualizar tu perfil con tu fecha de nacimiento para comprar.");
+            }
 
-        // Calcular edad del usuario
-        int edadUsuario = Period.between(usuario.getFechaNacimiento(), LocalDate.now()).getYears();
+            // Calcular edad del usuario
+            int edadUsuario = Period.between(usuario.getFechaNacimiento(), LocalDate.now()).getYears();
 
-        // Obtener edad mínima requerida por el juego
-        int edadMinimaRequerida = obtenerEdadMinima(juego.getClasificacion());
+            // Obtener edad mínima requerida por el juego
+            int edadMinimaRequerida = obtenerEdadMinima(juego.getClasificacion());
 
-        // Comparar
-        if (edadUsuario < edadMinimaRequerida) {
-            throw new Exception("Lo sentimos. Este juego tiene clasificación " +
-                    juego.getClasificacion() +
-                    " y requiere tener " + edadMinimaRequerida + " años.");
-        }
+            // Comparar
+            if (edadUsuario < edadMinimaRequerida) {
+                throw new Exception("Lo sentimos. Este juego tiene clasificación " +
+                        juego.getClasificacion() +
+                        " y requiere tener " + edadMinimaRequerida + " años.");
+            }
 
-        // Validar si ya lo tiene
-        if (bibliotecaRepository.usuarioTieneJuego(idUsuario, idJuego)) {
-            throw new Exception("¡Ya tienes este juego en tu biblioteca!");
-        }
+            // Validar si ya lo tiene
+            if (bibliotecaRepository.usuarioTieneJuego(conn, idUsuario, idJuego)) {
+                throw new Exception("¡Ya tienes este juego en tu biblioteca!");
+            }
 
-        // Validar Saldo Suficiente
-        BigDecimal saldoActual = transaccionRepository.obtenerSaldoActual(idUsuario);
-        if (saldoActual.compareTo(juego.getPrecio()) < 0) {
-            throw new Exception("Saldo insuficiente. Necesitas Q" + juego.getPrecio());
-        }
+            // Validar Saldo Suficiente
+            BigDecimal saldoActual = transaccionRepository.obtenerSaldoActual(idUsuario);
+            if (saldoActual.compareTo(juego.getPrecio()) < 0) {
+                throw new Exception("Saldo insuficiente. Necesitas Q" + juego.getPrecio());
+            }
 
-        Optional<Empresa> empresaOpt = empresaRepository.buscarPorId(juego.getIdEmpresa());
-        if (!empresaOpt.isPresent()) {
-            throw new Exception("Error: El juego no tiene una empresa asignada.");
-        }
-        Empresa empresa = empresaOpt.get();
-        BigDecimal porcentajeAplicar;
-        // Verificamos si la empresa tiene comisión específica y que NO sea nula
-        if (empresa.getComisionEspecifica() != null) {
-            porcentajeAplicar = empresa.getComisionEspecifica();
-        } else {
-            porcentajeAplicar = configuracionRepository.obtenerComisionGlobal();
-        }
-        BigDecimal montoComision = juego.getPrecio().multiply(porcentajeAplicar);
-        BigDecimal gananciaEmpresa = juego.getPrecio().subtract(montoComision);
+            Optional<Empresa> empresaOpt = empresaRepository.buscarPorId(juego.getIdEmpresa());
+            if (!empresaOpt.isPresent()) {
+                throw new Exception("Error: El juego no tiene una empresa asignada.");
+            }
+            Empresa empresa = empresaOpt.get();
+            BigDecimal porcentajeAplicar;
+            // Verificamos si la empresa tiene comisión específica y que NO sea nula
+            if (empresa.getComisionEspecifica() != null) {
+                porcentajeAplicar = empresa.getComisionEspecifica();
+            } else {
+                porcentajeAplicar = configuracionRepository.obtenerComisionGlobal();
+            }
+            BigDecimal montoComision = juego.getPrecio().multiply(porcentajeAplicar);
+            BigDecimal gananciaEmpresa = juego.getPrecio().subtract(montoComision);
 
-        // Ejecutar Transacción
-        boolean exito = ventaRepository.procesarCompra(idUsuario, idJuego, juego.getPrecio(), porcentajeAplicar, montoComision, gananciaEmpresa);
+            // Ejecutar Transacción
+            boolean exito = ventaRepository.procesarCompra(idUsuario, idJuego, juego.getPrecio(), porcentajeAplicar, montoComision, gananciaEmpresa);
 
-        if (exito) {
-            return new MensajeResponse("¡Compra realizada con éxito! El juego ya está en tu biblioteca.");
-        } else {
-            throw new Exception("Error al procesar la compra.");
+            if (exito) {
+                return new MensajeResponse("¡Compra realizada con éxito! El juego ya está en tu biblioteca.");
+            } else {
+                throw new Exception("Error al procesar la compra.");
+            }
+        }catch (Exception e){
+            throw new Exception("Error al procesar la compra." +  e.getMessage());
         }
     }
 
