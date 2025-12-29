@@ -20,24 +20,28 @@ export class CategoriaService {
 
   cargarCategorias() {
     this.http.get<Categoria[]>(this.apiUrl).subscribe({
-      next: (data) => {
-        this.categorias.set(data);
-      },
-      error: (err) => {
-        console.error('Error cargando categorías:', err);
-      }
+      next: (data) => this.categorias.set(data),
+      error: (e) => console.error('Error al cargar categorías', e)
     });
   }
 
-  guardar(cat: Categoria) {
-    return this.http.post(this.apiUrl, cat).pipe(
-      tap(() => this.cargarCategorias()) 
+  crear(categoria: Partial<Categoria>) {
+    return this.http.post<Categoria>(this.apiUrl, categoria).pipe(
+      tap(() => this.cargarCategorias()) // Recargar lista automáticamente
+    );
+  }
+
+  actualizar(id: number, categoria: Partial<Categoria>) {
+    const url = `${this.apiUrl}/${id}`;
+    return this.http.put<Categoria>(url, categoria).pipe(
+      tap(() => this.cargarCategorias())
     );
   }
 
   eliminar(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.cargarCategorias()) 
+    const url = `${this.apiUrl}/${id}`;
+    return this.http.delete(url).pipe(
+      tap(() => this.cargarCategorias())
     );
   }
 }

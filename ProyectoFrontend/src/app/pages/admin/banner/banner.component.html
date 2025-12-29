@@ -1,0 +1,67 @@
+<div class="container py-4">
+  <h2 class="fw-bold mb-4"><i class="bi bi-images"></i> Gestión del Banner Principal</h2>
+
+  <div class="row">
+    
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Juegos en Pantalla Principal</h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            @for (item of bannerService.bannerItems(); track item.idJuego; let i = $index) {
+              <li class="list-group-item d-flex align-items-center justify-content-between">
+                
+                <div class="d-flex align-items-center gap-3">
+                  <span class="badge bg-secondary rounded-circle">{{ i + 1 }}</span>
+                  
+                  <img [src]="item.imagenBase64 || 'assets/images/placeholder.jpg'" 
+                       class="rounded" style="width: 60px; height: 40px; object-fit: cover;">
+                  
+                  <span class="fw-bold">{{ item.titulo }}</span>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          (click)="cambiarPosicion(item, 'subir')" 
+                          title="Subir" [disabled]="i === 0">
+                    <i class="bi bi-arrow-up"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          (click)="cambiarPosicion(item, 'bajar')" 
+                          title="Bajar" [disabled]="i === bannerService.bannerItems().length - 1">
+                    <i class="bi bi-arrow-down"></i>
+                  </button>
+
+                  <button class="btn btn-sm btn-outline-danger ms-2" (click)="eliminar(item.idJuego)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+
+              </li>
+            } @empty {
+              <li class="list-group-item text-center py-4 text-muted">
+                No hay juegos en el banner. Agrega uno desde el panel derecho.
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      
+      <app-buscador 
+          (juegoSeleccionado)="onJuegoSeleccionado($event)">
+      </app-buscador>
+
+      <div class="alert alert-info mt-3 small">
+        <i class="bi bi-info-circle"></i> 
+        Busca un juego por título o categoría y haz clic en él para añadirlo al carrusel automáticamente.
+      </div>
+
+    </div>
+
+  </div>
+</div>

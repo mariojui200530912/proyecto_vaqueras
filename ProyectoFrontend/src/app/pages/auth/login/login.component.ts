@@ -31,7 +31,6 @@ export class LoginComponent {
 
     this.authService.login(this.loginData).subscribe({
       next: (user) => {
-        console.log('Login exitoso:', user);
         // Redireccionar según el rol
         this.authService.redirigirSegunRol(user);
       },

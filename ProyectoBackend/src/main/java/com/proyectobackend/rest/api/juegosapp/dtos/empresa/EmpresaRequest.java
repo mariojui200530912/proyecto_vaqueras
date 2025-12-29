@@ -11,12 +11,11 @@ public class EmpresaRequest {
     // Validaciones
     public boolean isValid() {
         return nombre != null && !nombre.trim().isEmpty()
-                && descripcion != null && !descripcion.trim().isEmpty()
-                && comisionEspecifica != null;
+                && descripcion != null && !descripcion.trim().isEmpty();
     }
 
     public boolean isValidComisionEspecifica() {
-        return comisionEspecifica.compareTo(BigDecimal.ZERO) < 0;
+        return comisionEspecifica.compareTo(BigDecimal.ZERO) > 0;
     }
 
     public String getNombre() {

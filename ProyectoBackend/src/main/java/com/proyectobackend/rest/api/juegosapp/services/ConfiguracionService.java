@@ -1,6 +1,7 @@
 package com.proyectobackend.rest.api.juegosapp.services;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.configuracion.Comision;
 import com.proyectobackend.rest.api.juegosapp.repositories.ConfiguracionRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
 
@@ -15,21 +16,31 @@ public class ConfiguracionService {
         this.configRepo = new ConfiguracionRepository();
     }
 
-    public MensajeResponse cambiarComisionGlobal(BigDecimal nuevaComision) throws Exception {
+    public Comision obtenerComision() {
+        try(Connection conn = DBConnection.getInstance().getConnection()) {
+            Comision comision = new Comision();
+            comision.setComision(configRepo.obtenerComisionGlobal());
+            return comision;
+        } catch (Exception e){
+            throw new RuntimeException("Error al obtener comision" + e.getMessage());
+        }
+    }
+
+    public MensajeResponse cambiarComisionGlobal(Comision nuevaComision) throws Exception {
 
         try (Connection conn = DBConnection.getInstance().getConnection()) {
             // Validaciones básicas
-            if (nuevaComision.compareTo(BigDecimal.ZERO) < 0 || nuevaComision.compareTo(new BigDecimal("100")) > 0) {
+            if (nuevaComision.getComision().compareTo(BigDecimal.ZERO) < 0 || nuevaComision.getComision().compareTo(new BigDecimal("100")) > 0) {
                 throw new Exception("La comisión debe estar entre 0% y 100%");
             }
 
             conn.setAutoCommit(false); // INICIO TRANSACCIÓN
             try {
                 // Actualizar la regla global
-                configRepo.actualizarValorGlobal(conn, nuevaComision);
+                configRepo.actualizarValorGlobal(conn, nuevaComision.getComision());
 
                 // Ajustar automáticamente a las empresas que violan la nueva regla
-                int empresasAfectadas = configRepo.recortarComisionesExcedidas(conn, nuevaComision);
+                int empresasAfectadas = configRepo.recortarComisionesExcedidas(conn, nuevaComision.getComision());
 
                 conn.commit(); // COMMIT
 

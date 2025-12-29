@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
+import com.proyectobackend.rest.api.juegosapp.models.Categoria;
 import com.proyectobackend.rest.api.juegosapp.models.Juego;
 import com.proyectobackend.rest.api.juegosapp.services.JuegoService;
 import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
@@ -88,6 +89,22 @@ public class JuegoResource {
     }
 
     @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response juegoPorId(
+            @PathParam("id") Integer idJuego
+    ) {
+        try {
+            JuegoResponse juego = juegoService.obtenerJuegoPorId(idJuego);
+            return Response.ok(juego).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error al obtener los detalles del juego : " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
     @Path("/catalogo")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listarJuegos() {
@@ -161,11 +178,25 @@ public class JuegoResource {
         }
     }
 
+    @GET
+    @Path("/{idJuego}/categorias")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerCategoriasDeJuego(@PathParam("idJuego") Integer idJuego) {
+        try {
+            List<Categoria> categorias = juegoService.obtenerCategoriasPorJuego(idJuego);
+            return Response.ok(categorias).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al obtener categorías: " + e.getMessage()))
+                    .build();
+        }
+    }
+
     @POST
     @Path("/{idJuego}/categoria/{idCategoria}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response categoriaJuego(
+    public Response insertarCategoriaJuego(
             @PathParam("idJuego") Integer idJuego,
             @PathParam("idCategoria") Integer idCategoria
     ){

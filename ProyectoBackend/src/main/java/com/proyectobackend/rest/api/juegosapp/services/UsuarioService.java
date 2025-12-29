@@ -11,12 +11,16 @@ import com.proyectobackend.rest.api.juegosapp.dtos.usuario.UsuarioRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.usuario.UsuarioResponse;
 import com.proyectobackend.rest.api.juegosapp.exceptions.EntityAlReadyExistException;
 import com.proyectobackend.rest.api.juegosapp.models.Usuario;
+import com.proyectobackend.rest.api.juegosapp.models.UsuarioEmpresa;
 import com.proyectobackend.rest.api.juegosapp.models.enums.EstadoUsuario;
 import com.proyectobackend.rest.api.juegosapp.models.enums.Rol;
+import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
+import com.proyectobackend.rest.api.juegosapp.repositories.EmpresaRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.UsuarioRepository;
 import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
 import com.proyectobackend.rest.api.juegosapp.utils.PasswordUtil;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,9 +32,11 @@ import java.util.stream.Collectors;
  */
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
 
     public UsuarioService() {
         this.usuarioRepository = new UsuarioRepository();
+        this.empresaRepository = new EmpresaRepository();
     }
 
     public UsuarioResponse registrarUsuario(UsuarioRequest request) throws EntityAlReadyExistException {
@@ -43,26 +49,36 @@ public class UsuarioService {
         if (usuarioExistente.isPresent()) {
             throw new EntityAlReadyExistException("El email ya está registrado.");
         }
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Crear usuario
+                Usuario usuario = new Usuario();
+                usuario.setNickname(request.getNickname());
+                usuario.setPassword(PasswordUtil.encodeBase64(request.getPassword()));
+                usuario.setEmail(request.getEmail());
+                usuario.setFechaNacimiento(request.getFechaNacimiento());
+                usuario.setTelefono(request.getTelefono());
+                usuario.setPais(request.getPais());
+                usuario.setAvatar(request.getAvatar());
+                usuario.setRol(request.getRol());
+                usuario.setEstado(EstadoUsuario.ACTIVO);
+                usuario.setCartera_saldo(new BigDecimal(0.00));
+                usuario.setFechaCreacion(LocalDateTime.now());
 
-        // Crear usuario
-        Usuario usuario = new Usuario();
-        usuario.setNickname(request.getNickname());
-        usuario.setPassword(PasswordUtil.encodeBase64(request.getPassword()));
-        usuario.setEmail(request.getEmail());
-        usuario.setFechaNacimiento(request.getFechaNacimiento());
-        usuario.setTelefono(request.getTelefono());
-        usuario.setPais(request.getPais());
-        usuario.setAvatar(request.getAvatar());
-        usuario.setRol(request.getRol());
-        usuario.setEstado(EstadoUsuario.ACTIVO);
-        usuario.setCartera_saldo(new BigDecimal(0.00));
-        usuario.setFechaCreacion(LocalDateTime.now());
+                // Guardar usuario
+                Usuario usuarioGuardado = usuarioRepository.save(conn, usuario);
+                conn.commit();
+                // Crear cartera para el usuario
+                return mapUsuarioToResponse(usuarioGuardado);
 
-        // Guardar usuario
-        Usuario usuarioGuardado = usuarioRepository.save(usuario);
-
-        // Crear cartera para el usuario
-        return mapUsuarioToResponse(usuarioGuardado);
+            } catch (Exception e) {
+                conn.rollback();
+                throw new Exception("Error al agregar usuario en BD");
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Error al registrar usuario" + ex.getMessage());
+        }
     }
 
     public List<UsuarioResponse> listarUsuarios() {
@@ -74,6 +90,13 @@ public class UsuarioService {
                 })
                 .collect(Collectors.toList());
 
+    }
+
+    public List<UsuarioResponse> listarPorTipo(Rol rol) {
+        List<Usuario> usuarios = usuarioRepository.findByRol(rol);
+        return usuarios.stream()
+                .map(u -> mapUsuarioToResponse(u))
+                .collect(Collectors.toList());
     }
 
     public UsuarioResponse obtenerUsuarioResponsePorId(Integer id) {
@@ -96,22 +119,34 @@ public class UsuarioService {
         if (!request.isValid()) {
             throw new RuntimeException("Datos de perfil inválidos");
         }
+        try(Connection conn = DBConnection.getInstance().getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Usuario usuario = usuarioRepository.findById(idUsuario);
+                if (usuario.getRol() == Rol.EMPRESA && request.getRol() != Rol.EMPRESA) {
+                    empresaRepository.desvincularUsuario(conn, idUsuario);
+                }
+                // Actualizar datos
+                usuario.setNickname(request.getNickname());
+                usuario.setPassword(request.getPassword());
+                usuario.setEmail(request.getEmail());
+                usuario.setFechaNacimiento(request.getFechaNacimiento());
+                usuario.setTelefono(request.getTelefono());
+                usuario.setPais(request.getPais());
+                usuario.setAvatar(request.getAvatar());
+                usuario.setRol(request.getRol());
+                usuario.setEstado(EstadoUsuario.valueOf(request.getEstado().getValor().toUpperCase()));
 
-        Usuario usuario = usuarioRepository.findById(idUsuario);
-
-        // Actualizar datos
-        usuario.setNickname(request.getNickname());
-        usuario.setPassword(request.getPassword());
-        usuario.setEmail(request.getEmail());
-        usuario.setFechaNacimiento(request.getFechaNacimiento());
-        usuario.setTelefono(request.getTelefono());
-        usuario.setPais(request.getPais());
-        usuario.setAvatar(request.getAvatar());
-        usuario.setRol(request.getRol());
-        usuario.setEstado(EstadoUsuario.valueOf(request.getEstado().getValor().toUpperCase()));
-
-        Usuario usuarioActualizado = usuarioRepository.update(usuario);
-        return mapUsuarioToResponse(usuarioActualizado);
+                Usuario usuarioActualizado = usuarioRepository.update(usuario);
+                conn.commit();
+                return mapUsuarioToResponse(usuarioActualizado);
+            } catch (Exception e) {
+                conn.rollback();
+                throw new Exception("Error al actualizar perfil" + e.getMessage());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al actualizar perfil" + e.getMessage());
+        }
     }
 
     public MensajeResponse cambiarPassword(Integer idUsuario, CambiarPasswordRequest request) {
@@ -153,12 +188,6 @@ public class UsuarioService {
         usuarioRepository.delete(id);
     }
 
-    public List<UsuarioResponse> listarPorTipo(Rol rol) {
-        List<Usuario> usuarios = usuarioRepository.findByRol(rol);
-        return usuarios.stream()
-                .map(u -> mapUsuarioToResponse(u))
-                .collect(Collectors.toList());
-    }
 
     public UsuarioResponse login(LoginRequest request) throws EntityAlReadyExistException {
         if (!request.isValid()) {
@@ -200,6 +229,11 @@ public class UsuarioService {
             response.setAvatar("data:image/jpeg;base64," + base64); // Prefijo necesario para HTML
         }
         response.setRol(usuario.getRol());
+        if (usuario.getRol() == Rol.EMPRESA) {
+            UsuarioEmpresa usuarioEmpresa = usuarioRepository.obtenerUsuarioEmpresaPorUsuario(usuario.getId());
+            response.setIdEmpresa(usuarioEmpresa.getId());
+            response.setRolEmpresa(usuarioEmpresa.getRol_empresa());
+        }
         response.setEstado(usuario.getEstado());
         response.setCartera_saldo(usuario.getCartera_saldo());
         response.setFechaCreacion(usuario.getFechaCreacion());

@@ -134,6 +134,12 @@ public class JuegoService {
         }
     }
 
+    public List<Categoria> obtenerCategoriasPorJuego(int idJuego) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            return juegoRepository.obtenerCategoriasPorJuego(idJuego);
+        }
+    }
+
     public void eliminarCategoriaJuego(int idJuego, int idCategoria) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
             juegoRepository.elimnarCategoriasJuego(conn, idJuego, idCategoria);
@@ -142,6 +148,9 @@ public class JuegoService {
 
     public void insertarCategoriaJuego(int idJuego, int idCategoria) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
+            if (juegoRepository.existeCategoriaEnJuego(conn, idJuego, idCategoria)) {
+                throw new Exception("El juego ya tiene esta categoría.");
+            }
             juegoRepository.insertarCategoriaJuego(conn, idJuego, idCategoria);
         }
     }
@@ -297,6 +306,7 @@ public class JuegoService {
         resp.setCalificacionPromedio(j.getCalificacionPromedio());
 
         if (empresa.isPresent()) {
+            resp.setIdEmpresa(empresa.get().getId());
             resp.setNombreEmpresa(empresa.get().getNombre());
         }
 

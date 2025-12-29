@@ -34,6 +34,8 @@ public class UsuarioResponse {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime fechaCreacion;
+    private Integer idEmpresa;
+    private String rolEmpresa;
 
     public Integer getId() {
         return id;
@@ -121,5 +123,21 @@ public class UsuarioResponse {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public Integer getIdEmpresa() {
+        return idEmpresa;
+    }
+
+    public void setIdEmpresa(Integer idEmpresa) {
+        this.idEmpresa = idEmpresa;
+    }
+
+    public String getRolEmpresa() {
+        return rolEmpresa;
+    }
+
+    public void setRolEmpresa(String rolEmpresa) {
+        this.rolEmpresa = rolEmpresa;
     }
 }

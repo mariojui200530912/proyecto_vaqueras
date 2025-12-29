@@ -1,0 +1,128 @@
+<div class="row g-4">
+
+    <div class="col-md-5">
+        <div class="card shadow-sm border-primary h-100">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus"></i> Vincular Nuevo Usuario</h6>
+            </div>
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Buscar Usuario (Nickname o Email)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" [(ngModel)]="textoBusqueda"
+                            (keyup.enter)="buscarCandidatos()" placeholder="Escribe al menos 3 letras...">
+                        <button class="btn btn-outline-primary" (click)="buscarCandidatos()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-3 p-3 bg-light rounded border">
+                    <label class="form-label small fw-bold text-muted">Rol a asignar en la empresa:</label>
+
+                    @if (authService.isAdmin()) {
+                    <select class="form-select border-primary" [(ngModel)]="rolSeleccionado">
+                        <option value="ADMIN">ADMIN (Administrador de Empresa)</option>
+                        <option value="EMPLEADO">EMPLEADO (Staff Regular)</option>
+                    </select>
+                    <small class="text-primary d-block mt-1">
+                        <i class="bi bi-info-circle"></i> Como Super Admin, puedes asignar permisos totales.
+                    </small>
+
+                    } @else {
+                    <div class="form-control bg-white text-secondary" disabled>
+                        <i class="bi bi-lock-fill"></i> EMPLEADO
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                        Solo puedes contratar personal con rol de empleado.
+                    </small>
+                    }
+                </div>
+
+                @if (candidatos().length > 0) {
+                <div class="list-group mt-3">
+                    @for (u of candidatos(); track u.id) {
+                    <button
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                        (click)="vincular(u)">
+                        <div>
+                            <span class="fw-bold d-block">{{ u.nickname }}</span>
+                            <small class="text-muted">{{ u.email }}</small>
+                        </div>
+                        <i class="bi bi-plus-circle-fill text-success fs-5"></i>
+                    </button>
+                    }
+                </div>
+                } @else if (textoBusqueda.length >= 3) {
+                <div class="text-center text-muted mt-4">
+                    <small>No se encontraron usuarios disponibles.</small>
+                </div>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-people"></i> Plantilla Actual
+            </div>
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol Empresa</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (emp of empleados(); track emp.idUsuario) {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
+                                            style="width: 35px; height: 35px; font-size:0.8rem;">
+                                            {{ emp.nickname.substring(0,2).toUpperCase() }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ emp.nickname }}</div>
+                                            <small class="text-muted" style="font-size: 0.75rem;">{{ emp.email
+                                                }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-purple text-white border">{{ emp.rolEmpresa }}</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger" (click)="desvincular(emp.idUsuario)"
+                                        title="Desvincular">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">Aún no hay personal vinculado.</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+</style>

@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { OnInit, inject } from '@angular/core';
 import { JuegoService } from '../../services/juego.service';
 import { CurrencyPipe } from '@angular/common';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-home.component',
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, RouterModule, RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })

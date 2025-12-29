@@ -167,7 +167,7 @@ CREATE TABLE grupo_familiar (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     id_creador INT NOT NULL,
-    FOREIGN KEY (id_creador) REFERENCES usuario(id)
+    FOREIGN KEY (id_creador) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE grupo_usuario (
@@ -175,7 +175,7 @@ CREATE TABLE grupo_usuario (
     id_grupo INT NOT NULL,
     id_usuario INT NOT NULL,
     FOREIGN KEY (id_grupo) REFERENCES grupo_familiar(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id) ON DELETE CASCADE
 );
 
 CREATE TABLE prestamo (
@@ -185,7 +185,7 @@ CREATE TABLE prestamo (
     id_dueno INT NOT NULL,        -- De quien es el juego
     estado VARCHAR(15) DEFAULT 'NO_INSTALADO', -- ENUM('INSTALADO', 'NO_INSTALADO')
     fecha DATETIME,
-    FOREIGN KEY (id_beneficiario) REFERENCES usuario(id),
-    FOREIGN KEY (id_juego) REFERENCES juego(id),
-    FOREIGN KEY (id_dueno) REFERENCES usuario(id)
+    FOREIGN KEY (id_beneficiario) REFERENCES usuario(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_juego) REFERENCES juego(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_dueno) REFERENCES usuario(id) ON DELETE CASCADE
 );

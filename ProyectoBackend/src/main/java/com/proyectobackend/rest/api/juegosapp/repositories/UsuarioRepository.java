@@ -5,6 +5,7 @@
 package com.proyectobackend.rest.api.juegosapp.repositories;
 
 import com.proyectobackend.rest.api.juegosapp.models.Usuario;
+import com.proyectobackend.rest.api.juegosapp.models.UsuarioEmpresa;
 import com.proyectobackend.rest.api.juegosapp.models.enums.EstadoUsuario;
 import com.proyectobackend.rest.api.juegosapp.models.enums.Rol;
 
@@ -83,11 +84,11 @@ public class UsuarioRepository {
 
     public List<Usuario> findByRol(Rol rol) {
         List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT * FROM usuario WHERE tipo = ?";
+        String sql = "SELECT * FROM usuario WHERE rol = ?";
 
         try (Connection conn = DBConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, rol.name());
+            stmt.setString(1, rol.getValor());
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -100,10 +101,9 @@ public class UsuarioRepository {
         return usuarios;
     }
 
-    public Usuario save(Usuario usuario) {
+    public Usuario save(Connection conn, Usuario usuario) {
         String sql = SQL_SAVE;
-        try (Connection conn = DBConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, usuario.getNickname());
             stmt.setString(2, usuario.getPassword());
@@ -223,11 +223,31 @@ public class UsuarioRepository {
         }
     }
 
-    public void cambiarRol(Connection conn, Integer id_usario, Rol rol) {
-        String sql = "UPDATE usuario SET rol = ? WHERE id_usuario = ?";
+    public UsuarioEmpresa obtenerUsuarioEmpresaPorUsuario(Integer id_usuario){
+        String sql = "SELECT * FROM usuario_empresa WHERE id_usuario = ?";
+        UsuarioEmpresa usuarioEmpresa = new UsuarioEmpresa();
+        try(Connection conn = DBConnection.getInstance().getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setInt(1, id_usuario);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                usuarioEmpresa.setId(rs.getInt("id"));
+                usuarioEmpresa.setId_usuario(rs.getInt("id_usuario"));
+                usuarioEmpresa.setId_empresa(rs.getInt("id_empresa"));
+                usuarioEmpresa.setRol_empresa(rs.getString("rol_empresa"));
+                return usuarioEmpresa;
+            }
+            return null;
+        }catch (SQLException e){
+            throw new RuntimeException("Error al obtener Usuario Empresa por ID de usuario: " + id_usuario, e);
+        }
+    }
+
+    public void cambiarRol(Connection conn, Integer id_usuario, Rol rol) {
+        String sql = "UPDATE usuario SET rol = ? WHERE id = ?";
         try(PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, rol.getValor());
-            ps.setInt(2, id_usario);
+            ps.setInt(2, id_usuario);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al cambiar rol del usuario: " + e.getMessage());

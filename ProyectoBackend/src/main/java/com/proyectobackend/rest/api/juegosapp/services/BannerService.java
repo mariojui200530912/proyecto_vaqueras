@@ -41,7 +41,7 @@ public class BannerService {
             try {
                 // Validar si el juego existe
 
-                if (!juegoRepo.buscarPorId(conn, idJuego).isEmpty()) {
+                if (!juegoRepo.buscarPorId(conn, idJuego).isPresent()) {
                     throw new Exception("El juego no existe.");
                 }
 
@@ -77,7 +77,30 @@ public class BannerService {
     // CAMBIAR POSICIÓN (Reordenar)
     public void cambiarPosicion(int idJuego, int nuevaPosicion) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
-            bannerRepo.actualizarOrden(conn, idJuego, nuevaPosicion);
+            conn.setAutoCommit(false); // IMPORTANTE: Iniciar Transacción
+            try {
+                int viejaPosicion = bannerRepo.obtenerOrdenActual(conn, idJuego);
+
+                if (viejaPosicion == -1) {
+                    throw new Exception("El juego no está en el banner.");
+                }
+
+                Integer idJuegoVecino = bannerRepo.obtenerJuegoEnPosicion(conn, nuevaPosicion);
+
+                if (idJuegoVecino != null) {
+                    bannerRepo.actualizarOrden(conn, idJuegoVecino, viejaPosicion);
+                }
+                // mando a nueva posicion
+                bannerRepo.actualizarOrden(conn, idJuego, nuevaPosicion);
+
+                conn.commit(); // Confirmar cambios
+
+            } catch (Exception e) {
+                if (conn != null) conn.rollback(); // Si falla, deshacer
+                throw e;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al configurar el banner: " + e.getMessage());
         }
     }
 }

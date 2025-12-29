@@ -1,0 +1,178 @@
+<div class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h2>
+
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 fw-bold">Listado</h5>
+                        <button class="btn btn-primary btn-sm" (click)="iniciarCreacion()">
+                            <i class="bi bi-person-plus-fill"></i> Nuevo Usuario
+                        </button>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 bg-light"
+                            placeholder="Buscar por nickname o email..." [(ngModel)]="textoBusqueda">
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Info</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (u of usuariosFiltrados; track u.id) {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img [src]="u.avatar || 'assets/images/default_avatar.png'"
+                                                class="rounded-circle me-2 border"
+                                                style="width: 40px; height: 40px; object-fit: cover;">
+                                            <span class="fw-bold">{{ u.nickname }}</span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <small class="d-block">{{ u.email }}</small>
+                                        <span class="badge bg-light text-dark border">{{ u.pais }}</span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge" [class.bg-warning]="u.rol === 'ADMIN'"
+                                            [class.bg-info]="u.rol === 'EMPRESA'"
+                                            [class.bg-primary]="u.rol === 'GAMER'">
+                                            {{ u.rol }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <button class="btn btn-sm badge rounded-pill border-0"
+                                            [class.bg-success]="u.estado === 'ACTIVO'"
+                                            [class.bg-danger]="u.estado === 'INACTIVO'" (click)="toggleEstado(u)"
+                                            title="Click para cambiar estado">
+                                            {{ u.estado }}
+                                        </button>
+                                    </td>
+
+                                    <td>
+                                        <button class="btn btn-sm btn-link text-primary" (click)="cargarParaEditar(u)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-link text-danger" (click)="eliminar(u.id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                } @empty {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">No se encontraron usuarios.</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        {{ modoEdicion ? 'Editar Perfil' : 'Registrar Usuario' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form (ngSubmit)="guardar()">
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Nickname</label>
+                            <input type="text" class="form-control" [(ngModel)]="formUsuario.nickname" name="nick"
+                                required>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" class="form-control" [(ngModel)]="formUsuario.email" name="email"
+                                required>
+                        </div>
+
+                        @if (!modoEdicion) {
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Contraseña</label>
+                            <input type="password" class="form-control" [(ngModel)]="formUsuario.password" name="pass"
+                                required>
+                        </div>
+                        }
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Fecha Nac.</label>
+                                <input type="date" class="form-control" [(ngModel)]="formUsuario.fechaNacimiento"
+                                    name="fecha">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">País</label>
+                                <input type="text" class="form-control" [(ngModel)]="formUsuario.pais" name="pais">
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Teléfono</label>
+                            <input type="text" class="form-control" [(ngModel)]="formUsuario.telefono" name="tel">
+                        </div>
+
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Rol</label>
+                                <select class="form-select" [(ngModel)]="formUsuario.rol" name="rol">
+                                    <option value="GAMER">GAMER</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Estado</label>
+                                <select class="form-select" [(ngModel)]="formUsuario.estado" name="estado">
+                                    <option value="ACTIVO">ACTIVO</option>
+                                    <option value="BLOQUEADO">BLOQUEADO</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Avatar</label>
+                            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {{ modoEdicion ? 'Guardar Cambios' : 'Registrar' }}
+                            </button>
+                            @if (modoEdicion) {
+                            <button type="button" class="btn btn-secondary"
+                                (click)="iniciarCreacion()">Cancelar</button>
+                            }
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

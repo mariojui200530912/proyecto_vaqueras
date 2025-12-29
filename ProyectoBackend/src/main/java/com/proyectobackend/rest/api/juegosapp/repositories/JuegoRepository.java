@@ -240,6 +240,17 @@ public class JuegoRepository {
         }
     }
 
+    public boolean existeCategoriaEnJuego(Connection conn, int idJuego, int idCategoria) throws SQLException {
+        String sql = "SELECT 1 FROM juego_categoria WHERE id_juego = ? AND id_categoria = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idJuego);
+            ps.setInt(2, idCategoria);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     //Gestionar Imagenes
     public void actualizarPortada(Connection conn, Integer idJuego, byte[] nuevaPortada) throws SQLException {
         String sql = "UPDATE imagen_juego SET imagen = ? WHERE id_juego = ? AND atributo = 'PORTADA'";

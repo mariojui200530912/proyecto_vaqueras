@@ -4,6 +4,7 @@ public class BannerResponse {
     private int idJuego;
     private String titulo;
     private String descripcion;
+    private int orden;
     private String imagenBase64;
 
     public int getIdJuego() {
@@ -36,5 +37,13 @@ public class BannerResponse {
 
     public void setImagenBase64(String imagenBase64) {
         this.imagenBase64 = imagenBase64;
+    }
+
+    public int getOrden() {
+        return orden;
+    }
+
+    public void setOrden(int orden) {
+        this.orden = orden;
     }
 }

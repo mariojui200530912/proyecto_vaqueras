@@ -1,6 +1,7 @@
 package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.configuracion.Comision;
 import com.proyectobackend.rest.api.juegosapp.services.AdminService;
 import com.proyectobackend.rest.api.juegosapp.services.ConfiguracionService;
 import jakarta.ws.rs.*;
@@ -19,18 +20,24 @@ public class AdminResource {
         this.adminService = new AdminService();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerComision(){
+        try{
+            Comision comision = configService.obtenerComision();
+            return Response.status(Response.Status.OK).entity(comision).build();
+        }catch(Exception ex){
+            return Response.status(Response.Status.BAD_REQUEST).entity(new MensajeResponse(ex.getMessage())).build();
+        }
+    }
+
     @POST
     @Path("/comision-global")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response actualizarComisionGlobal(@FormParam("comision") BigDecimal nuevaComision) {
+    public Response actualizarComisionGlobal(Comision comision) {
         try {
-            if (nuevaComision == null) {
-                throw new Exception("El valor de la comisión es requerido.");
-            }
-
-            MensajeResponse respuesta = configService.cambiarComisionGlobal(nuevaComision);
-
+            MensajeResponse respuesta = configService.cambiarComisionGlobal(comision);
             return Response.ok(respuesta).build();
 
         } catch (Exception e) {

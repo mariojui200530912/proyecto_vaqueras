@@ -16,7 +16,7 @@ public class BannerRepository {
         List<BannerResponse> lista = new ArrayList<>();
 
         // Filtramos: Solo juegos activos y ordenados por 'orden'
-        String sql = "SELECT j.id, j.titulo, j.descripcion, i.imagen " +
+        String sql = "SELECT j.id, j.titulo, j.descripcion, i.imagen, b.orden " +
                 "FROM banner b " +
                 "INNER JOIN juego j ON b.id_juego = j.id " +
                 "LEFT JOIN imagen_juego i ON j.id = i.id_juego AND i.atributo = 'BANNER' " +
@@ -111,6 +111,29 @@ public class BannerRepository {
         }
     }
 
+    public int obtenerOrdenActual(Connection conn, int idJuego) throws SQLException {
+        String sql = "SELECT orden FROM banner WHERE id_juego = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idJuego);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("orden");
+            }
+        }
+        return -1; // Error o no encontrado
+    }
+
+    // Buscar qué juego está estorbando en la posición destino
+    public Integer obtenerJuegoEnPosicion(Connection conn, int orden) throws SQLException {
+        String sql = "SELECT id_juego FROM banner WHERE orden = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, orden);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_juego");
+            }
+        }
+        return null;
+    }
+
     // Helper para no repetir código de mapeo
     private BannerResponse mapearResultSet(ResultSet rs) throws SQLException {
         BannerResponse dto = new BannerResponse();
@@ -123,6 +146,7 @@ public class BannerRepository {
             desc = desc.substring(0, 100) + "...";
         }
         dto.setDescripcion(desc);
+        dto.setOrden(rs.getInt("orden"));
 
         // Convertir BLOB a Base64
         byte[] imgBytes = rs.getBytes("imagen");

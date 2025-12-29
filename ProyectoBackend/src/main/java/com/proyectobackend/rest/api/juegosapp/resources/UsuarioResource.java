@@ -52,6 +52,7 @@ public class UsuarioResource {
             @FormDataParam("fechaNacimiento") String fechaNacimiento,
             @FormDataParam("telefono") String telefono,
             @FormDataParam("pais") String pais,
+            @FormDataParam("rol") String rol,
             @FormDataParam("avatar") InputStream avatarInput,
             @FormDataParam("avatar") FormDataContentDisposition fileDetail
     ) {
@@ -72,7 +73,7 @@ public class UsuarioResource {
                 request.setAvatar(FileUploadUtil.leerBytesDeInput(getClass().getResourceAsStream("/images/default_avatar.png")));
             }
 
-            request.setRol(Rol.valueOf("GAMER"));
+            request.setRol(Rol.valueOf(rol));
 
             UsuarioResponse usuario = usuarioService.registrarUsuario(request);
             return Response.status(Response.Status.CREATED).entity(usuario).build();
@@ -94,6 +95,20 @@ public class UsuarioResource {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new MensajeResponse("Error al listar usuarios: " + e.getMessage()))
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/gamers")
+    public Response listarGamers() {
+        try{
+            List<UsuarioResponse> usuarios = usuarioService.listarPorTipo(Rol.GAMER);
+            return Response.ok(usuarios).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error al listar usuarios gamers: " + e.getMessage()))
                     .type(MediaType.APPLICATION_JSON)
                     .build();
         }
@@ -155,6 +170,8 @@ public class UsuarioResource {
             // Guardar nueva imagen solo si se envía
             if (avatarInput != null && fileDetail != null && fileDetail.getFileName() != null && !fileDetail.getFileName().isEmpty()) {
                 request.setAvatar(FileUploadUtil.leerBytesDeInput(avatarInput));
+            }else{
+                request.setAvatar(usuarioActual.getAvatar());
             }
 
             // Solo admin puede modificar tipo y estado; si no vienen, conservar
@@ -205,7 +222,7 @@ public class UsuarioResource {
             // Validamos que envíen un estado
             if (request.getEstado() == null || request.getEstado().isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new MensajeResponse("Debe proporcionar el nuevo estado (ACTIVO o BLOQUEADO)."))
+                        .entity(new MensajeResponse("Debe proporcionar el nuevo estado (ACTIVO o INACTIVO)."))
                         .build();
             }
 
@@ -215,7 +232,7 @@ public class UsuarioResource {
                 nuevoEstado = EstadoUsuario.valueOf(request.getEstado().toUpperCase());
             } catch (IllegalArgumentException e) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new MensajeResponse("Estado inválido. Valores permitidos: ACTIVO, BLOQUEADO"))
+                        .entity(new MensajeResponse("Estado inválido. Valores permitidos: ACTIVO, INACTIVO"))
                         .build();
             }
 

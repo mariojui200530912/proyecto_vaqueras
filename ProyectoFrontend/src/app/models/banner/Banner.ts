@@ -3,4 +3,5 @@ export interface Banner {
   titulo: string;
   descripcion: string;
   imagenBase64: string; // Puede venir como "data:image/jpeg;base64,..."
+  orden: number; 
 }

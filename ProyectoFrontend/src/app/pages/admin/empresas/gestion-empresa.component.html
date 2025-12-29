@@ -1,0 +1,177 @@
+<div class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="bi bi-building"></i> Gestión de Empresas</h2>
+
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">Listado</h5>
+                    <button class="btn btn-primary btn-sm" (click)="iniciarCreacion()">
+                        <i class="bi bi-plus-lg"></i> Nueva Empresa
+                    </button>
+                </div>
+                <div class="p-3 bg-light border-bottom">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 ps-0"
+                            placeholder="Buscar por nombre o descripción..." [(ngModel)]="textoBusqueda">
+
+                        @if (textoBusqueda) {
+                        <button class="btn btn-outline-secondary border-start-0 bg-white" (click)="textoBusqueda = ''">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        }
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Comisión</th>
+                                    <th>Comentarios</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (emp of empresasFiltradas; track emp.id) {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img [src]="emp.logo || 'assets/images/default-company.png'"
+                                                class="rounded me-2 border"
+                                                style="width: 40px; height: 40px; object-fit: cover;">
+                                            <div>
+                                                <div class="fw-bold">{{ emp.nombre }}</div>
+                                                <small class="text-muted text-truncate d-block"
+                                                    style="max-width: 150px;">
+                                                    {{ emp.descripcion }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ emp.fechaCreacion | date:'shortDate' }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ emp.comisionEspecifica ?? "GLOBAL " +
+                                            configuracionService.comisionActual() }}%</small>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                [checked]="emp.permiteComentarios" (change)="toggleComentarios(emp)">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-link text-primary"
+                                            (click)="cargarParaEditar(emp)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-link text-danger" (click)="eliminar(emp.id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-link text-secondary"
+                                            (click)="abrirUsuariosEmpresa(emp)" title="Gestionar Personal Empresa">
+                                            <i class="bi bi-people"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                }
+                                @empty {
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        @if (textoBusqueda) {
+                                        No se encontraron empresas con "{{ textoBusqueda }}".
+                                        } @else {
+                                        No hay empresas registradas.
+                                        }
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        {{ modoEdicion ? 'Editar Empresa' : 'Registrar Empresa' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form (ngSubmit)="guardar()">
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" [(ngModel)]="formEmpresa.nombre" name="nombre"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="formEmpresa.descripcion"
+                                name="desc"></textarea>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label">Comisión Inicial (%)</label>
+                            <input type="number" class="form-control" [(ngModel)]="formEmpresa.comisionEspecifica"
+                                name="comision">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label class="form-label">Logo</label>
+                            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {{ modoEdicion ? 'Guardar Cambios' : 'Crear Empresa' }}
+                            </button>
+                            @if (modoEdicion) {
+                            <button type="button" class="btn btn-secondary" (click)="iniciarCreacion()">
+                                Cancelar
+                            </button>
+                            }
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@if (empresaSeleccionada) {
+    <div class="modal-backdrop fade show"></div>
+
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl modal-dialog-centered"> <div class="modal-content">
+                
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-people"></i> Personal de: <strong>{{ empresaSeleccionada.nombre }}</strong>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" (click)="cerrarModalUsuarios()"></button>
+                </div>
+                
+                <div class="modal-body bg-light">
+                    <app-usuarios-empresa [idEmpresa]="empresaSeleccionada.id"></app-usuarios-empresa>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}

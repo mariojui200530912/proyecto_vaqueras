@@ -88,7 +88,7 @@ public class EmpresaRepository {
     }
 
     public void actualizarComision(int idEmpresa, BigDecimal nuevaComision) throws SQLException {
-        String sql = "UPDATE empresa SET porcentaje_comision = ? WHERE id = ?";
+        String sql = "UPDATE empresa SET comision_especifica = ? WHERE id = ?";
         try (Connection conn = DBConnection.getInstance().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBigDecimal(1, nuevaComision);
@@ -146,6 +146,8 @@ public class EmpresaRepository {
             ps.setInt(2, idUsuario);
             ps.setString(3, rol); // Ej: "ADMIN" o "OPERADOR"
             ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error en BD: " + e);
         }
     }
 
@@ -163,7 +165,7 @@ public class EmpresaRepository {
                     dto.setIdUsuario(rs.getInt("id"));
                     dto.setNickname(rs.getString("nickname"));
                     dto.setEmail(rs.getString("email"));
-                    dto.setRolEnEmpresa(rs.getString("rol_empresa"));
+                    dto.setRolEmpresa(rs.getString("rol_empresa"));
                     lista.add(dto);
                 }
             }
@@ -171,12 +173,11 @@ public class EmpresaRepository {
         return lista;
     }
 
-    public boolean desvincularUsuario(Connection conn, int idEmpresa, int idUsuario) throws SQLException {
-        String sql = "DELETE FROM usuario_empresa WHERE id_empresa = ? AND id_usuario = ?";
+    public boolean desvincularUsuario(Connection conn, int idUsuario) throws SQLException {
+        String sql = "DELETE FROM usuario_empresa WHERE id_usuario = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idEmpresa);
-            ps.setInt(2, idUsuario);
+            ps.setInt(1, idUsuario);
 
             // executeUpdate devuelve el número de filas borradas
             int filasAfectadas = ps.executeUpdate();

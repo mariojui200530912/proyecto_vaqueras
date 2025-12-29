@@ -57,9 +57,9 @@ public class BannerResource {
 
     // PUT: Reordenar (Opcional)
     @PUT
-    @Path("/{idJuego}/orden")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response cambiarOrden(@PathParam("idJuego") Integer idJuego, @FormParam("orden") Integer nuevoOrden) {
+    @Path("/{idJuego}/orden/{orden}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response cambiarOrden(@PathParam("idJuego") Integer idJuego, @PathParam("orden") Integer nuevoOrden) {
         try {
             bannerService.cambiarPosicion(idJuego, nuevoOrden);
             return Response.ok(new MensajeResponse("Orden actualizado.")).build();

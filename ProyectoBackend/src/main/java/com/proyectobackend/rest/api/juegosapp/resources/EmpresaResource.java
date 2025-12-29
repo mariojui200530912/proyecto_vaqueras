@@ -2,9 +2,11 @@ package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.empresa.EmpresaComision;
 import com.proyectobackend.rest.api.juegosapp.dtos.empresa.EmpresaRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.empresa.EmpresaResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.empresa.UsuarioEmpresa;
+import com.proyectobackend.rest.api.juegosapp.dtos.usuario.UsuarioRol;
 import com.proyectobackend.rest.api.juegosapp.services.EmpresaService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -96,18 +98,18 @@ public class EmpresaResource {
 
     @PATCH // PATCH se usa para actualizaciones parciales
     @Path("/{id}/comision")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED) // O JSON si prefieres
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response cambiarComision(
             @PathParam("id") Integer idEmpresa,
-            @FormParam("comision") BigDecimal nuevaComision
+            EmpresaComision comision
     ) {
         try {
-            if (nuevaComision == null) {
+            if (comision.getComision() == null) {
                 throw new Exception("Debe enviar el valor de la comisión.");
             }
 
-            empresaService.actualizarComisionEmpresa(idEmpresa, nuevaComision);
+            empresaService.actualizarComisionEmpresa(idEmpresa, comision.getComision());
 
             return Response.ok(new MensajeResponse("Comisión de la empresa actualizada correctamente."))
                     .build();
@@ -135,20 +137,19 @@ public class EmpresaResource {
     // Vincular usuarios a empresa
     @POST
     @Path("/{id}/usuarios")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response agregarUsuario(
             @PathParam("id") Integer idEmpresa,
-            @FormParam("idUsuario") Integer idUsuario,
-            @FormParam("rol") String rol
+            UsuarioRol usuarioRol
     ) {
         try {
-            if (idUsuario == null) {
+            if (usuarioRol == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(new MensajeResponse("El ID del usuario es obligatorio."))
                         .build();
             }
-            empresaService.vincularUsuario(idEmpresa, idUsuario, rol);
+            empresaService.vincularUsuario(idEmpresa, usuarioRol.getIdUsuario(), usuarioRol.getRolEmpresa());
             return Response.ok(new MensajeResponse("Usuario vinculado a la empresa exitosamente."))
                     .build();
 
@@ -175,14 +176,13 @@ public class EmpresaResource {
     }
 
     @DELETE
-    @Path("/{id}/usuarios/{idUsuario}")
+    @Path("/usuarios/{idUsuario}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response eliminarUsuarioDeEmpresa(
-            @PathParam("id") Integer idEmpresa,
             @PathParam("idUsuario") Integer idUsuario
     ) {
         try {
-            empresaService.eliminarEmpleado(idEmpresa, idUsuario);
+            empresaService.eliminarEmpleado(idUsuario);
             return Response.ok(new MensajeResponse("Usuario desvinculado de la empresa correctamente."))
                     .build();
         } catch (Exception e) {

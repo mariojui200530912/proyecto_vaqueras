@@ -42,6 +42,9 @@ public class EmpresaService {
             if (!request.isValid()) {
                 throw new Exception("Datos de creacion de empresa no validos");
             }
+            if (!request.isValidComisionEspecifica()) {
+                throw new Exception("Datos de comision especifica de empresa no validos");
+            }
 
             // Verificar si el email ya existe
             Optional<Empresa> empresaExistente = Optional.ofNullable(empresaRepository.buscarPorNombre(request.getNombre()));
@@ -153,7 +156,7 @@ public class EmpresaService {
                 conn.commit();
             }catch (Exception e) {
                 conn.rollback();
-                throw new Exception("Error al agregar empresa en BD");
+                throw new Exception("Error al realizar la vinculacion del usuario" + e.getMessage());
             }
         } catch (SQLException e) {
             if (e.getErrorCode() == 1062) {
@@ -172,11 +175,11 @@ public class EmpresaService {
         }
     }
 
-    public void eliminarEmpleado(int idEmpresa, int idUsuario) throws Exception {
+    public void eliminarEmpleado(int idUsuario) throws Exception {
         try (Connection conn = DBConnection.getInstance().getConnection()) {
             conn.setAutoCommit(false); // Transacción por seguridad
             try {
-                boolean eliminado = empresaRepository.desvincularUsuario(conn, idEmpresa, idUsuario);
+                boolean eliminado = empresaRepository.desvincularUsuario(conn, idUsuario);
 
                 if (!eliminado) {
                     throw new Exception("El usuario no pertenece a esta empresa o ya fue eliminado.");
@@ -216,7 +219,7 @@ public class EmpresaService {
         resp.setDescripcion(e.getDescripcion());
         if (e.getLogo() != null && e.getLogo().length > 0) {
             String base64 = java.util.Base64.getEncoder().encodeToString(e.getLogo());
-            resp.setLogo(base64);
+            resp.setLogo("data:image/jpeg;base64," + base64);
         }
         resp.setComisionEspecifica(e.getComisionEspecifica());
         resp.setFechaCreacion(e.getFecha_creacion());

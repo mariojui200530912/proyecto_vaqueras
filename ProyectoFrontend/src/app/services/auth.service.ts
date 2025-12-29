@@ -21,8 +21,10 @@ export class AuthService {
   // 2. SIGNAL COMPUTADA: Nos dice true/false si está logueado automáticamente
   isLoggedIn = computed(() => !!this.currentUser());
 
-  // 3. SIGNAL COMPUTADA: Para saber si es Admin fácilmente
+  // 3. SIGNAL COMPUTADA: Para saber rol del usuario actual
   isAdmin = computed(() => this.currentUser()?.rol === 'ADMIN');
+  isEmpresa = computed(() => this.currentUser()?.rol === 'EMPRESA');
+  isGamer = computed(() => this.currentUser()?.rol === 'GAMER');
 
   login(credenciales: LoginRequest) {
     return this.http.post<Usuario>(`${this.apiUrl}/login`, credenciales).pipe(
@@ -64,8 +66,6 @@ export class AuthService {
         rutaDestino = '/'; // Home
         break;
     }
-
-    console.log(`Redirigiendo usuario ${usuario.rol} hacia: ${rutaDestino}`);
     this.router.navigate([rutaDestino]);
   }
 
@@ -73,5 +73,15 @@ export class AuthService {
   private obtenerUsuarioDelStorage(): Usuario | null {
     const userStr = localStorage.getItem('usuario');
     return userStr ? JSON.parse(userStr) : null;
+  }
+  // Verifica si el usuario actual es dueño de la empresa creadora del juego
+  esDuenio(idEmpresaCreadoraJuego: number | undefined): boolean {
+    const user = this.currentUser();
+    
+    if (user && user.rol === 'EMPRESA' && user.idEmpresa) {
+        return user.idEmpresa === idEmpresaCreadoraJuego;
+    }
+    
+    return false;
   }
 }

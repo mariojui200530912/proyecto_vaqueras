@@ -10,4 +10,6 @@ export interface Usuario {
   estado: 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
   carteraSaldo: number;
   fechaCreacion: Date;
+  idEmpresa?: number; // Solo para rol EMPRESA
+  rolEmpresa?: 'ADMIN' | 'EMPLEADO'; // Solo para rol EMPRESA
 }

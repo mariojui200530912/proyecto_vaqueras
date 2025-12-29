@@ -1,0 +1,62 @@
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <h6 class="card-title fw-bold mb-3">
+        <i class="bi bi-search"></i> Buscar Juego
+    </h6>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-7">
+            <input type="text" 
+                   class="form-control" 
+                   placeholder="Título del juego..." 
+                   [(ngModel)]="filtroTitulo"
+                   (keyup.enter)="buscar()">
+        </div>
+        <div class="col-md-5">
+            <select class="form-select" [(ngModel)]="filtroCategoria" (change)="buscar()">
+                <option [ngValue]="undefined">Todas las categorías</option>
+                @for (cat of categoriaService.categorias(); track cat.id) {
+                    <option [ngValue]="cat.id">{{ cat.nombre }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="d-grid mb-3">
+        <button class="btn btn-outline-primary" (click)="buscar()" [disabled]="buscando()">
+            @if (buscando()) {
+                <span class="spinner-border spinner-border-sm"></span> Buscando...
+            } @else {
+                Buscar
+            }
+        </button>
+    </div>
+
+    @if (resultados().length > 0) {
+        <div class="list-group">
+            @for (juego of resultados(); track juego.id) {
+                <button type="button" 
+                        class="list-group-item list-group-item-action d-flex align-items-center gap-3 resultado-item"
+                        (click)="seleccionar(juego)">
+                    
+                    <img [src]="juego.imagenPortada || 'assets/images/placeholder.jpg'" class="img-mini" alt="portada">
+                    
+                    <div class="flex-grow-1 text-start">
+                        <div class="fw-bold small">{{ juego.titulo }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                            {{ juego.nombreEmpresa }} | {{ juego.precio | currency:'USD' }}
+                        </div>
+                    </div>
+
+                    <i class="bi bi-plus-circle-fill text-primary fs-5"></i>
+                </button>
+            }
+        </div>
+    } @else if (haBuscado() && !buscando()) {
+        <div class="alert alert-light text-center small text-muted">
+            No se encontraron juegos con esos filtros.
+        </div>
+    }
+
+  </div>
+</div>

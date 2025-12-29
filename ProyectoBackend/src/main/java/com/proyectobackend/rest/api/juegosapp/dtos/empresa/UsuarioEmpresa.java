@@ -4,7 +4,7 @@ public class UsuarioEmpresa {
     private int idUsuario;
     private String nickname;
     private String email;
-    private String rolEnEmpresa;
+    private String rolEmpresa;
 
     public int getIdUsuario() {
         return idUsuario;
@@ -30,11 +30,11 @@ public class UsuarioEmpresa {
         this.email = email;
     }
 
-    public String getRolEnEmpresa() {
-        return rolEnEmpresa;
+    public String getRolEmpresa() {
+        return rolEmpresa;
     }
 
-    public void setRolEnEmpresa(String rolEnEmpresa) {
-        this.rolEnEmpresa = rolEnEmpresa;
+    public void setRolEmpresa(String rolEmpresa) {
+        this.rolEmpresa = rolEmpresa;
     }
 }

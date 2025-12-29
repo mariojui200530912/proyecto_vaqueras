@@ -13,6 +13,7 @@ public class JuegoResponse {
     private int id;
     private String titulo;
     private String descripcion;
+    private Integer idEmpresa;
     private String nombreEmpresa;
     private BigDecimal precio;
     private String recursosMinimos;
@@ -121,6 +122,14 @@ public class JuegoResponse {
 
     public void setCalificacionPromedio(BigDecimal calificacionPromedio) {
         this.calificacionPromedio = calificacionPromedio;
+    }
+
+    public Integer getIdEmpresa() {
+        return idEmpresa;
+    }
+
+    public void setIdEmpresa(Integer idEmpresa) {
+        this.idEmpresa = idEmpresa;
     }
 
     public String getNombreEmpresa() {
