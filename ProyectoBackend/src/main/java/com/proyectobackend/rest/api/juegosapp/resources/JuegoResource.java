@@ -3,6 +3,7 @@ package com.proyectobackend.rest.api.juegosapp.resources;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.juego.EstadoJuegoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Categoria;
@@ -312,4 +313,32 @@ public class JuegoResource {
         }
     }
 
+    @PATCH
+    @Path("/{idJuego}/estado")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response cambiarEstadoJuego(
+            @PathParam("idJuego") Integer idJuego,
+            EstadoJuegoRequest request // DTO simple { "estado": "ACTIVO" | "SUSPENDIDO" }
+    ) {
+        try {
+            // Validamos
+            if (request == null || request.getEstadoVenta() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new MensajeResponse("Debe enviar el nuevo estado (ACTIVO/SUSPENDIDO)."))
+                        .build();
+            }
+
+            // Llamamos al servicio (Debes implementar este método en JuegoService)
+            juegoService.cambiarEstado(idJuego, request.getEstadoVenta());
+
+            return Response.ok(new MensajeResponse("El estado del juego se actualizó a: " + request.getEstadoVenta()))
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage()))
+                    .build();
+        }
+    }
 }

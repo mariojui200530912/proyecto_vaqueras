@@ -26,7 +26,7 @@ public class JuegoResponse {
     private List<String> categorias;
     //Imagenes
     private String portada;
-    private List<String> galeria;
+    private List<ImagenResponse> galeria;
 
     public int getId() {
         return id;
@@ -92,11 +92,11 @@ public class JuegoResponse {
         this.portada = portada;
     }
 
-    public List<String> getGaleria() {
+    public List<ImagenResponse> getGaleria() {
         return galeria;
     }
 
-    public void setGaleria(List<String> galeria) {
+    public void setGaleria(List<ImagenResponse> galeria) {
         this.galeria = galeria;
     }
 

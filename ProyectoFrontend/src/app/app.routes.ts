@@ -11,6 +11,7 @@ import { BannerComponent } from './pages/admin/banner/banner.component';
 import { GestionComisionComponent } from './pages/admin/comision/gestion-comision.component';
 import { GestionEmpresaComponent } from './pages/admin/empresas/gestion-empresa.component';
 import { GestionUsuariosComponent } from './pages/admin/usuarios/gestion-usuarios.component';
+import { PerfilEmpresaComponent } from './pages/empresa/perfil-empresa/perfil-empresa.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -64,5 +65,9 @@ export const routes: Routes = [
         path: 'mi-perfil/reportes',
         component: ReporteComponent,
         // canActivate: [authGuard]
+    },
+    {
+        path: 'empresa/:id', 
+        component: PerfilEmpresaComponent
     }
 ];

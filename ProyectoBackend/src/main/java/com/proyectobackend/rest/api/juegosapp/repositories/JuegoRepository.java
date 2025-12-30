@@ -149,6 +149,7 @@ public class JuegoRepository {
                 while(rs.next()) {
                     ImagenJuego img = new ImagenJuego();
                     img.setId(rs.getInt("id"));
+                    img.setIdJuego(rs.getInt("id_juego"));
                     img.setImagen(rs.getBytes("imagen")); // <--- getBytes
                     img.setAtributo(rs.getString("atributo"));
                     lista.add(img);
@@ -412,6 +413,17 @@ public class JuegoRepository {
             j.setFechaLanzamiento(rs.getDate("fecha_lanzamiento").toLocalDate());
         }
         return j;
+    }
+
+    public void cambiarEstadoVenta(Connection conn, int idJuego, String estado) throws SQLException {
+        String sql = "UPDATE juego SET estado_venta = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, estado);
+            ps.setInt(2, idJuego);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al actualizar en base de datos estado de venta: " + e);
+        }
     }
 
 }

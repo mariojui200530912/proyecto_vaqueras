@@ -59,7 +59,7 @@ export class AuthService {
         rutaDestino = '/admin/dashboard';
         break;
       case 'EMPRESA':
-        rutaDestino = '/empresa/dashboard';
+        rutaDestino = `/empresa/${usuario.idEmpresa}`;
         break;
       case 'GAMER':
       default:

@@ -35,6 +35,14 @@ export class JuegoService {
     return this.http.get<Juego[]>(`${this.apiUrl}/juego/destacados`);
   }
 
+  obtenerJuegosPorEmpresa(idEmpresa: number, esDuenio: boolean) {
+    let params = new HttpParams();
+    if (esDuenio) {
+      params = params.set('rol', 'EMPRESA'); // Esto hace que el backend devuelva también los SUSPENDIDOS
+    }
+    return this.http.get<Juego[]>(`${this.apiUrl}/juego/catalogo/${idEmpresa}/empresa`, { params });
+  }
+
   buscarJuegos(titulo?: string, idCategoria?: number, min?: number, max?: number) {
     let params = new HttpParams();
     if (titulo) params = params.set('titulo', titulo);
@@ -61,16 +69,41 @@ export class JuegoService {
   }
 
   obtenerCategoriasDeJuego(idJuego: number) {
-    return this.http.get<Categoria[]>(`${this.apiUrl}/${idJuego}/categorias`);
+    return this.http.get<Categoria[]>(`${this.apiUrl}/juego/${idJuego}/categorias`);
   }
   // Agregar una categoría a un juego
   agregarCategoria(idJuego: number, idCategoria: number) {
-    return this.http.post(`${this.apiUrl}/${idJuego}/categoria/${idCategoria}`, {});
+    return this.http.post(`${this.apiUrl}/juego/${idJuego}/categoria/${idCategoria}`, {});
   }
   // Elimina una categoría de un juego
   eliminarCategoria(idJuego: number, idCategoria: number) {
     const params = new HttpParams().set('idCategoria', idCategoria);
-    return this.http.delete(`${this.apiUrl}/${idJuego}/categoria`, { params });
+    return this.http.delete(`${this.apiUrl}/juego/${idJuego}/categoria`, { params });
+  }
+  // SUBIR IMÁGENES A LA GALERÍA
+  agregarImagenesGaleria(idJuego: number, archivos: File[]) {
+    const formData = new FormData();
+    
+    archivos.forEach(file => {
+      formData.append('imagenes', file);
+    });
+
+    return this.http.post(`${this.apiUrl}/juego/${idJuego}/galeria`, formData);
+  }
+  // ELIMINAR UNA IMAGEN DE LA GALERÍA
+  eliminarImagenGaleria(idJuego: number, idImagen: number) {
+    return this.http.delete(`${this.apiUrl}/juego/${idJuego}/galeria/${idImagen}`);
+  }
+  // SUBIR ACTUALIZAR BANNER ESPECÍFICO
+  subirBanner(idJuego: number, archivo: File) {
+    const formData = new FormData();
+    formData.append('imagen', archivo);
+    return this.http.put(`${this.apiUrl}/juego/${idJuego}/imagenes/banner`, formData);
+  }
+
+  cambiarEstadoJuego(idJuego: number, nuevoEstado: 'ACTIVO' | 'SUSPENDIDO') {
+    const body = { estadoVenta: nuevoEstado };
+    return this.http.patch(`${this.apiUrl}/juego/${idJuego}/estado`, body);
   }
 
   // Método maestro para cargar todo al inicio

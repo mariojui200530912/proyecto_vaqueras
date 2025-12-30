@@ -37,6 +37,10 @@ export class EmpresaService {
     );
   }
 
+  obtenerPorId(id: number) {
+    return this.http.get<Empresa>(`${this.apiUrl}/${id}`);
+  }
+
   // ACTUALIZAR
   actualizar(id: number, datos: Partial<Empresa>, logo: File | null) {
     const formData = new FormData();

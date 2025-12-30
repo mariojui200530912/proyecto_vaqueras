@@ -1,5 +1,6 @@
 package com.proyectobackend.rest.api.juegosapp.services;
 
+import com.proyectobackend.rest.api.juegosapp.dtos.juego.ImagenResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
 import com.proyectobackend.rest.api.juegosapp.models.Categoria;
@@ -291,6 +292,14 @@ public class JuegoService {
         }
     }
 
+    public void cambiarEstado(int idJuego, String estado) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            juegoRepository.cambiarEstadoVenta(conn, idJuego, estado);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al cambiar estado de venta de juego: " + e);
+        }
+    }
+
     private JuegoResponse construirResponse(Juego j, List<Categoria> categorias, List<ImagenJuego> imagenesBlob, Optional<Empresa> empresa) {
         JuegoResponse resp = new JuegoResponse();
 
@@ -319,7 +328,7 @@ public class JuegoService {
         }
 
         // Conversión de Imágenes (Bytes -> Base64)
-        List<String> galeriaB64 = new ArrayList<>();
+        List<ImagenResponse> galeriaObjetos = new ArrayList<>();
 
         if (imagenesBlob != null) {
             for (ImagenJuego img : imagenesBlob) {
@@ -331,14 +340,18 @@ public class JuegoService {
                         // Si es portada, va al campo único
                         resp.setPortada("data:image/jpeg;base64," + b64);
                     } else {
-                        // Si es gameplay, se agrega a la lista
-                        galeriaB64.add("data:image/jpeg;base64," + b64);
+                        ImagenResponse imgResponse = new ImagenResponse();
+                        imgResponse.setId(img.getId());
+                        imgResponse.setIdJuego(img.getIdJuego());
+                        imgResponse.setImagen("data:image/jpeg;base64," + b64);
+                        imgResponse.setAtributo(img.getAtributo());
+                        galeriaObjetos.add(imgResponse);
                     }
                 }
             }
         }
 
-        resp.setGaleria(galeriaB64);
+        resp.setGaleria(galeriaObjetos);
         return resp;
     }
 }

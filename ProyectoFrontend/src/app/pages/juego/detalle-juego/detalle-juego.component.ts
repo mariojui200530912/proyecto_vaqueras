@@ -23,42 +23,56 @@ export class DetalleJuegoComponent {
 
   // ESTADO
   juego = signal<Juego | null>(null);
-  isLoading = true;
+  isLoading = signal<boolean>(true);
   modoEdicion = false; // Controla si mostramos Inputs o Textos
-  
   // Para subida de archivos
   nuevaPortada: File | null = null;
+  archivosGaleria: File[] = [];
+  nuevoBanner: File | null = null;
+  isUploading = signal<boolean>(false); // Para mostrar spinner en botones
 
   ngOnInit() {
-    // Obtener ID de la URL
     this.route.paramMap.subscribe(params => {
-      const id = Number(params.get('id'));
-      if (id) this.cargarJuego(id);
-    });
-  }
+      const idStr = params.get('id');
+      const id = Number(idStr);
 
-  cargarJuego(id: number) {
-    this.isLoading = true;
-    this.juegoService.obtenerJuegoPorId(id).subscribe({
-      next: (data) => {
-        this.juego.set(data);
-        this.isLoading = false;
-      },
-      error: () => {
-        alert('Juego no encontrado');
+      if (id && !isNaN(id) && id > 0) {
+        this.cargarJuego(id);
+      } else {
+        console.error('ID inválido');
+        this.isLoading.set(false); // Detener carga si no hay ID
         this.router.navigate(['/']);
       }
     });
   }
 
-  // --- ACCIONES DE EDICIÓN (EMPRESA) ---
+  cargarJuego(id: number) {
+    // Usar .set() para signals
+    this.isLoading.set(true); 
+
+    this.juegoService.obtenerJuegoPorId(id).subscribe({
+      next: (data) => {
+        this.juego.set(data);
+        this.isLoading.set(false); // Angular ahora SÍ detectará esto
+      },
+      error: (e) => {
+        console.error('Error cargando juego:', e);
+        this.isLoading.set(false); // Detener spinner aunque falle
+        alert('Juego no encontrado o error de conexión');
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  // --- ACCIONES DE EDICIÓN ---
   activarEdicion() {
     this.modoEdicion = true;
   }
 
   cancelarEdicion() {
     this.modoEdicion = false;
-    this.cargarJuego(this.juego()!.id); // Revertir cambios recargando
+    const currentId = this.juego()?.id;
+    if (currentId) this.cargarJuego(currentId);
   }
 
   guardarCambios() {
@@ -66,7 +80,6 @@ export class DetalleJuegoComponent {
     const user = this.authService.currentUser();
     if (!j || !user) return;
 
-    // datos a actualizar
     const datosActualizar = {
       titulo: j.titulo,
       descripcion: j.descripcion,
@@ -90,5 +103,66 @@ export class DetalleJuegoComponent {
 
   onPortadaSelected(event: any) {
     this.nuevaPortada = event.target.files[0];
+  }
+  onGaleriaSelected(event: any) {
+    // Convertimos FileList a Array
+    if (event.target.files && event.target.files.length > 0) {
+      this.archivosGaleria = Array.from(event.target.files);
+    }
+  }
+
+  subirGaleria() {
+    const j = this.juego();
+    if (!j || this.archivosGaleria.length === 0) return;
+
+    this.isUploading.set(true);
+
+    this.juegoService.agregarImagenesGaleria(j.id, this.archivosGaleria).subscribe({
+      next: () => {
+        alert('Imágenes agregadas correctamente');
+        this.archivosGaleria = []; // Limpiar selección
+        this.isUploading.set(false);
+        this.cargarJuego(j.id); // Recargar para ver las nuevas fotos
+      },
+      error: (e) => {
+        this.isUploading.set(false);
+        alert('Error al subir imágenes: ' + e.message);
+      }
+    });
+  }
+
+  eliminarImagen(idImagen: number) {
+    const j = this.juego();
+    if (!j || !confirm('¿Eliminar esta imagen de la galería?')) return;
+
+    this.juegoService.eliminarImagenGaleria(j.id, idImagen).subscribe({
+      next: () => this.cargarJuego(j.id),
+      error: (e) => alert('Error: ' + e.message)
+    });
+  }
+
+  // --- LÓGICA DE BANNER ---
+
+  onBannerSelected(event: any) {
+    this.nuevoBanner = event.target.files[0];
+  }
+
+  guardarBanner() {
+    const j = this.juego();
+    if (!j || !this.nuevoBanner) return;
+
+    this.isUploading.set(true);
+    this.juegoService.subirBanner(j.id, this.nuevoBanner).subscribe({
+        next: () => {
+            alert('Banner actualizado');
+            this.isUploading.set(false);
+            this.nuevoBanner = null;
+            this.cargarJuego(j.id);
+        },
+        error: (e) => {
+            this.isUploading.set(false);
+            alert('Error: ' + e.message);
+        }
+    });
   }
 }
