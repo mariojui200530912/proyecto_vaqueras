@@ -9,6 +9,8 @@ export interface Juego {
   clasificacion: string;
   fechaLanzamiento: Date;
   calificacionPromedio: number;
+  permiteComentariosJuegos: boolean;
+  permiteComentariosEmpresa: boolean;
   portada?: string; // El base64 de la imagen
   categorias?: string[];
   estadoVenta: 'ACTIVO' | 'SUSPENDIDO';

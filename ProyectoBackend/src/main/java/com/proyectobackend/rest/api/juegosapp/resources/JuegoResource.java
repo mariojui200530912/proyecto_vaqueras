@@ -50,7 +50,7 @@ public class JuegoResource {
             JuegoRequest request = objectMapper.readValue(jsonDatos, JuegoRequest.class);
 
             // 3. Llamar al servicio
-            Juego juegoCreado = juegoService.publicarJuego(
+            JuegoResponse juegoCreado = juegoService.publicarJuego(
                     request,
                     idUsuarioLogueado,
                     portadaIS,
@@ -339,6 +339,27 @@ public class JuegoResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new MensajeResponse("Error: " + e.getMessage()))
                     .build();
+        }
+    }
+
+    @PATCH
+    @Path("/{idJuego}/configuracion/comentarios")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response configurarComentariosJuego(
+            @PathParam("idJuego") Integer idJuego,
+            @FormDataParam("permitir") Boolean permitir
+    ) {
+        try {
+            if (permitir == null) throw new Exception("Debe especificar true o false.");
+
+            juegoService.configurarComentarios(idJuego, permitir);
+
+            String estado = permitir ? "HABILITADOS" : "DESHABILITADOS";
+            return Response.ok(new MensajeResponse("Comentarios " + estado + " para este juego.")).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage())).build();
         }
     }
 }

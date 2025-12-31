@@ -94,11 +94,34 @@ export class PerfilEmpresaComponent implements OnInit {
 
   irACrearJuego() {
     // Redirigir a tu formulario de creación de juegos
-    this.router.navigate(['/admin/juego/nuevo']); 
+    this.router.navigate(['/empresa/juego/nuevo']); 
   }
 
   irAEditarJuego(idJuego: number) {
      // Redirigir al detalle en modo edición o a un form específico
      this.router.navigate(['/juego', idJuego]); 
+  }
+  
+  toggleComentariosGlobal() {
+    const emp = this.empresa();
+    if (!emp || !this.esPropietario) return;
+
+    const nuevoEstado = !emp.permiteComentarios; // Invertimos el estado actual
+    
+    // Feedback optimista (cambiamos visualmente antes de la respuesta)
+    this.empresa.update(current => current ? { ...current, permiteComentarios: nuevoEstado } : null);
+
+    this.empresaService.configurarComentarios(emp.id, nuevoEstado).subscribe({
+      next: (res: any) => {
+        // Opcional: Mostrar un toast o mensaje pequeño
+        // alert(res.mensaje);
+      },
+      error: (e) => {
+        console.error(e);
+        alert('Error al cambiar configuración: ' + (e.error?.mensaje || e.message));
+        // Si falla, revertimos el cambio visualmente
+        this.empresa.update(current => current ? { ...current, permiteComentarios: !nuevoEstado } : null);
+      }
+    });
   }
 }

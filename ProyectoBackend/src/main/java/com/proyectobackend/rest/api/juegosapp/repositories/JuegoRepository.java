@@ -12,11 +12,11 @@ import com.proyectobackend.rest.api.juegosapp.models.ImagenJuego;
 import com.proyectobackend.rest.api.juegosapp.models.Juego;
 
 public class JuegoRepository {
-    private static final String SQL_CREATE_GAME = "INSERT INTO juego (id_empresa, titulo, descripcion, precio, recursos_minimos, clasificacion, fecha_lanzamiento, estado_venta) VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, 'ACTIVO')";
+    private static final String SQL_CREATE_GAME = "INSERT INTO juego (id_empresa, titulo, descripcion, precio, recursos_minimos, clasificacion, fecha_lanzamiento, estado_venta, permite_comentarios) VALUES (?, ?, ?, ?, ?, ?, CURRENT_DATE, 'ACTIVO', ?)";
     private static final String SQL_CREATE_GAME_CATEGORY = "INSERT INTO juego_categoria (id_juego, id_categoria) VALUES (?, ?)";
     private static final String SQL_CREATE_GAME_IMAGES = "INSERT INTO imagen_juego (id_juego, url, atributo) VALUES (?, ?, ?)";
 
-    public Juego crearJuegoCompleto(Juego juego, List<Integer> categoriasIds, byte[] portadaBytes, List<byte[]> galeriaBytes) throws SQLException {
+    public Integer crearJuegoCompleto(Juego juego, List<Integer> categoriasIds, byte[] portadaBytes, List<byte[]> galeriaBytes) throws SQLException {
         String sql = SQL_CREATE_GAME;
         String sqlCat = SQL_CREATE_GAME_CATEGORY;
         String sqlImg = SQL_CREATE_GAME_IMAGES;
@@ -34,6 +34,7 @@ public class JuegoRepository {
                 psJuego.setBigDecimal(4, juego.getPrecio());
                 psJuego.setString(5, juego.getRecursosMinimos());
                 psJuego.setString(6, juego.getClasificacion());
+                psJuego.setBoolean(7, juego.getPermiteComentariosJuegos());
                 psJuego.executeUpdate();
 
                 // Obtener ID generado
@@ -78,7 +79,7 @@ public class JuegoRepository {
 
                 //CONFIRMAR TRANSACCIÓN (COMMIT)
                 conn.commit();
-                return juego;
+                return idJuego;
 
             } catch (SQLException e) {
                 // SI ALGO FALLA DESHACER
@@ -208,7 +209,7 @@ public class JuegoRepository {
 
     //Actualiza los datos basicos del juego
     public void actualizarDatosBasicosJuego(Connection conn, Juego juego) throws SQLException {
-        String sql = "UPDATE juego SET titulo=?, descripcion=?, precio=?, recursos_minimos=?, clasificacion=?, estado_venta=? WHERE id=?";
+        String sql = "UPDATE juego SET titulo=?, descripcion=?, precio=?, recursos_minimos=?, clasificacion=?, estado_venta=?, permite_comentarios=? WHERE id=?";
         try (Connection con = DBConnection.getInstance().getConnection();
             PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, juego.getTitulo());
@@ -217,7 +218,8 @@ public class JuegoRepository {
             ps.setString(4, juego.getRecursosMinimos());
             ps.setString(5, juego.getClasificacion());
             ps.setString(6, juego.getEstadoVenta());
-            ps.setInt(7, juego.getId());
+            ps.setBoolean(7, juego.getPermiteComentariosJuegos());
+            ps.setInt(8, juego.getId());
             ps.executeUpdate();
         }
     }
@@ -397,24 +399,6 @@ public class JuegoRepository {
         }
     }
 
-    private Juego mapearJuego(ResultSet rs) throws SQLException {
-        Juego j = new Juego();
-        j.setId(rs.getInt("id"));
-        j.setIdEmpresa(rs.getInt("id_empresa"));
-        j.setTitulo(rs.getString("titulo"));
-        j.setDescripcion(rs.getString("descripcion"));
-        j.setPrecio(rs.getBigDecimal("precio"));
-        j.setRecursosMinimos(rs.getString("recursos_minimos"));
-        j.setClasificacion(rs.getString("clasificacion"));
-        j.setEstadoVenta(rs.getString("estado_venta"));
-        j.setCalificacionPromedio(rs.getBigDecimal("calificacion_promedio"));
-
-        if (rs.getDate("fecha_lanzamiento") != null) {
-            j.setFechaLanzamiento(rs.getDate("fecha_lanzamiento").toLocalDate());
-        }
-        return j;
-    }
-
     public void cambiarEstadoVenta(Connection conn, int idJuego, String estado) throws SQLException {
         String sql = "UPDATE juego SET estado_venta = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -426,4 +410,33 @@ public class JuegoRepository {
         }
     }
 
+    public void permitirComentarios(Connection conn, Integer idJuego, boolean permitir) throws SQLException {
+        String sql = "UPDATE juego SET permite_comentarios = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, permitir);
+            ps.setInt(2, idJuego);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al actualizar en base de datos permite comentarios: " + e);
+        }
+    }
+
+    private Juego mapearJuego(ResultSet rs) throws SQLException {
+        Juego j = new Juego();
+        j.setId(rs.getInt("id"));
+        j.setIdEmpresa(rs.getInt("id_empresa"));
+        j.setTitulo(rs.getString("titulo"));
+        j.setDescripcion(rs.getString("descripcion"));
+        j.setPrecio(rs.getBigDecimal("precio"));
+        j.setRecursosMinimos(rs.getString("recursos_minimos"));
+        j.setClasificacion(rs.getString("clasificacion"));
+        j.setEstadoVenta(rs.getString("estado_venta"));
+        j.setCalificacionPromedio(rs.getBigDecimal("calificacion_promedio"));
+        j.setPermiteComentariosJuegos(rs.getBoolean("permite_comentarios"));
+
+        if (rs.getDate("fecha_lanzamiento") != null) {
+            j.setFechaLanzamiento(rs.getDate("fecha_lanzamiento").toLocalDate());
+        }
+        return j;
+    }
 }

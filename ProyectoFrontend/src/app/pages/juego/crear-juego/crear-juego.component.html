@@ -1,0 +1,179 @@
+<div class="position-relative bg-dark" style="height: 350px; overflow: hidden;">
+    
+    <img [src]="previewBanner || 'assets/images/placeholder-banner.jpg'" 
+         class="w-100 h-100 object-fit-cover opacity-50" 
+         alt="Banner Preview">
+
+    <div class="position-absolute top-0 start-0 w-100 h-100" 
+         style="background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);">
+    </div>
+
+    <div class="position-absolute bottom-0 start-0 w-100 p-4 pb-5 container-fluid">
+        <div class="container">
+            
+            <div class="mb-3">
+               <label class="text-warning small fw-bold mb-1">TÍTULO DEL JUEGO *</label>
+               <input type="text" 
+                      class="form-control form-control-lg fs-1 fw-bold bg-transparent text-white border-secondary" 
+                      style="border: 2px dashed rgba(255,255,255,0.3);"
+                      [(ngModel)]="nuevoJuego.titulo" 
+                      placeholder="Escribe el título aquí...">
+            </div>
+
+            <p class="text-light opacity-75 fs-5">
+                <i class="bi bi-building"></i> Desarrollado por: {{ authService.currentUser()?.nickname || 'Tu Empresa' }}
+            </p>
+
+            <div class="mt-3">
+                 <label class="btn btn-sm btn-outline-info text-white border-light">
+                    <i class="bi bi-image"></i> Seleccionar Banner de Fondo
+                    <input type="file" hidden (change)="onBannerSelected($event)" accept="image/*">
+                 </label>
+                 @if(previewBanner) { 
+                    <span class="text-success ms-2 small fw-bold">
+                        <i class="bi bi-check-circle-fill"></i> Imagen cargada
+                    </span> 
+                 }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container" style="margin-top: -3rem; position: relative; z-index: 10;">
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow border-0 mb-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3 text-primary"><i class="bi bi-file-text"></i> Detalles del Juego</h4>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción *</label>
+                        <textarea class="form-control" rows="8" 
+                                  [(ngModel)]="nuevoJuego.descripcion" 
+                                  placeholder="Describe la historia, mecánicas y características..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Requisitos Mínimos *</label>
+                        <textarea class="form-control" rows="3" 
+                                  [(ngModel)]="nuevoJuego.recursosMinimos" 
+                                  placeholder="Ej: Windows 10, Intel Core i5, 8GB RAM..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                   <i class="bi bi-images"></i> Galería de Imágenes
+                </div>
+                <div class="card-body bg-light">
+                    <div class="text-center py-4 border rounded bg-white">
+                        <i class="bi bi-cloud-upload display-4 text-muted opacity-50"></i>
+                        <p class="text-muted mt-2 mb-3">Sube capturas de pantalla del gameplay</p>
+                        
+                        <label class="btn btn-primary">
+                            Seleccionar Imágenes
+                            <input type="file" hidden multiple (change)="onGaleriaSelected($event)" accept="image/*">
+                        </label>
+                        
+                        @if(galeriaSeleccionada.length > 0) {
+                            <div class="mt-3 text-success fw-bold">
+                                {{ galeriaSeleccionada.length }} imágenes listas para subir.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card shadow border-0 mb-4 overflow-hidden position-relative">
+                <img [src]="previewPortada || 'assets/images/placeholder.jpg'" 
+                     class="card-img-top" 
+                     style="height: 350px; object-fit: cover;" 
+                     alt="Portada Preview">
+                
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex flex-column justify-content-center align-items-center opacity-hover">
+                    <label class="btn btn-light fw-bold shadow">
+                        <i class="bi bi-camera"></i> Subir Portada *
+                        <input type="file" hidden (change)="onPortadaSelected($event)" accept="image/*">
+                    </label>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    
+                    <div class="text-center mb-4">
+                        <label class="form-label fw-bold text-success">PRECIO (GTQ) *</label>
+                        <input type="number" 
+                               class="form-control form-control-lg text-center fw-bold fs-2 text-success border-success" 
+                               [(ngModel)]="nuevoJuego.precio" 
+                               min="0" step="0.01">
+                        <small class="text-muted">Ingresa 0 para juegos gratuitos</small>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">CLASIFICACIÓN</label>
+                        <select class="form-select" [(ngModel)]="nuevoJuego.clasificacion">
+                            <option value="E">E (Everyone)</option>
+                            <option value="T">T (Teen)</option>
+                            <option value="M">M (Mature)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">CATEGORÍAS *</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @if(categoriaService.categorias().length > 0) {
+                                @for (cat of categoriaService.categorias(); track cat.id) {
+                                    <button type="button" 
+                                            class="btn btn-sm rounded-pill"
+                                            [class.btn-primary]="categoriasSeleccionadas.includes(cat.id)"
+                                            [class.btn-outline-secondary]="!categoriasSeleccionadas.includes(cat.id)"
+                                            (click)="toggleCategoria(cat.id)">
+                                        {{ cat.nombre }}
+                                    </button>
+                                }
+                            } @else {
+                                <span class="text-muted small">Cargando categorías...</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-success btn-lg fw-bold shadow-sm" 
+                                (click)="guardar()" 
+                                [disabled]="isSubmitting">
+                            @if(isSubmitting) {
+                                <span class="spinner-border spinner-border-sm me-2"></span> Publicando...
+                            } @else {
+                                <i class="bi bi-rocket-takeoff-fill"></i> PUBLICAR JUEGO
+                            }
+                        </button>
+                        <button class="btn btn-outline-danger" routerLink="/">
+                            Cancelar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .opacity-hover { opacity: 0; transition: 0.3s; }
+    .card:hover .opacity-hover { opacity: 1; }
+    /* Si no hay portada seleccionada, mostramos el botón siempre */
+    .card img[src*="placeholder"] + .opacity-hover { opacity: 1 !important; background: rgba(0,0,0,0.2); }
+</style>

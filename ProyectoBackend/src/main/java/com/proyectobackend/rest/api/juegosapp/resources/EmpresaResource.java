@@ -194,19 +194,17 @@ public class EmpresaResource {
 
     @PATCH
     @Path("/{id}/configuracion/comentarios")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response cambiarPermisoComentarios(
             @PathParam("id") Integer idEmpresa,
-            @FormParam("permitir") Boolean permitir // true o false
+            @FormDataParam("permitir") Boolean permitir // true o false
     ) {
         try {
             if (permitir == null) {
                 throw new Exception("Debe especificar si permite comentarios (true/false).");
             }
-
             empresaService.configurarComentarios(idEmpresa, permitir);
-
             String estado = permitir ? "HABILITADOS" : "DESHABILITADOS";
             return Response.ok(new MensajeResponse("Los comentarios han sido " + estado + " para esta empresa."))
                     .build();

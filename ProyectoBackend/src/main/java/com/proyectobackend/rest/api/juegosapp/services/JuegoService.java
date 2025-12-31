@@ -36,7 +36,7 @@ public class JuegoService {
         this.empresaRepository = new EmpresaRepository();
     }
 
-    public Juego publicarJuego(JuegoRequest request,
+    public JuegoResponse publicarJuego(JuegoRequest request,
                                Integer idUsuarioLogueado,
                                InputStream portadaInput, String nombrePortada,
                                List<FormDataBodyPart> galeriaParts) throws Exception {
@@ -44,12 +44,9 @@ public class JuegoService {
             // Obtener ID de la empresa del usuario
             int idEmpresa = usuarioRepository.obtenerIdEmpresaPorUsuario(idUsuarioLogueado);
             if (idEmpresa == 0) throw new Exception("El usuario no pertenece a ninguna empresa.");
-
             // Guardar Portada (Obligatoria)
-
             byte[] portadaBytes = FileUploadUtil.leerBytesDeInput(portadaInput);
             if (portadaBytes == null || portadaBytes.length == 0) throw new Exception("Portada obligatoria");
-
             // Guardar Galería (Opcional)
             List<byte[]> galeriaBytes = new ArrayList<>();
             if (galeriaParts != null) {
@@ -69,9 +66,10 @@ public class JuegoService {
             juego.setPrecio(request.getPrecio());
             juego.setRecursosMinimos(request.getRecursosMinimos());
             juego.setClasificacion(request.getClasificacion());
+            juego.setPermiteComentariosJuegos(true);
 
-            // Llamar al Repo Transaccional
-            return juegoRepository.crearJuegoCompleto(juego, request.getCategoriasIds(), portadaBytes, galeriaBytes);
+            Integer idNuevoJuego = juegoRepository.crearJuegoCompleto(juego, request.getCategoriasIds(), portadaBytes, galeriaBytes);
+            return  obtenerJuegoPorId(idNuevoJuego);
         } catch (Exception e) {
             throw new Exception("Error al guardar juego en BD: " + e.getMessage());
         }
@@ -300,6 +298,14 @@ public class JuegoService {
         }
     }
 
+    public void configurarComentarios(Integer idJuego, boolean permitir) throws Exception{
+        try(Connection conn = DBConnection.getInstance().getConnection()) {
+            juegoRepository.permitirComentarios(conn, idJuego, permitir);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al cambiar permiso de comentarios " + e);
+        }
+    }
+
     private JuegoResponse construirResponse(Juego j, List<Categoria> categorias, List<ImagenJuego> imagenesBlob, Optional<Empresa> empresa) {
         JuegoResponse resp = new JuegoResponse();
 
@@ -313,10 +319,12 @@ public class JuegoService {
         resp.setFechaLanzamiento(j.getFechaLanzamiento());
         resp.setEstadoVenta(j.getEstadoVenta());
         resp.setCalificacionPromedio(j.getCalificacionPromedio());
+        resp.setPermiteComentariosJuegos(j.getPermiteComentariosJuegos());
 
         if (empresa.isPresent()) {
             resp.setIdEmpresa(empresa.get().getId());
             resp.setNombreEmpresa(empresa.get().getNombre());
+            resp.setPermiteComentariosEmpresa(empresa.get().getPermiteComentarios());
         }
 
         // Mapeo de Categorías (De Objetos a Lista de Nombres String)

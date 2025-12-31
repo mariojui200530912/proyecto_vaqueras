@@ -54,22 +54,21 @@ export class EmpresaService {
 
   // CAMBIAR COMISIÓN
   actualizarComision(id: number, nuevaComision: number) {
-    const body = { 
-        comision: nuevaComision 
+    const body = {
+      comision: nuevaComision
     };
-    
+
     return this.http.patch(`${this.apiUrl}/${id}/comision`, body).pipe(
-        tap(() => this.cargarEmpresas())
+      tap(() => this.cargarEmpresas())
     );
   }
 
   // CONFIGURAR COMENTARIOS
-  configurarComentarios(id: number, permitir: boolean) {
-    const body = new HttpParams().set('permitir', permitir);
+  configurarComentarios(idEmpresa: number, permitir: boolean) {
+    const formData = new FormData();
+    formData.append('permitir', permitir.toString()); // Convertir a string para FormData
 
-    return this.http.patch(`${this.apiUrl}/${id}/configuracion/comentarios`, body, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' })
-    }).pipe(tap(() => this.cargarEmpresas()));
+    return this.http.patch(`${this.apiUrl}/${idEmpresa}/configuracion/comentarios`, formData);
   }
 
   eliminar(id: number) {
@@ -94,6 +93,6 @@ export class EmpresaService {
 
   // LISTAR PERSONAL ACTUAL
   listarEmpleados(idEmpresa: number) {
-      return this.http.get<UsuarioEmpresa[]>(`${this.apiUrl}/${idEmpresa}/usuarios`);
+    return this.http.get<UsuarioEmpresa[]>(`${this.apiUrl}/${idEmpresa}/usuarios`);
   }
 }

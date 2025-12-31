@@ -4,6 +4,6 @@ export interface Empresa {
   descripcion: string;
   logo?: string; // Base64 o URL
   comisionEspecifica?: number;
-  fechaCreacion: Date;
-  permiteComentarios: boolean;
+  fechaCreacion?: Date;
+  permiteComentarios?: boolean;
 }

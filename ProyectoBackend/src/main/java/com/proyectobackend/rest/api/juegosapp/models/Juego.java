@@ -14,6 +14,7 @@ public class Juego {
     private LocalDate fechaLanzamiento;
     private String estadoVenta; // ACTIVO, SUSPENDIDO
     private BigDecimal calificacionPromedio;
+    private boolean permiteComentariosJuegos;
 
     public int getId() {
         return id;
@@ -93,5 +94,13 @@ public class Juego {
 
     public void setCalificacionPromedio(BigDecimal calificacionPromedio) {
         this.calificacionPromedio = calificacionPromedio;
+    }
+
+    public boolean getPermiteComentariosJuegos() {
+        return permiteComentariosJuegos;
+    }
+
+    public void setPermiteComentariosJuegos(boolean permiteComentariosJuegos) {
+        this.permiteComentariosJuegos = permiteComentariosJuegos;
     }
 }

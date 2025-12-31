@@ -10,8 +10,8 @@
 
 <div class="position-relative bg-dark" style="height: 350px; overflow: hidden;">
 
-  <img [src]="game.portada || 'assets/images/placeholder-banner.jpg'"
-    class="w-100 h-100 object-fit-cover opacity-75" alt="Banner del juego">
+  <img [src]="game.portada || 'assets/images/placeholder-banner.jpg'" class="w-100 h-100 object-fit-cover opacity-75"
+    alt="Banner del juego">
 
   <div class="position-absolute top-0 start-0 w-100 h-100"
     style="background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);">
@@ -63,12 +63,22 @@
           @if (authService.esDuenio(game.idEmpresa)) {
           <div
             class="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded border-start border-4 border-primary">
+
             <div>
               <h6 class="fw-bold m-0 text-primary">Panel de Propietario</h6>
-              <small class="text-muted">Gestiona la información de tu juego.</small>
+              <small class="text-muted">Gestiona tu juego.</small>
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex align-items-center gap-3">
+
+              <div class="form-check form-switch d-flex align-items-center gap-2 border-end pe-3">
+                <input class="form-check-input" type="checkbox" role="switch" id="switchComentarios"
+                  [checked]="game.permiteComentariosJuegos" (change)="toggleComentarios()" [disabled]="modoEdicion">
+                <label class="form-check-label small fw-bold text-secondary" for="switchComentarios">
+                  Comentarios
+                </label>
+              </div>
+
               @if (!modoEdicion) {
               <button class="btn btn-primary px-4" (click)="activarEdicion()">
                 <i class="bi bi-pencil-square"></i> Editar
@@ -182,11 +192,11 @@
           <div class="text-center mb-4">
             @if (!modoEdicion) {
             <h2 class="display-5 fw-bold text-success mb-0">
-              {{ game.precio | currency:'USD' }}
+              {{ game.precio | currency:'GTQ' }}
             </h2>
             <small class="text-muted text-uppercase fw-bold">Pago Único</small>
             } @else {
-            <label class="form-label fw-bold text-success">Precio (USD)</label>
+            <label class="form-label fw-bold text-success">Precio (GTQ)</label>
             <input type="number" class="form-control form-control-lg text-center fw-bold" [(ngModel)]="game.precio">
             }
           </div>
@@ -267,7 +277,36 @@
 
     </div>
   </div>
-</div> }
+</div> 
+
+<div class="card shadow-sm border-0 mt-4">
+  <div class="card-header bg-white fw-bold py-3">
+    <i class="bi bi-chat-left-text"></i> Reseñas y Comentarios
+  </div>
+  <div class="card-body">
+
+    @if (game.permiteComentariosJuegos && game.permiteComentariosEmpresa) {
+
+      <div class="text-center text-muted py-4">
+        <em>Aquí aparecerán los comentarios de los usuarios.</em>
+        </div>
+
+    } @else {
+
+      <div class="alert alert-secondary text-center mb-0" role="alert">
+        <i class="bi bi-slash-circle me-2"></i>
+        
+        @if (!game.permiteComentariosEmpresa) {
+            Los comentarios están desactivados <strong>globalmente</strong> por la configuración de la empresa.
+        } @else {
+            Los comentarios han sido desactivados para este juego específico.
+        }
+      </div>
+
+    }
+  </div>
+</div>
+}
 
 <style>
   .text-shadow {

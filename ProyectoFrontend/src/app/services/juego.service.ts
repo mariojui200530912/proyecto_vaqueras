@@ -5,6 +5,7 @@ import { Juego } from '../models/juego/Juego';
 import { Banner } from '../models/banner/Banner';
 import { map } from 'rxjs/operators';
 import { Categoria } from '../models/categoria/Categoria';
+import { JuegoCreacion } from '../models/juego/JuegoCreacion';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,24 @@ export class JuegoService {
   juegosCatalogo = signal<Juego[]>([]);
   juegosDestacados = signal<Juego[]>([]);
   isLoading = signal<boolean>(true);
+
+  publicarJuego(idUsuario: number, datosJuego: JuegoCreacion, portada: File, galeria: File[]) {
+    const formData = new FormData();
+    formData.append('id_usuario', idUsuario.toString());
+    formData.append('datos', JSON.stringify(datosJuego));
+
+    if (portada) {
+      formData.append('portada', portada);
+    }
+
+    if (galeria && galeria.length > 0) {
+      galeria.forEach(archivo => {
+        formData.append('galeria', archivo);
+      });
+    }
+
+    return this.http.post(`${this.apiUrl}/juego`, formData);
+  }
   
   obtenerBanner() {
     return this.http.get<Banner[]>(`${this.apiUrl}/banner`);
@@ -56,7 +75,6 @@ export class JuegoService {
   actualizarDatosJuego(idJuego: number, idUsuario: number, datos: any) {
     const formData = new FormData();
     formData.append('idUsuario', idUsuario.toString());
-    // El backend espera un String JSON en el campo "datos"
     formData.append('datos', JSON.stringify(datos));
 
     return this.http.post(`${this.apiUrl}/${idJuego}/actualizar`, formData);
@@ -65,7 +83,7 @@ export class JuegoService {
   actualizarPortada(idJuego: number, archivo: File) {
     const formData = new FormData();
     formData.append('portada', archivo);
-    return this.http.put(`${this.apiUrl}/${idJuego}/actualizar/imagen`, formData);
+    return this.http.put(`${this.apiUrl}/juego/${idJuego}/actualizar/imagen`, formData);
   }
 
   obtenerCategoriasDeJuego(idJuego: number) {
@@ -104,6 +122,13 @@ export class JuegoService {
   cambiarEstadoJuego(idJuego: number, nuevoEstado: 'ACTIVO' | 'SUSPENDIDO') {
     const body = { estadoVenta: nuevoEstado };
     return this.http.patch(`${this.apiUrl}/juego/${idJuego}/estado`, body);
+  }
+
+  configurarComentarios(idJuego: number, permitir: boolean) {
+    const formData = new FormData();
+    formData.append('permitir', permitir.toString()); 
+    
+    return this.http.patch(`${this.apiUrl}/juego/${idJuego}/configuracion/comentarios`, formData);
   }
 
   // Método maestro para cargar todo al inicio

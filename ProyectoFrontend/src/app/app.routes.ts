@@ -3,7 +3,6 @@ import { LoginComponent } from './pages/auth/login/login.component';
 import { HomeComponent } from './pages/home/home.component';
 import { RegistroComponent } from './pages/auth/registro/registro.component';
 import { AdminDashboard } from './pages/admin/adminDashboard/admin-dashboard';
-import { adminGuard } from './guards/auth/admin-guard';
 import { ReporteComponent } from './pages/reportes/reporte.component';
 import { CategoriasComponent } from './pages/admin/categorias/categorias.component';
 import { DetalleJuegoComponent } from './pages/juego/detalle-juego/detalle-juego.component';
@@ -12,11 +11,13 @@ import { GestionComisionComponent } from './pages/admin/comision/gestion-comisio
 import { GestionEmpresaComponent } from './pages/admin/empresas/gestion-empresa.component';
 import { GestionUsuariosComponent } from './pages/admin/usuarios/gestion-usuarios.component';
 import { PerfilEmpresaComponent } from './pages/empresa/perfil-empresa/perfil-empresa.component';
+import { CrearJuegoComponent } from './pages/juego/crear-juego/crear-juego.component';
+import { authGuard, adminGuard, empresaGuard, publicGuard } from './guards/auth/auth-guard';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'registro', component: RegistroComponent },
+    { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
+    { path: 'registro', component: RegistroComponent, canActivate: [publicGuard] },
     {
         path: 'juego/:id',
         component: DetalleJuegoComponent
@@ -59,15 +60,20 @@ export const routes: Routes = [
     {
         path: 'empresa/reportes',
         component: ReporteComponent,
-        // canActivate: [empresaGuard] <--- Crear guard empresa
+        canActivate: [empresaGuard]
     },
     {
         path: 'mi-perfil/reportes',
         component: ReporteComponent,
-        // canActivate: [authGuard]
+        canActivate: [authGuard]
     },
     {
-        path: 'empresa/:id', 
+        path: 'empresa/:id',
         component: PerfilEmpresaComponent
+    },
+    {
+        path: 'empresa/juego/nuevo',
+        component: CrearJuegoComponent,
+        canActivate: [empresaGuard]
     }
 ];

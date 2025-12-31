@@ -71,6 +71,7 @@ export class DetalleJuegoComponent {
 
   cancelarEdicion() {
     this.modoEdicion = false;
+    this.nuevaPortada = null; 
     const currentId = this.juego()?.id;
     if (currentId) this.cargarJuego(currentId);
   }
@@ -87,6 +88,12 @@ export class DetalleJuegoComponent {
       recursosMinimos: j.recursosMinimos,
       clasificacion: j.clasificacion 
     };
+    if (!j.titulo || !j.precio || !j.descripcion) {
+        alert('Por favor, no dejes campos vacíos (Título, Precio, Descripción).');
+        return;
+    }
+
+    this.isUploading.set(true);
 
     this.juegoService.actualizarDatosJuego(j.id, user.id, datosActualizar).subscribe({
       next: () => {
@@ -94,6 +101,7 @@ export class DetalleJuegoComponent {
             this.juegoService.actualizarPortada(j.id, this.nuevaPortada).subscribe();
         }
         alert('Juego actualizado con éxito');
+        this.isUploading.set(false);
         this.modoEdicion = false;
         this.cargarJuego(j.id);
       },
@@ -163,6 +171,28 @@ export class DetalleJuegoComponent {
             this.isUploading.set(false);
             alert('Error: ' + e.message);
         }
+    });
+  }
+
+  toggleComentarios() {
+    const g = this.juego();
+    if (!g) return;
+
+    const nuevoEstado = !g.permiteComentariosJuegos;
+
+    this.juegoService.configurarComentarios(g.id, nuevoEstado).subscribe({
+      next: (res: any) => {
+        this.juego.update(current => {
+            if (!current) return null;
+            return { ...current, permiteComentariosJuegos: nuevoEstado };
+        });
+        alert('Configuración de comentarios actualizada');
+      },
+      error: (e) => {
+        console.error(e);
+        alert('Error al cambiar configuración: ' + (e.error?.mensaje || e.message));
+        this.cargarJuego(g.id); 
+      }
     });
   }
 }

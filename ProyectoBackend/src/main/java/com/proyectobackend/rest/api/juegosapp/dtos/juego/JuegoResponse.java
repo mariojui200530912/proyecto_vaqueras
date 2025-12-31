@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class JuegoResponse {
@@ -27,6 +26,8 @@ public class JuegoResponse {
     //Imagenes
     private String portada;
     private List<ImagenResponse> galeria;
+    private boolean permiteComentariosJuegos;
+    private boolean permiteComentariosEmpresa;
 
     public int getId() {
         return id;
@@ -138,5 +139,21 @@ public class JuegoResponse {
 
     public void setNombreEmpresa(String nombreEmpresa) {
         this.nombreEmpresa = nombreEmpresa;
+    }
+
+    public boolean getPermiteComentariosJuegos() {
+        return permiteComentariosJuegos;
+    }
+
+    public void setPermiteComentariosJuegos(boolean permiteComentariosJuegos) {
+        this.permiteComentariosJuegos = permiteComentariosJuegos;
+    }
+
+    public boolean getPermiteComentariosEmpresa() {
+        return permiteComentariosEmpresa;
+    }
+
+    public void setPermiteComentariosEmpresa(boolean permiteComentariosEmpresa) {
+        this.permiteComentariosEmpresa = permiteComentariosEmpresa;
     }
 }

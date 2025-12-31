@@ -9,6 +9,7 @@ public class JuegoRequest {
     private BigDecimal precio;
     private String recursosMinimos;
     private String clasificacion; // E, T, M
+    private boolean permiteComentariosJuegos;
     private List<Integer> categoriasIds;
 
     public String getTitulo() {
@@ -57,5 +58,13 @@ public class JuegoRequest {
 
     public void setCategoriasIds(List<Integer> categoriasIds) {
         this.categoriasIds = categoriasIds;
+    }
+
+    public boolean getPermiteComentariosJuegos() {
+        return permiteComentariosJuegos;
+    }
+
+    public void setPermiteComentariosJuegos(boolean permiteComentariosJuegos) {
+        this.permiteComentariosJuegos = permiteComentariosJuegos;
     }
 }
