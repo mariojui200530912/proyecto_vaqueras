@@ -34,7 +34,7 @@ public class CalificacionService {
                 juegoRepository.actualizarPromedioCalificacion(conn, idJuego, calificacionPromedio);
             }catch (Exception e){
                 conn.rollback();
-                throw new Exception("Error al calificar el juego");
+                throw new Exception("Error al calificar el juego: " + e.getMessage());
             }
         }
     }

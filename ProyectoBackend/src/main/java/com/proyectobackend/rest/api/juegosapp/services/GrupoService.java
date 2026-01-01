@@ -1,10 +1,12 @@
 package com.proyectobackend.rest.api.juegosapp.services;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.grupo.GrupoResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.grupo.JuegoGrupoResponse;
 import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
 import com.proyectobackend.rest.api.juegosapp.repositories.GrupoRepository;
 
 import java.sql.Connection;
+import java.util.List;
 
 public class GrupoService {
     private final GrupoRepository grupoRepo = new GrupoRepository();
@@ -98,6 +100,24 @@ public class GrupoService {
             }
 
             grupoRepo.eliminarMiembro(conn, idGrupo, idUsuarioAExpulsar);
+        }
+    }
+
+    public GrupoResponse obtenerGrupoPorUsuario(int idUsuario) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            Integer idGrupo = grupoRepo.obtenerIdGrupoDeUsuario(conn, idUsuario);
+
+            if (idGrupo == null) {
+                throw new Exception("Grupo no encontrado");
+            }
+            // Reutilizamos el metodo existente que ya carga miembros y detalles
+            return obtenerDetalleGrupo(idGrupo);
+        }
+    }
+
+    public List<JuegoGrupoResponse> listarJuegosParaPrestamo(int idGrupo, int idSolicitante) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            return grupoRepo.obtenerJuegosDelGrupo(conn, idGrupo, idSolicitante);
         }
     }
 }

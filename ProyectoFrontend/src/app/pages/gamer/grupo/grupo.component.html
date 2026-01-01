@@ -1,0 +1,215 @@
+<div class="container py-5">
+
+    @if (isLoading()) {
+    <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+    </div>
+    }
+
+    @else if (grupoService.miGrupo(); as grupo) {
+
+    <div class="card shadow-sm border-0 mb-4 bg-dark text-white">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h6 class="text-uppercase text-warning mb-1 fw-bold">Grupo Familiar</h6>
+                <h1 class="display-5 fw-bold mb-0">
+                    <i class="bi bi-people-fill me-2"></i> {{ grupo.nombre }}
+                </h1>
+                <p class="mb-0 text-light opacity-75">
+                    Admin ID: <span class="badge bg-secondary">{{ grupo.idCreador }}</span>
+                </p>
+            </div>
+
+            @if (esLider()) {
+            <button class="btn btn-outline-danger btn-sm" (click)="eliminarGrupo()">
+                <i class="bi bi-trash-fill"></i> Disolver Grupo
+            </button>
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 fw-bold">
+                    Miembros del Clan ({{ grupo.miembros.length }}/6)
+                </div>
+                <div class="list-group list-group-flush">
+                    @for (miembro of grupo.miembros; track miembro.id) {
+                    <div class="list-group-item d-flex align-items-center justify-content-between py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img [src]="miembro.avatar || 'assets/images/default-avatar.png'"
+                                class="rounded-circle border" style="width: 50px; height: 50px; object-fit: cover;">
+
+                            <div>
+                                <h6 class="mb-0 fw-bold">
+                                    {{ miembro.nickname }}
+                                    @if (miembro.id === authService.currentUser()?.id) {
+                                    <span class="badge bg-success ms-2">Tú</span>
+                                    }
+                                    @if (miembro.id === grupo.idCreador) {
+                                    <span class="badge bg-warning text-dark ms-1"><i class="bi bi-star-fill"></i>
+                                        Líder</span>
+                                    }
+                                </h6>
+                                <small class="text-muted">ID: {{ miembro.id }}</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            @if (esLider() && miembro.id !== authService.currentUser()?.id) {
+                            <button class="btn btn-outline-danger btn-sm" title="Expulsar"
+                                (click)="eliminarUsuario(miembro)">
+                                <i class="bi bi-person-x-fill"></i>
+                            </button>
+                            }
+
+                            @if (miembro.id === authService.currentUser()?.id) {
+                            <button class="btn btn-outline-secondary btn-sm" title="Salir del grupo"
+                                (click)="eliminarUsuario(miembro)">
+                                <i class="bi bi-door-open-fill"></i> Salir
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    } @empty {
+                    <div class="text-center py-4 text-muted">
+                        No hay miembros (esto es raro, debería estar el creador).
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="bi bi-person-plus-fill text-primary"></i> Invitar
+                        Miembro</h5>
+                    <p class="text-muted small">Ingresa el ID del usuario que deseas agregar a tu grupo familiar.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">ID de Usuario</label>
+                        <input type="number" class="form-control" [(ngModel)]="idNuevoMiembro" placeholder="Ej: 15">
+                    </div>
+
+                    <button class="btn btn-primary w-100 fw-bold"
+                        [disabled]="!idNuevoMiembro || grupo.miembros.length >= 6" (click)="agregarMiembro()">
+                        @if (grupo.miembros.length >= 6) {
+                        Grupo Lleno
+                        } @else {
+                        Enviar Invitación
+                        }
+                    </button>
+
+                    @if (grupo.miembros.length >= 6) {
+                    <div class="alert alert-warning mt-3 small">
+                        Has alcanzado el límite de 6 miembros.
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+    @if (grupoService.miGrupo()) {
+
+    <hr class="my-5 text-secondary">
+
+    <div class="d-flex align-items-center mb-4">
+        <h3 class="fw-bold mb-0 text-white">
+            <i class="bi bi-collection text-warning"></i> Librería del Clan
+        </h3>
+        <span class="badge bg-dark border ms-3">{{ juegosGrupo().length }} Juegos Disponibles</span>
+    </div>
+
+    @if (isLoadingJuegos()) {
+    <div class="d-flex justify-content-center py-4">
+        <div class="spinner-border text-light"></div>
+    </div>
+    } @else {
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @for (juego of juegosGrupo(); track juego.idJuego) {
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 bg-dark text-white border-secondary game-hover">
+
+                <div class="position-relative">
+                    <img [src]="juego.portada" class="card-img-top opacity-75"
+                        style="height: 160px; object-fit: cover;">
+
+                    <div class="position-absolute bottom-0 end-0 m-2">
+                        <img [src]="juego.avatarDueno"
+                            class="rounded-circle border border-2 border-warning shadow"
+                            style="width: 40px; height: 40px;" title="Pertenece a: {{ juego.nombreDueno }}">
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <h6 class="card-title text-truncate mb-1 fw-bold">{{ juego.titulo }}</h6>
+                    <small class="text-secondary d-block mb-3">
+                        De: <span class="text-warning">{{ juego.nombreDueno }}</span>
+                    </small>
+
+                    <button class="btn btn-primary btn-sm w-100 fw-bold" (click)="solicitarJuego(juego)">
+                        <i class="bi bi-box-arrow-in-down"></i> SOLICITAR
+                    </button>
+                </div>
+            </div>
+        </div>
+        } @empty {
+        <div class="col-12">
+            <div class="alert alert-dark text-center border-secondary">
+                <i class="bi bi-emoji-neutral fs-4 d-block mb-2"></i>
+                No hay juegos disponibles para pedir prestado en este momento.
+                <br><small class="text-muted">(O ya tienes todos los juegos de tus compañeros)</small>
+            </div>
+        </div>
+        }
+    </div>
+
+    }
+    }
+    }
+
+    @else {
+    <div class="row justify-content-center align-items-center py-5">
+        <div class="col-md-6 text-center">
+            <div class="mb-4">
+                <i class="bi bi-people fs-1 text-primary opacity-50" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold">Aún no tienes un grupo</h2>
+            <p class="text-muted mb-4">
+                Crea un grupo familiar para compartir tu biblioteca de juegos con tus amigos o familia.
+                <br>¡Hasta 6 miembros pueden unirse!
+            </p>
+
+            <div class="card shadow border-0 p-4 text-start">
+                <h5 class="fw-bold mb-3">Crear Nuevo Grupo</h5>
+                <form [formGroup]="crearForm" (ngSubmit)="crearGrupo()">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Grupo</label>
+                        <input type="text" class="form-control" formControlName="nombre"
+                            placeholder="Ej: Los Vengadores">
+                        @if (crearForm.get('nombre')?.invalid && crearForm.get('nombre')?.touched) {
+                        <div class="form-text text-danger">El nombre es requerido (min 3 letras).</div>
+                        }
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold" [disabled]="crearForm.invalid">
+                            <i class="bi bi-plus-circle"></i> Crear Grupo
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <p class="mt-4 small text-muted">
+                ¿Buscas unirte a uno? Pídele al administrador del grupo que te agregue usando tu ID:
+                <strong class="text-dark">{{ authService.currentUser()?.id }}</strong>
+            </p>
+        </div>
+    </div>
+    }
+
+</div>

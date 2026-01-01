@@ -1,10 +1,13 @@
 package com.proyectobackend.rest.api.juegosapp.repositories;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.grupo.GrupoResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.grupo.JuegoGrupoResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.prestamo.PrestamoResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.usuario.UsuarioResponse;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class GrupoRepository {
@@ -103,5 +106,58 @@ public class GrupoRepository {
                 return rs.next();
             }
         }
+    }
+
+    public Integer obtenerIdGrupoDeUsuario(Connection conn, int idUsuario) throws SQLException {
+        // Revisar si es miembro (tabla grupo_usuario)
+        String sqlMiembro = "SELECT id_grupo FROM grupo_usuario WHERE id_usuario = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sqlMiembro)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_grupo");
+            }
+        }
+        return null; // No tiene grupo
+    }
+
+    public List<JuegoGrupoResponse> obtenerJuegosDelGrupo(Connection conn, int idGrupo, int idSolicitante) throws SQLException {
+        List<JuegoGrupoResponse> lista = new ArrayList<>();
+
+        String sql = "SELECT j.id AS id_juego, j.titulo, " +
+                "u.id AS id_dueno, u.nickname, u.avatar, " +
+                "img.imagen AS portada_blob " +
+                "FROM grupo_usuario gu " +
+                "JOIN biblioteca b ON gu.id_usuario = b.id_usuario " +
+                "JOIN juego j ON b.id_juego = j.id " +
+                "JOIN usuario u ON b.id_usuario = u.id " +
+                "LEFT JOIN imagen_juego img ON j.id = img.id_juego AND img.atributo = 'PORTADA' " +
+                "WHERE gu.id_grupo = ? " +
+                "AND b.id_usuario != ?"; // Excluir al que consulta
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idGrupo);
+            ps.setInt(2, idSolicitante);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    JuegoGrupoResponse dto = new JuegoGrupoResponse();
+                    dto.setIdJuego(rs.getInt("id_juego"));
+                    dto.setTitulo(rs.getString("titulo"));
+                    dto.setIdDueno(rs.getInt("id_dueno"));
+                    dto.setNombreDueno(rs.getString("nickname"));
+
+                    // Imagen Portada
+                    byte[] imgBytes = rs.getBytes("portada_blob");
+                    if (imgBytes != null) dto.setPortada("data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imgBytes));
+
+                    // Avatar Dueño (Opcional)
+                    byte[] avatarBytes = rs.getBytes("avatar");
+                    if (avatarBytes != null) dto.setAvatarDueno("data:image/jpeg;base64," + Base64.getEncoder().encodeToString(avatarBytes));
+
+                    lista.add(dto);
+                }
+            }
+        }
+        return lista;
     }
 }

@@ -201,7 +201,7 @@
             }
           </div>
 
-          @if (authService.isGamer() && !modoEdicion) {
+          @if (authService.isGamer() && !modoEdicion && !tieneJuego()) {
           @if (cartService.estaEnCarrito(game.id)) {
           <button class="btn btn-success btn-lg py-3 shadow-sm" routerLink="/carrito">
             <i class="bi bi-cart-check-fill me-2"></i> Ver en Carrito
@@ -288,8 +288,15 @@
 
     @if (game.permiteComentariosJuegos && game.permiteComentariosEmpresa) {
 
-    <div class="text-center text-muted py-4">
-      <em>Aquí aparecerán los comentarios de los usuarios.</em>
+    <div class="container pb-5">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+          <app-comentario [idJuego]="game.id" [esPropietario]="tieneJuego()">
+          </app-comentario>
+
+        </div>
+      </div>
     </div>
 
     } @else {

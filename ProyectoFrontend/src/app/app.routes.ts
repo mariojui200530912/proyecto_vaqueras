@@ -16,6 +16,7 @@ import { authGuard, adminGuard, empresaGuard, publicGuard } from './guards/auth/
 import { TransaccionComponent } from './pages/transaccion/transaccion.component';
 import { CartComponent } from './pages/cart/cart.component';
 import { BibliotecaComponent } from './pages/gamer/biblioteca/biblioteca.component';
+import { GrupoComponent } from './pages/gamer/grupo/grupo.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -90,8 +91,12 @@ export const routes: Routes = [
         canActivate: [authGuard]
     },
     {
-        path: 'biblioteca',
+        path: 'usuario/biblioteca',
         component: BibliotecaComponent,
         canActivate: [authGuard]
-    },
+    },{
+        path: 'usuario/grupo',
+        component: GrupoComponent,
+        canActivate: [authGuard]
+    }
 ];

@@ -1,12 +1,16 @@
 package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.grupo.AgregarMiembro;
 import com.proyectobackend.rest.api.juegosapp.dtos.grupo.GrupoRequest;
 import com.proyectobackend.rest.api.juegosapp.dtos.grupo.GrupoResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.grupo.JuegoGrupoResponse;
 import com.proyectobackend.rest.api.juegosapp.services.GrupoService;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 @Path("/grupo")
 public class GrupoResource {
@@ -42,11 +46,11 @@ public class GrupoResource {
 
     //AGREGAR MIEMBRO
     @POST
-    @Path("/{id}/miembros")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response agregarMiembro(@PathParam("id") Integer idGrupo, @FormParam("idUsuario") Integer idUsuarioNuevo) {
+    @Path("/agregar/miembro")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response agregarMiembro(AgregarMiembro datos) {
         try {
-            grupoService.invitarUsuario(idGrupo, idUsuarioNuevo);
+            grupoService.invitarUsuario(datos.getIdGrupo(), datos.getIdUsuario());
             return Response.ok(new MensajeResponse("Usuario agregado al grupo.")).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -80,6 +84,35 @@ public class GrupoResource {
             return Response.ok(new MensajeResponse("Grupo familiar eliminado.")).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse(e.getMessage())).build();
+        }
+    }
+
+    @GET
+    @Path("/usuario/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerGrupoDeUsuario(@PathParam("id") Integer idUsuario) {
+        try {
+            GrupoResponse grupo = grupoService.obtenerGrupoPorUsuario(idUsuario);
+
+            return Response.ok(grupo).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error: " + e.getMessage())).build();
+        }
+    }
+
+    @GET
+    @Path("/{id}/juegos")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response verJuegosDelGrupo(
+            @PathParam("id") Integer idGrupo,
+            @QueryParam("idUsuario") Integer idSolicitante) {
+        try {
+            List<JuegoGrupoResponse> juegos = grupoService.listarJuegosParaPrestamo(idGrupo, idSolicitante);
+            return Response.ok(juegos).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new MensajeResponse(e.getMessage())).build();
         }
     }

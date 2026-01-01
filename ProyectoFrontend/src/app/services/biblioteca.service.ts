@@ -61,4 +61,8 @@ export class BibliotecaService {
       tap(() => this.cargarPrestamos(idUsuario))
     );
   }
+
+  tieneJuego(idUsuario: number, idJuego: number) {
+    return this.http.get<boolean>(`${this.apiUrl}/biblioteca/${idJuego}/usuario/${idUsuario}`);
+  }
 }

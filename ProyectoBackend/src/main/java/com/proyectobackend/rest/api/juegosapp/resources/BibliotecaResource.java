@@ -51,5 +51,22 @@ public class BibliotecaResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("/{idJuego}/usuario/{idUsuario}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response tieneUsuarioJuegoBiblioteca(
+            @PathParam("idJuego") Integer idJuego,
+            @PathParam("idUsuario") Integer idUsuario
+    ){
+        try {
+            boolean tieneJuego = bibliotecaService.verificarUsuarioTieneJuego(idUsuario, idJuego);
+            return Response.ok(tieneJuego).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al obtener si el usuario tiene el juego en biblioteca" + e.getMessage()))
+                    .build();
+        }
+    }
 }
 

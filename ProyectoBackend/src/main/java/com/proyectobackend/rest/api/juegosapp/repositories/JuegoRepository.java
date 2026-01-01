@@ -288,7 +288,7 @@ public class JuegoRepository {
     }
 
     public void actualizarPromedioCalificacion(Connection conn, int idJuego, BigDecimal calificacionPromedio) throws SQLException {
-        String sql = "UPDATE juego SET calificacion_promedio = ? WHERE id_juego = ?";
+        String sql = "UPDATE juego SET calificacion_promedio = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setBigDecimal(1, calificacionPromedio);
             ps.setInt(2, idJuego);

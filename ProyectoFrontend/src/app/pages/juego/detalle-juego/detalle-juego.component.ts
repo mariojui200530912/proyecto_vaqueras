@@ -9,10 +9,12 @@ import { FormsModule } from '@angular/forms';
 import { ModeracionCategoriasComponent } from '../../admin/moderacion-categorias/moderacion-categorias.component';
 import { RouterModule } from '@angular/router';
 import { CartService } from '../../../services/cart.service';
+import { ComentarioComponent } from "../../gamer/comentario/comentario.component";
+import { BibliotecaService } from '../../../services/biblioteca.service';
 
 @Component({
   selector: 'app-detalle-juego.component',
-  imports: [CommonModule, FormsModule, RouterModule, ModeracionCategoriasComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ModeracionCategoriasComponent, ComentarioComponent],
   templateUrl: './detalle-juego.component.html',
   styleUrl: './detalle-juego.component.css',
 })
@@ -22,9 +24,11 @@ export class DetalleJuegoComponent {
   private juegoService = inject(JuegoService);
   public authService = inject(AuthService);
   public cartService = inject(CartService);
+  public bibliotecaService = inject(BibliotecaService);
 
   // ESTADO
   juego = signal<Juego | null>(null);
+  tieneJuego = signal<boolean>(false);
   isLoading = signal<boolean>(true);
   modoEdicion = false; // Controla si mostramos Inputs o Textos
   // Para subida de archivos
@@ -40,28 +44,42 @@ export class DetalleJuegoComponent {
 
       if (id && !isNaN(id) && id > 0) {
         this.cargarJuego(id);
+        this.verificarTieneJuego(id);
       } else {
         console.error('ID inválido');
         this.isLoading.set(false); // Detener carga si no hay ID
         this.router.navigate(['/']);
       }
     });
+    
   }
 
   cargarJuego(id: number) {
-    // Usar .set() para signals
     this.isLoading.set(true); 
 
     this.juegoService.obtenerJuegoPorId(id).subscribe({
       next: (data) => {
         this.juego.set(data);
-        this.isLoading.set(false); // Angular ahora SÍ detectará esto
+        this.isLoading.set(false); 
       },
       error: (e) => {
         console.error('Error cargando juego:', e);
         this.isLoading.set(false); // Detener spinner aunque falle
         alert('Juego no encontrado o error de conexión');
         this.router.navigate(['/']);
+      }
+    });
+  }
+
+  verificarTieneJuego(idJuego: number) {
+    this.bibliotecaService.tieneJuego(
+      this.authService.currentUser()?.id || 0,
+      idJuego
+    ).subscribe({
+      next: (tiene) => this.tieneJuego.set(tiene),
+      error: (e) => {
+        console.error('Error verificando si el usuario tiene el juego:', e.error?.mensaje);
+        this.tieneJuego.set(false);
       }
     });
   }

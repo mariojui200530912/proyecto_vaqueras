@@ -1,0 +1,115 @@
+<div class="card shadow-sm border-0 mt-4">
+  <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-chat-dots-fill text-primary"></i> Reseñas y Comentarios</span>
+    <span class="badge bg-light text-dark border">{{ comentarios().length }} Hilos</span>
+  </div>
+  
+  <div class="card-body">
+
+    <div class="mb-4 text-center border-bottom pb-4">
+      <h5 class="fw-bold mb-3">Califica este juego</h5>
+      <div class="d-flex justify-content-center gap-2 mb-3">
+        @for (star of [1,2,3,4,5]; track star) {
+          <i class="bi fs-2 cursor-pointer transition-transform"
+             [class.bi-star-fill]="star <= calificacionSeleccionada()"
+             [class.bi-star]="star > calificacionSeleccionada()"
+             [class.text-warning]="star <= calificacionSeleccionada()"
+             [class.text-muted]="star > calificacionSeleccionada()"
+             [class.disabled-stars]="!esPropietario"
+             (click)="setRating(star)">
+          </i>
+        }
+      </div>
+      @if (esPropietario) {
+        <button class="btn btn-outline-warning btn-sm fw-bold" 
+                (click)="enviarCalificacion()"
+                [disabled]="calificacionSeleccionada() === 0 || isSubmitting()">
+          Enviar Calificación
+        </button>
+      }
+    </div>
+
+    @if (esPropietario) {
+      <div class="d-flex gap-3 mb-5">
+        <img [src]="authService.currentUser()?.avatar || 'assets/images/default-avatar.png'" 
+             class="rounded-circle border" style="width: 45px; height: 45px; object-fit: cover;">
+        
+        <div class="flex-grow-1">
+          <textarea class="form-control" rows="2" 
+                    placeholder="Escribe tu opinión..." 
+                    [(ngModel)]="nuevoComentario"></textarea>
+          <div class="text-end mt-2">
+            <button class="btn btn-primary btn-sm" 
+                    (click)="enviarComentarioRaiz()"
+                    [disabled]="!nuevoComentario().trim() || isSubmitting()">
+              Publicar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="text-center py-3"><div class="spinner-border text-primary"></div></div>
+    } @else {
+      <div class="d-flex flex-column gap-3">
+        @for (comentario of comentarios(); track comentario.id) {
+          <ng-container *ngTemplateOutlet="commentTemplate; context: { $implicit: comentario }"></ng-container>
+        }
+        
+        @if (comentarios().length === 0) {
+          <div class="text-center text-muted py-3">
+            Sé el primero en opinar sobre este juego.
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<ng-template #commentTemplate let-c>
+  <div class="d-flex gap-3">
+    <img [src]="c.usuarioAvatarUrl || 'assets/images/default-avatar.png'" 
+         class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+    
+    <div class="flex-grow-1">
+      <div class="bg-light p-3 rounded-3 position-relative">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <h6 class="fw-bold mb-0 text-dark">{{ c.usuarioNickname }}</h6>
+          <small class="text-muted" style="font-size: 0.75rem;">{{ c.fecha }}</small>
+        </div>
+        <p class="mb-0 text-secondary" style="font-size: 0.95rem;">{{ c.comentario }}</p>
+      </div>
+
+      <div class="mt-1 mb-2 ms-2">
+        @if (esPropietario) {
+          <button class="btn btn-link btn-sm text-decoration-none p-0 text-muted small fw-bold" 
+                  (click)="responder(c)">
+            {{ c.isReplying ? 'Cancelar' : 'Responder' }}
+          </button>
+        }
+      </div>
+
+      @if (c.isReplying) {
+        <div class="d-flex gap-2 mb-3 ms-2 animate-fade-in">
+          <input type="text" class="form-control form-control-sm" 
+                 placeholder="Escribe una respuesta..." 
+                 [(ngModel)]="c.replyText"
+                 (keyup.enter)="enviarRespuesta(c)">
+          <button class="btn btn-sm btn-primary" (click)="enviarRespuesta(c)">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </div>
+      }
+
+      @if (c.respuestas && c.respuestas.length > 0) {
+        <div class="ms-4 mt-3 border-start border-2 ps-3 d-flex flex-column gap-3">
+          @for (respuesta of c.respuestas; track respuesta.id) {
+            <ng-container *ngTemplateOutlet="commentTemplate; context: { $implicit: respuesta }"></ng-container>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>
