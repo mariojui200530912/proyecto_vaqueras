@@ -13,6 +13,9 @@ import { GestionUsuariosComponent } from './pages/admin/usuarios/gestion-usuario
 import { PerfilEmpresaComponent } from './pages/empresa/perfil-empresa/perfil-empresa.component';
 import { CrearJuegoComponent } from './pages/juego/crear-juego/crear-juego.component';
 import { authGuard, adminGuard, empresaGuard, publicGuard } from './guards/auth/auth-guard';
+import { TransaccionComponent } from './pages/transaccion/transaccion.component';
+import { CartComponent } from './pages/cart/cart.component';
+import { BibliotecaComponent } from './pages/gamer/biblioteca/biblioteca.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -75,5 +78,20 @@ export const routes: Routes = [
         path: 'empresa/juego/nuevo',
         component: CrearJuegoComponent,
         canActivate: [empresaGuard]
-    }
+    },
+    {
+        path: 'transaccion',
+        component: TransaccionComponent,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'carrito',
+        component: CartComponent,
+        canActivate: [authGuard]
+    },
+    {
+        path: 'biblioteca',
+        component: BibliotecaComponent,
+        canActivate: [authGuard]
+    },
 ];

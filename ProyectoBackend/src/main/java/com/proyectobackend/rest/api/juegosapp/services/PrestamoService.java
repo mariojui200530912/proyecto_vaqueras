@@ -1,10 +1,13 @@
 package com.proyectobackend.rest.api.juegosapp.services;
 
+import com.proyectobackend.rest.api.juegosapp.dtos.biblioteca.BibliotecaResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.prestamo.PrestamoResponse;
 import com.proyectobackend.rest.api.juegosapp.repositories.BibliotecaRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
 import com.proyectobackend.rest.api.juegosapp.repositories.PrestamoRepository;
 
 import java.sql.Connection;
+import java.util.List;
 
 public class PrestamoService {
     private final PrestamoRepository prestamoRepo = new PrestamoRepository();
@@ -44,6 +47,10 @@ public class PrestamoService {
         } catch (Exception e) {
             throw new Exception("Error al prestar juego: " + e.getMessage());
         }
+    }
+
+    public List<PrestamoResponse> obtenerJuegosPrestados(int idUsuario) throws Exception {
+        return prestamoRepo.obtenerPrestamosUsuario(idUsuario);
     }
 
     // INSTALAR (AQUÍ APLICAMOS LA REGLA DE "UNO A LA VEZ")

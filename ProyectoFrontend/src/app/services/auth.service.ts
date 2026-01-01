@@ -84,4 +84,25 @@ export class AuthService {
     
     return false;
   }
+
+  actualizarUsuario(usuarioId: number) {
+    this.http.get<Usuario>(`${this.apiUrl}/${usuarioId}`).subscribe({
+      next: (usuarioActualizado) => {
+        this.currentUser.set(usuarioActualizado);
+        localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+      },
+      error: (err) => {
+        console.error('Error actualizando usuario:', err);
+      }
+    });
+  }
+
+  actualizarSaldo(nuevoSaldo: number) {
+    const usuarioActual = this.currentUser();
+    if (usuarioActual) {
+      const usuarioActualizado = { ...usuarioActual, carteraSaldo: nuevoSaldo };
+      this.currentUser.set(usuarioActualizado);
+      localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+    }
+  }
 }

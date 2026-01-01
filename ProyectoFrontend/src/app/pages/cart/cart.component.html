@@ -1,0 +1,185 @@
+<div class="bg-light border-bottom mb-4">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-5 fw-bold text-dark">
+          <i class="bi bi-cart3 text-primary"></i> Carrito de Compras
+        </h1>
+        <p class="lead text-muted">Estás a un paso de tu próxima aventura.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="badge bg-white text-dark shadow-sm border p-3 fs-6">
+          <i class="bi bi-joystick"></i> {{ cartService.count() }} Artículos
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  @if (mensajeExito()) {
+    <div class="alert alert-success d-flex align-items-center shadow-sm mb-4" role="alert">
+      <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+      <div>
+        <h5 class="alert-heading m-0">¡Compra Exitosa!</h5>
+        <p class="mb-0">{{ mensajeExito() }}</p>
+        <a routerLink="/biblioteca" class="btn btn-sm btn-success mt-2">Ir a mi Biblioteca</a>
+      </div>
+    </div>
+  }
+
+  @if (mensajeError()) {
+    <div class="alert alert-danger d-flex align-items-center shadow-sm mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+      <div>
+        <strong>Error:</strong> {{ mensajeError() }}
+        @if (mensajeError().includes('Saldo')) {
+          <a routerLink="/billetera" class="alert-link ms-2">Ir a Recargar</a>
+        }
+      </div>
+    </div>
+  }
+
+  @if (cartService.count() > 0) {
+    <div class="row g-4">
+      
+      <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th scope="col" class="ps-4 py-3">Juego</th>
+                    <th scope="col" class="py-3">Plataforma/Detalles</th>
+                    <th scope="col" class="text-end py-3">Precio</th>
+                    <th scope="col" class="text-end pe-4 py-3">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of cartService.obtenerItems()(); track item.id) {
+                    <tr>
+                      <td class="ps-4 py-3">
+                        <div class="d-flex align-items-center">
+                          <img [src]="getImagen(item.portada)" 
+                               class="rounded border me-3" 
+                               style="width: 60px; height: 60px; object-fit: cover;">
+                          <div>
+                            <h6 class="fw-bold mb-0 text-dark">
+                              <a [routerLink]="['/juego', item.id]" class="text-decoration-none text-dark hover-primary">
+                                {{ item.titulo }}
+                              </a>
+                            </h6>
+                            <small class="text-muted">{{ item.nombreEmpresa }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border">PC / Digital</span>
+                        <div class="small text-muted mt-1">Clasif: {{ item.clasificacion }}</div>
+                      </td>
+                      <td class="text-end fw-bold text-dark fs-5">
+                        {{ item.precio | currency:'GTQ' }}
+                      </td>
+                      <td class="text-end pe-4">
+                        <button class="btn btn-outline-danger btn-sm border-0" 
+                                (click)="cartService.remover(item.id)"
+                                title="Eliminar del carrito">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer bg-white d-flex justify-content-between py-3">
+            <button class="btn btn-outline-secondary btn-sm" (click)="cartService.limpiar()">
+              <i class="bi bi-trash3"></i> Vaciar Carrito
+            </button>
+            <a routerLink="/" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-plus-lg"></i> Seguir Comprando
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card shadow border-0 position-sticky" style="top: 20px;">
+          <div class="card-header bg-primary text-white fw-bold py-3">
+            <i class="bi bi-receipt"></i> Resumen del Pedido
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush mb-3">
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                Subtotal ({{ cartService.count() }} items)
+                <span>{{ cartService.total() | currency:'GTQ' }}</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                Impuestos
+                <span class="text-success">Gratis</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0 fw-bold fs-4">
+                TOTAL
+                <span class="text-primary">{{ cartService.total() | currency:'GTQ' }}</span>
+              </li>
+            </ul>
+
+            @if (authService.currentUser(); as user) {
+              <div class="mb-3 p-2 rounded border" 
+                   [class.bg-success-subtle]="user.carteraSaldo! >= cartService.total()"
+                   [class.bg-danger-subtle]="user.carteraSaldo! < cartService.total()">
+                <div class="d-flex justify-content-between small">
+                  <span>Tu Saldo:</span>
+                  <span class="fw-bold">{{ user.carteraSaldo | currency:'GTQ' }}</span>
+                </div>
+                @if (user.carteraSaldo! < cartService.total()) {
+                  <div class="text-danger small mt-1 fw-bold">
+                    <i class="bi bi-x-circle"></i> Saldo insuficiente
+                  </div>
+                }
+              </div>
+
+              <div class="d-grid gap-2">
+                <button class="btn btn-success btn-lg py-3 fw-bold shadow-sm" 
+                        (click)="realizarPago()"
+                        [disabled]="isProcessing() || user.carteraSaldo! < cartService.total()">
+                  @if (isProcessing()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span> Procesando...
+                  } @else {
+                    PAGAR AHORA
+                  }
+                </button>
+              </div>
+            } @else {
+              <div class="alert alert-warning small mb-3">
+                Debes iniciar sesión para completar tu compra.
+              </div>
+              <div class="d-grid">
+                <a routerLink="/login" class="btn btn-primary">Iniciar Sesión</a>
+              </div>
+            }
+
+          </div>
+          <div class="card-footer bg-light text-center small text-muted">
+             Transacción segura • Entrega digital inmediata
+          </div>
+        </div>
+      </div>
+    </div>
+
+  } @else {
+    <div class="text-center py-5">
+      <div class="mb-4">
+        <i class="bi bi-cart-x text-muted opacity-25" style="font-size: 5rem;"></i>
+      </div>
+      <h3 class="text-muted fw-bold">Tu carrito está vacío</h3>
+      <p class="text-muted mb-4">Parece que aún no has agregado juegos a tu colección.</p>
+      <a routerLink="/" class="btn btn-primary btn-lg px-5 shadow-sm">
+        Explorar Catálogo
+      </a>
+    </div>
+  }
+</div>

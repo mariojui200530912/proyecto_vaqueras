@@ -1,9 +1,15 @@
 package com.proyectobackend.rest.api.juegosapp.repositories;
 
+import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.prestamo.PrestamoResponse;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 public class PrestamoRepository {
     // CREAR EL REGISTRO DE PRÉSTAMO
@@ -26,6 +32,47 @@ public class PrestamoRepository {
             ps.setInt(2, idPrestamo);
             ps.executeUpdate();
         }
+    }
+
+    public List<PrestamoResponse> obtenerPrestamosUsuario(int idUsuario) throws SQLException {
+        List<PrestamoResponse> lista = new ArrayList<>();
+        // JOIN Triple: Juego -> Prestamo -> Imagen (Solo Portada)
+        String sql = "SELECT j.id, j.titulo, j.descripcion, j.clasificacion, img.imagen as portada_blob, p.id as idPrestamo, p.id_dueno, u.nickname, p.estado, p.fecha " +
+                "FROM juego j " +
+                "INNER JOIN prestamo p ON j.id = p.id_juego " +
+                "INNER JOIN usuario u ON p.id_dueno = u.id " +
+                "LEFT JOIN imagen_juego img ON j.id = img.id_juego AND img.atributo = 'PORTADA' " +
+                "WHERE p.id_beneficiario = ?";
+
+        try (Connection conn = DBConnection.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, idUsuario);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    PrestamoResponse pr = new PrestamoResponse();
+                    pr.setIdPrestamo(rs.getInt("idPrestamo"));
+                    pr.setIdJuego(rs.getInt("id"));
+                    pr.setTitulo(rs.getString("titulo"));
+                    pr.setDescripcion(rs.getString("descripcion"));
+                    pr.setClasificacion(rs.getString("clasificacion"));
+                    pr.setIdDueno(rs.getInt("id_dueno"));
+                    pr.setNicknameDueno(rs.getString("nickname"));
+                    pr.setEstado(rs.getString("estado"));
+                    pr.setFechaPrestamo(rs.getTimestamp("fecha").toLocalDateTime());
+
+                    // Conversión directa a Base64 para el Frontend
+                    byte[] bytes = rs.getBytes("portada_blob");
+                    if (bytes != null && bytes.length > 0) {
+                        pr.setPortada("data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes));
+                    }
+
+                    lista.add(pr);
+                }
+            }
+        }
+        return lista;
     }
 
     // FINALIZAR PRÉSTAMO (Borrar registro o mover a histórico)

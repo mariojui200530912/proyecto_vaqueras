@@ -114,7 +114,7 @@ public class UsuarioRepository {
             stmt.setBytes(7, usuario.getAvatar());
             stmt.setString(8, usuario.getRol().getValor());
             stmt.setString(9, usuario.getEstado().getValor());
-            stmt.setBigDecimal(10, usuario.getCartera_saldo());
+            stmt.setBigDecimal(10, usuario.getCarteraSaldo());
             stmt.setTimestamp(11, Timestamp.valueOf(usuario.getFechaCreacion()));
 
             int affectedRows = stmt.executeUpdate();

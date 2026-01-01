@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { RouterLink, RouterModule } from "@angular/router";
 import { CommonModule } from '@angular/common';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,5 +13,6 @@ import { CommonModule } from '@angular/common';
 })
 export class NavbarComponent {
   authService = inject(AuthService);
+  cartService = inject(CartService);
 
 }

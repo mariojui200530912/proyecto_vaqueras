@@ -30,7 +30,7 @@ public class UsuarioResponse {
     private String avatar;
     private Rol rol;
     private EstadoUsuario estado;
-    private BigDecimal cartera_saldo;
+    private BigDecimal carteraSaldo;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime fechaCreacion;
@@ -109,12 +109,12 @@ public class UsuarioResponse {
         this.estado = estado;
     }
 
-    public BigDecimal getCartera_saldo() {
-        return cartera_saldo;
+    public BigDecimal getCarteraSaldo() {
+        return carteraSaldo;
     }
 
-    public void setCartera_saldo(BigDecimal cartera_saldo) {
-        this.cartera_saldo = cartera_saldo;
+    public void setCartera_saldo(BigDecimal carteraSaldo) {
+        this.carteraSaldo = carteraSaldo;
     }
 
     public LocalDateTime getFechaCreacion() {

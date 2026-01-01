@@ -1,6 +1,7 @@
 package com.proyectobackend.rest.api.juegosapp.resources;
 
 import com.proyectobackend.rest.api.juegosapp.dtos.MensajeResponse;
+import com.proyectobackend.rest.api.juegosapp.dtos.biblioteca.BibliotecaResponse;
 import com.proyectobackend.rest.api.juegosapp.dtos.juego.JuegoResponse;
 import com.proyectobackend.rest.api.juegosapp.services.BibliotecaService;
 import jakarta.ws.rs.*;
@@ -23,7 +24,7 @@ public class BibliotecaResource {
 
             int idUsuarioLogueado = id;
 
-            List<JuegoResponse> misJuegos = bibliotecaService.obtenerMisJuegos(idUsuarioLogueado);
+            List<BibliotecaResponse> misJuegos = bibliotecaService.obtenerMisJuegos(idUsuarioLogueado);
             return Response.ok(misJuegos).build();
 
         } catch (Exception e) {
@@ -32,4 +33,23 @@ public class BibliotecaResource {
                     .build();
         }
     }
+
+    @PUT
+    @Path("/{idJuego}/instalar/{idUsuario}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response instalarJuegoBiblioteca(
+            @PathParam("idJuego") Integer idJuego,
+            @PathParam("idUsuario") Integer idUsuario,
+            @QueryParam("instalar") boolean instalar
+    ){
+        try {
+            bibliotecaService.cambiarEstadoInstalacion(idUsuario, idJuego, instalar);
+            return Response.ok(new MensajeResponse("Estado actualizado exitosamente")).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error al instalar juego: " + e.getMessage()))
+                    .build();
+        }
+    }
 }
+

@@ -24,6 +24,7 @@ CREATE TABLE usuario (
     rol VARCHAR(10) NOT NULL, -- ENUM('ADMIN', 'EMPRESA', 'GAMER')
     estado VARCHAR(10) DEFAULT 'ACTIVO', -- ENUM('ACTIVO', 'BLOQUEADO')
     cartera_saldo DECIMAL(10, 2) DEFAULT 0.00,
+    biblioteca_publica BOOLEAN DEFAULT TRUE,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -118,7 +119,7 @@ CREATE TABLE transaccion (
     tipo VARCHAR(20) NOT NULL, -- ENUM('RECARGA', 'COMPRA')
     id_venta INT NULL, -- NULLABLE: Clave para diferenciar recargas de compras
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
-    FOREIGN KEY (id_venta) REFERENCES venta(id)
+    FOREIGN KEY (id_venta) REFERENCES venta(id) ON DELETE CASCADE
 );
 
 -- 4. MÓDULO DE BIBLIOTECA Y SOCIAL

@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModeracionCategoriasComponent } from '../../admin/moderacion-categorias/moderacion-categorias.component';
 import { RouterModule } from '@angular/router';
+import { CartService } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-detalle-juego.component',
@@ -20,6 +21,7 @@ export class DetalleJuegoComponent {
   private router = inject(Router);
   private juegoService = inject(JuegoService);
   public authService = inject(AuthService);
+  public cartService = inject(CartService);
 
   // ESTADO
   juego = signal<Juego | null>(null);
@@ -195,4 +197,14 @@ export class DetalleJuegoComponent {
       }
     });
   }
+
+  agregarAlCarrito(juego: Juego) {
+  const agregado = this.cartService.agregar(juego);
+  if (agregado) {
+    // Opcional: Mostrar un Toast o alerta pequeña
+    alert('Juego agregado al carrito'); 
+  } else {
+    alert('Este juego ya está en tu carrito');
+  }
+}
 }

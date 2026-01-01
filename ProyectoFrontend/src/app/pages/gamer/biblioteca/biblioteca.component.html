@@ -1,0 +1,154 @@
+<div class="bg-light border-bottom mb-4">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <h1 class="display-5 fw-bold text-dark">
+          <i class="bi bi-collection-play text-primary"></i> Mi Biblioteca
+        </h1>
+        <p class="lead text-muted">Gestiona el espacio en disco de tus juegos y préstamos.</p>
+        
+        <div class="d-flex gap-2 mt-2">
+          <span class="badge bg-success bg-opacity-75 fs-6">
+            {{ bibliotecaService.miBiblioteca().length }} Propios
+          </span>
+          <span class="badge bg-warning text-dark bg-opacity-75 fs-6">
+            {{ bibliotecaService.misPrestamos().length }} Prestados
+          </span>
+        </div>
+      </div>
+
+      <div class="col-md-5 mt-4 mt-md-0 text-md-end">
+        <div class="btn-group shadow-sm">
+          <button class="btn px-4" [class.btn-dark]="filtroActual() === 'TODOS'" [class.btn-outline-dark]="filtroActual() !== 'TODOS'" (click)="filtroActual.set('TODOS')">Todo</button>
+          <button class="btn px-4" [class.btn-success]="filtroActual() === 'PROPIOS'" [class.btn-outline-success]="filtroActual() !== 'PROPIOS'" (click)="filtroActual.set('PROPIOS')">Míos</button>
+          <button class="btn px-4" [class.btn-warning]="filtroActual() === 'PRESTADOS'" [class.btn-outline-warning]="filtroActual() !== 'PRESTADOS'" (click)="filtroActual.set('PRESTADOS')">Prestados</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+  @if (isLoading()) {
+    <div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else {
+
+    @if (filtroActual() === 'TODOS' || filtroActual() === 'PROPIOS') {
+      @if (filtroActual() === 'TODOS' && bibliotecaService.miBiblioteca().length > 0) {
+        <h4 class="fw-bold mb-4 border-start border-4 border-success ps-3 text-uppercase"><i class="bi bi-box-seam"></i> Colección Personal</h4>
+      }
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+        @for (juego of bibliotecaService.miBiblioteca(); track juego.idBiblioteca) {
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 game-card">
+              
+              <div class="position-relative">
+                <img [src]="juego.portada" class="card-img-top" 
+                     [class.grayscale]="juego.estado !== 'INSTALADO'"
+                     style="height: 180px; object-fit: cover;">
+                
+                <div class="position-absolute top-0 end-0 m-2">
+                  @if (juego.estado === 'INSTALADO') {
+                    <span class="badge bg-success shadow"><i class="bi bi-hdd-fill"></i> INSTALADO</span>
+                  } @else {
+                    <span class="badge bg-secondary shadow"><i class="bi bi-cloud"></i> NUBE</span>
+                  }
+                </div>
+              </div>
+
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-truncate mb-1">{{ juego.titulo }}</h5>
+                <small class="text-muted mb-2">Adquirido: {{ juego.fechaAdquisicion | date:'dd/MM/yyyy' }}</small>
+                
+                <div class="mt-auto">
+                  <div class="d-grid gap-2">
+                    @if (juego.estado === 'INSTALADO') {
+                      <button class="btn btn-success btn-sm fw-bold">
+                        <i class="bi bi-play-fill"></i> JUGAR
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" 
+                              (click)="onDesinstalarPropio(juego)"
+                              [disabled]="processingId() === juego.idJuego">
+                        <i class="bi bi-trash"></i> Desinstalar
+                      </button>
+                    } @else {
+                      <button class="btn btn-primary btn-sm fw-bold"
+                              (click)="onInstalarPropio(juego)"
+                              [disabled]="processingId() === juego.idJuego">
+                         @if (processingId() === juego.idJuego) {
+                           <span class="spinner-border spinner-border-sm"></span>
+                         } @else {
+                           <i class="bi bi-download"></i> INSTALAR
+                         }
+                      </button>
+                    }
+                    <a [routerLink]="['/juego', juego.idJuego]" class="btn btn-link btn-sm text-decoration-none">Ver Ficha</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      @if (bibliotecaService.miBiblioteca().length === 0 && filtroActual() === 'PROPIOS') {
+         <div class="alert alert-light text-center border">No tienes juegos comprados.</div>
+      }
+    }
+
+    @if (filtroActual() === 'TODOS' || filtroActual() === 'PRESTADOS') {
+      @if (filtroActual() === 'TODOS' && bibliotecaService.misPrestamos().length > 0) {
+        <h4 class="fw-bold mb-4 border-start border-4 border-warning ps-3 text-uppercase"><i class="bi bi-share"></i> Juegos Prestados</h4>
+      }
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @for (prestamo of bibliotecaService.misPrestamos(); track prestamo.idPrestamo) {
+          <div class="col">
+            <div class="card h-100 shadow-sm border-warning border-opacity-50 game-card">
+              
+              <div class="position-relative">
+                <img [src]="prestamo.portada" class="card-img-top" 
+                     [class.grayscale]="prestamo.estado !== 'INSTALADO'"
+                     style="height: 180px; object-fit: cover;">
+                
+                <div class="position-absolute top-0 end-0 m-2">
+                  @if (prestamo.estado === 'INSTALADO') {
+                    <span class="badge bg-success shadow"><i class="bi bi-hdd-fill"></i> INSTALADO</span>
+                  } @else {
+                    <span class="badge bg-dark shadow"><i class="bi bi-cloud"></i> NUBE</span>
+                  }
+                </div>
+              </div>
+
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-truncate">{{ prestamo.titulo }}</h5>
+                
+                <div class="alert alert-warning py-1 px-2 mb-3 d-flex align-items-center gap-2 border-0 bg-opacity-10 small">
+                  <i class="bi bi-person-circle text-warning"></i>
+                  <span class="text-truncate">Dueño: <strong>{{ prestamo.nombreDueno }}</strong></span>
+                </div>
+
+                <div class="mt-auto d-grid gap-2">
+                  @if (prestamo.estado === 'INSTALADO') {
+                    <button class="btn btn-success btn-sm fw-bold"><i class="bi bi-controller"></i> JUGAR</button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="onDesinstalarPrestado(prestamo)" [disabled]="processingId() === prestamo.idJuego">
+                       <i class="bi bi-hdd-network"></i> Desinstalar
+                    </button>
+                  } @else {
+                    <button class="btn btn-warning btn-sm fw-bold text-dark" (click)="onInstalarPrestado(prestamo)" [disabled]="processingId() === prestamo.idJuego">
+                      @if (processingId() === prestamo.idJuego) { <span class="spinner-border spinner-border-sm"></span> } @else { <i class="bi bi-download"></i> INSTALAR }
+                    </button>
+                    <button class="btn btn-link btn-sm text-danger text-decoration-none" (click)="onDevolver(prestamo)">Devolver</button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      @if (bibliotecaService.misPrestamos().length === 0 && filtroActual() === 'PRESTADOS') {
+        <div class="alert alert-light text-center border">No tienes préstamos activos.</div>
+     }
+    }
+  }
+</div>

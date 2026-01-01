@@ -235,7 +235,7 @@ public class UsuarioService {
             response.setRolEmpresa(usuarioEmpresa.getRol_empresa());
         }
         response.setEstado(usuario.getEstado());
-        response.setCartera_saldo(usuario.getCartera_saldo());
+        response.setCartera_saldo(usuario.getCarteraSaldo());
         response.setFechaCreacion(usuario.getFechaCreacion());
 
         return response;

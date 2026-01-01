@@ -43,49 +43,47 @@
 }
 
 @if (juegoService.juegosDestacados().length > 0) {
-  <div class="container my-5">
+<div class="container my-5">
     <div class="d-flex align-items-center mb-4">
-      <h3 class="fw-bold mb-0 text-warning">
-        <i class="bi bi-trophy-fill"></i> Recomendados de la Comunidad
-      </h3>
-      <span class="badge bg-secondary ms-2">Top Balance</span>
+        <h3 class="fw-bold mb-0 text-warning">
+            <i class="bi bi-trophy-fill"></i> Recomendados de la Comunidad
+        </h3>
+        <span class="badge bg-secondary ms-2">Top Balance</span>
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-      @for (juego of juegoService.juegosDestacados(); track juego.id) {
+        @for (juego of juegoService.juegosDestacados(); track juego.id) {
         <div class="col">
-          <div class="card h-100 border-warning border-2 shadow hover-effect">
-            
-            <div class="position-absolute top-0 start-0 m-2">
-                <span class="badge bg-warning text-dark fw-bold shadow-sm">
-                    <i class="bi bi-fire"></i> HOT
-                </span>
-            </div>
+            <div class="card h-100 border-warning border-2 shadow hover-effect">
 
-            <img [src]="juego.portada || 'assets/images/placeholder.jpg'" 
-                 class="card-img-top" 
-                 style="height: 180px; object-fit: cover;" 
-                 [alt]="juego.titulo">
-            
-            <div class="card-body">
-              <h5 class="card-title fw-bold text-truncate">{{ juego.titulo }}</h5>
-              
-              <div class="text-warning mb-2">
-                <i class="bi bi-star-fill"></i> {{ juego.calificacionPromedio }} / 5.0
-              </div>
+                <div class="position-absolute top-0 start-0 m-2">
+                    <span class="badge bg-warning text-dark fw-bold shadow-sm">
+                        <i class="bi bi-fire"></i> HOT
+                    </span>
+                </div>
 
-              <div class="d-flex justify-content-between align-items-center mt-3">
-                 <span class="fw-bold fs-5">{{ juego.precio | currency:'GTQ' }}</span>
-                 <button class="btn btn-warning btn-sm fw-bold" [routerLink]="['/juego', juego.id]">
-                    Ver Más
-                 </button>
-              </div>
+                <img [src]="juego.portada || 'assets/images/placeholder.jpg'" class="card-img-top"
+                    style="height: 180px; object-fit: cover;" [alt]="juego.titulo">
+
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-truncate">{{ juego.titulo }}</h5>
+
+                    <div class="text-warning mb-2">
+                        <i class="bi bi-star-fill"></i> {{ juego.calificacionPromedio }} / 5.0
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fw-bold fs-5">{{ juego.precio | currency:'GTQ' }}</span>
+                        <button class="btn btn-warning btn-sm fw-bold" [routerLink]="['/juego', juego.id]">
+                            Ver Más
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      }
+        }
     </div>
-  </div>
+</div>
 }
 
 <div class="container mb-5">
@@ -120,9 +118,15 @@
                 </div>
 
                 <div class="card-footer bg-transparent border-top-0">
-                    <button class="btn btn-primary w-100">
+                    @if (cartService.estaEnCarrito(juego.id)) {
+                    <button class="btn btn-success w-100" routerLink="/carrito">
+                        <i class="bi bi-check-lg"></i> En Carrito (Ver)
+                    </button>
+                    } @else {
+                    <button class="btn btn-primary w-100" (click)="agregarAlCarrito(juego)">
                         <i class="bi bi-cart-plus"></i> Agregar
                     </button>
+                    }
                 </div>
 
             </div>

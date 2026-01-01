@@ -86,7 +86,7 @@ public class VentaService {
             } else {
                 porcentajeAplicar = configuracionRepository.obtenerComisionGlobal();
             }
-            BigDecimal montoComision = juego.getPrecio().multiply(porcentajeAplicar);
+            BigDecimal montoComision = juego.getPrecio().multiply(porcentajeAplicar.divide(BigDecimal.valueOf(100)));
             BigDecimal gananciaEmpresa = juego.getPrecio().subtract(montoComision);
 
             // Ejecutar Transacción

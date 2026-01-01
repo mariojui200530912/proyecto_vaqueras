@@ -1,0 +1,138 @@
+<div class="bg-light border-bottom mb-4">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-5 fw-bold text-dark">
+          <i class="bi bi-wallet2 text-primary"></i> Mi Billetera
+        </h1>
+        <p class="lead text-muted">Gestiona tu saldo y revisa tus movimientos.</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="p-3 bg-white rounded shadow-sm border d-inline-block text-start">
+          <small class="text-muted fw-bold text-uppercase">Saldo Actual</small>
+          <div class="fs-2 fw-bold text-success">{{ user()?.carteraSaldo || 0 | currency:'GTQ' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+  
+  <div class="row g-4">
+    
+    <div class="col-lg-4">
+      <h4 class="fw-bold mb-3 border-start border-4 border-primary ps-3">Recargar Saldo</h4>
+      
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <i class="bi bi-cash-coin fs-1 text-success"></i>
+            <h5 class="card-title fw-bold mt-2">Añadir Fondos</h5>
+            <p class="card-text small text-muted">El saldo se acreditará inmediatamente.</p>
+          </div>
+
+          <form [formGroup]="recargaForm" (ngSubmit)="onRecargar()">
+            <div class="mb-3">
+              <label class="form-label fw-bold small">Monto a recargar</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0">Q</span>
+                <input type="number" 
+                       class="form-control border-start-0 ps-0" 
+                       formControlName="monto" 
+                       placeholder="0.00">
+              </div>
+              @if (recargaForm.get('monto')?.invalid && recargaForm.get('monto')?.touched) {
+                <div class="form-text text-danger small">
+                  <i class="bi bi-exclamation-circle"></i> Ingresa un monto válido mayor a 0.
+                </div>
+              }
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" 
+                      class="btn btn-primary fw-bold py-2"
+                      [disabled]="recargaForm.invalid || isLoading()">
+                @if (isLoading()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span> Procesando...
+                } @else {
+                  Confirmar Recarga
+                }
+              </button>
+            </div>
+          </form>
+
+          @if (mensajeEstado()) {
+            <div class="alert mt-3 mb-0 py-2 small" 
+                 [class.alert-success]="!esError()" 
+                 [class.alert-danger]="esError()">
+              <i class="bi" [class.bi-check-circle-fill]="!esError()" [class.bi-x-circle-fill]="esError()"></i>
+              {{ mensajeEstado() }}
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0 border-start border-4 border-warning ps-3">Historial de Movimientos</h4>
+        <button class="btn btn-sm btn-outline-secondary" (click)="cargarHistorial()" title="Actualizar">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+      </div>
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th scope="col" class="ps-4">ID</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col" class="text-end pe-4">Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of historial(); track item.id) {
+                  <tr>
+                    <td class="ps-4 text-muted small">#{{ item.id }}</td>
+                    <td>
+                      <i class="bi bi-calendar3 me-1 text-muted"></i>
+                      {{ item.fecha }} 
+                      </td>
+                    <td>
+                      @if (item.tipo === 'RECARGA') {
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                          <i class="bi bi-arrow-up-circle-fill"></i> Recarga
+                        </span>
+                      } @else {
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary">
+                          <i class="bi bi-bag-check-fill"></i> Compra
+                        </span>
+                      }
+                    </td>
+                    <td class="text-end pe-4 fw-bold" 
+                        [class.text-success]="item.tipo === 'RECARGA'"
+                        [class.text-dark]="item.tipo !== 'RECARGA'">
+                      {{ item.tipo === 'RECARGA' ? '+' : '' }} {{ item.monto | currency:'GTQ' }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">
+                      <div class="mb-2"><i class="bi bi-receipt-cutoff fs-1 opacity-25"></i></div>
+                      <p class="mb-0">No tienes transacciones registradas.</p>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

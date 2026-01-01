@@ -9,6 +9,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Path("/transaccion")
@@ -28,7 +29,7 @@ public class TransaccionResource {
 
             int idUsuarioLogueado = request.getIdUsuario();
 
-            MensajeResponse respuesta = transaccionService.recargarSaldo(idUsuarioLogueado, request);
+            BigDecimal respuesta = transaccionService.recargarSaldo(idUsuarioLogueado, request);
             return Response.ok(respuesta).build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)

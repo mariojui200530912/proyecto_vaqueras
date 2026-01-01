@@ -202,14 +202,15 @@
           </div>
 
           @if (authService.isGamer() && !modoEdicion) {
-          <div class="d-grid gap-2">
-            <button class="btn btn-success btn-lg py-3 shadow-sm hover-scale">
-              <i class="bi bi-cart-fill me-2"></i> Comprar Ahora
-            </button>
-            <button class="btn btn-outline-secondary">
-              <i class="bi bi-gift"></i> Regalar
-            </button>
-          </div>
+          @if (cartService.estaEnCarrito(game.id)) {
+          <button class="btn btn-success btn-lg py-3 shadow-sm" routerLink="/carrito">
+            <i class="bi bi-cart-check-fill me-2"></i> Ver en Carrito
+          </button>
+          } @else {
+          <button class="btn btn-primary btn-lg py-3 shadow-sm hover-scale" (click)="agregarAlCarrito(game)">
+            <i class="bi bi-cart-plus-fill me-2"></i> Agregar al Carrito
+          </button>
+          }
           }
 
           <hr class="my-4">
@@ -277,7 +278,7 @@
 
     </div>
   </div>
-</div> 
+</div>
 
 <div class="card shadow-sm border-0 mt-4">
   <div class="card-header bg-white fw-bold py-3">
@@ -287,21 +288,21 @@
 
     @if (game.permiteComentariosJuegos && game.permiteComentariosEmpresa) {
 
-      <div class="text-center text-muted py-4">
-        <em>Aquí aparecerán los comentarios de los usuarios.</em>
-        </div>
+    <div class="text-center text-muted py-4">
+      <em>Aquí aparecerán los comentarios de los usuarios.</em>
+    </div>
 
     } @else {
 
-      <div class="alert alert-secondary text-center mb-0" role="alert">
-        <i class="bi bi-slash-circle me-2"></i>
-        
-        @if (!game.permiteComentariosEmpresa) {
-            Los comentarios están desactivados <strong>globalmente</strong> por la configuración de la empresa.
-        } @else {
-            Los comentarios han sido desactivados para este juego específico.
-        }
-      </div>
+    <div class="alert alert-secondary text-center mb-0" role="alert">
+      <i class="bi bi-slash-circle me-2"></i>
+
+      @if (!game.permiteComentariosEmpresa) {
+      Los comentarios están desactivados <strong>globalmente</strong> por la configuración de la empresa.
+      } @else {
+      Los comentarios han sido desactivados para este juego específico.
+      }
+    </div>
 
     }
   </div>

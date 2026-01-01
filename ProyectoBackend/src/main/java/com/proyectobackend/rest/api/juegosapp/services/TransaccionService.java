@@ -16,7 +16,8 @@ public class TransaccionService {
         this.transaccionRepository = new TransaccionRepository();
     }
 
-    public MensajeResponse recargarSaldo(int idUsuario, RecargarRequest request) throws Exception {
+    public BigDecimal recargarSaldo(int idUsuario, RecargarRequest request) throws Exception {
+        BigDecimal nuevoSaldo;
         if (request.getMonto() == null || request.getMonto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new Exception("El monto de recarga debe ser mayor a 0.");
         }
@@ -24,8 +25,7 @@ public class TransaccionService {
         boolean exito = transaccionRepository.realizarRecarga(idUsuario, request.getMonto());
         if (!exito) throw new Exception("Error al procesar la recarga.");
 
-        BigDecimal nuevoSaldo = transaccionRepository.obtenerSaldoActual(idUsuario);
-        return new MensajeResponse("Recarga exitosa. Tu nuevo saldo es: Q" + nuevoSaldo);
+        return nuevoSaldo = transaccionRepository.obtenerSaldoActual(idUsuario);
     }
 
     public List<TransaccionResponse> obtenerHistorial(int idUsuario) throws Exception {

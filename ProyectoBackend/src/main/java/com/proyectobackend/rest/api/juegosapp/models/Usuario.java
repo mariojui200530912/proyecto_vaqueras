@@ -25,7 +25,7 @@ public class Usuario {
     private byte[] avatar;
     private Rol rol;
     private EstadoUsuario estado;
-    private BigDecimal cartera_saldo;
+    private BigDecimal carteraSaldo;
     private LocalDateTime fechaCreacion;
 
     public Integer getId() {
@@ -108,12 +108,12 @@ public class Usuario {
         this.estado = estado;
     }
 
-    public BigDecimal getCartera_saldo() {
-        return cartera_saldo;
+    public BigDecimal getCarteraSaldo() {
+        return carteraSaldo;
     }
 
-    public void setCartera_saldo(BigDecimal cartera_saldo) {
-        this.cartera_saldo = cartera_saldo;
+    public void setCartera_saldo(BigDecimal carteraSaldo) {
+        this.carteraSaldo = carteraSaldo;
     }
 
     public LocalDateTime getFechaCreacion() {
