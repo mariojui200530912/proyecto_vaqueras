@@ -65,4 +65,9 @@ export class BibliotecaService {
   tieneJuego(idUsuario: number, idJuego: number) {
     return this.http.get<boolean>(`${this.apiUrl}/biblioteca/${idJuego}/usuario/${idUsuario}`);
   }
+
+  cambiarVisibilidad(idUsuario: number, esPublica: boolean) {
+    const params = new HttpParams().set('publica', esPublica);
+    return this.http.put<MensajeResponse>(`${this.apiUrl}/biblioteca/${idUsuario}/visibilidad`, {}, { params });
+  }
 }

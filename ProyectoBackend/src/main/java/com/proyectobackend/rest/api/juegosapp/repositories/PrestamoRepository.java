@@ -15,7 +15,7 @@ public class PrestamoRepository {
     // CREAR EL REGISTRO DE PRÉSTAMO
     public void crearPrestamo(Connection conn, int idBeneficiario, int idJuego, int idDueno) throws SQLException {
         String sql = "INSERT INTO prestamo (id_beneficiario, id_juego, id_dueno, estado, fecha) " +
-                "VALUES (?, ?, ?, 'NO_INSTALADO', NOW())";
+                "VALUES (?, ?, ?, 'NO INSTALADO', NOW())";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idBeneficiario);
             ps.setInt(2, idJuego);

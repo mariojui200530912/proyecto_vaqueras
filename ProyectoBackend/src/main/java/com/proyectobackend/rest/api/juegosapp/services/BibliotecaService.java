@@ -37,4 +37,19 @@ public class BibliotecaService {
             throw new RuntimeException("Error al verificar si usuario tiene juego" + e.getMessage());
         }
     }
+
+    public boolean verificarBibliotecaPublica(int idUsuario) throws Exception {
+        try{
+            boolean esbibliotecaPublica = bibliotecaRepository.esBibliotecaPublica(idUsuario);
+            return esbibliotecaPublica;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al verficiar si biblioteca es publica " + e.getMessage());
+        }
+    }
+
+    public void cambiarVisibilidad(int idUsuario, boolean esPublica) throws Exception {
+        try (Connection conn = DBConnection.getInstance().getConnection()) {
+            bibliotecaRepository.actualizarVisibilidadBiblioteca(conn, idUsuario, esPublica);
+        }
+    }
 }

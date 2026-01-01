@@ -266,8 +266,9 @@ public class UsuarioRepository {
         usuario.setAvatar(rs.getBytes("avatar"));
         usuario.setRol(Rol.valueOf(rs.getString("rol")));
         usuario.setEstado(EstadoUsuario.valueOf(rs.getString("estado")));
-        usuario.setCartera_saldo(rs.getBigDecimal("cartera_saldo"));
+        usuario.setCarteraSaldo(rs.getBigDecimal("cartera_saldo"));
         usuario.setFechaCreacion(rs.getTimestamp("fecha_creacion").toLocalDateTime());
+        usuario.setBibliotecaPublica(rs.getBoolean("biblioteca_publica"));
 
         return usuario;
     }

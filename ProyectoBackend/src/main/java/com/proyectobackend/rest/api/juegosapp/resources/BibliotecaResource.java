@@ -68,5 +68,40 @@ public class BibliotecaResource {
                     .build();
         }
     }
+
+    @GET
+    @Path("/{idUsuario}/publica")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response obtenerPublicaBiblioteca(
+            @PathParam("idUsuario") Integer idUsuario
+    ){
+        try{
+            boolean esBibliotecaPublica = bibliotecaService.verificarBibliotecaPublica(idUsuario);
+            return Response.ok(esBibliotecaPublica).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new MensajeResponse("Error al obtener si el usuario tiene publica la biblioteca" + e.getMessage()))
+                    .build();
+        }
+
+    }
+
+    @PUT
+    @Path("/{idUsuario}/visibilidad")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response cambiarVisibilidadBiblioteca(
+            @PathParam("idUsuario") Integer idUsuario,
+            @QueryParam("publica") boolean publica
+    ) {
+        try {
+            bibliotecaService.cambiarVisibilidad(idUsuario, publica);
+            String estado = publica ? "PÚBLICA" : "PRIVADA";
+            return Response.ok(new MensajeResponse("Tu biblioteca ahora es " + estado)).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new MensajeResponse("Error al actualizar privacidad: " + e.getMessage()))
+                    .build();
+        }
+    }
 }
 

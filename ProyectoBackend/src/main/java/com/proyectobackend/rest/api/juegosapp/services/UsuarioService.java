@@ -17,7 +17,6 @@ import com.proyectobackend.rest.api.juegosapp.models.enums.Rol;
 import com.proyectobackend.rest.api.juegosapp.repositories.DBConnection;
 import com.proyectobackend.rest.api.juegosapp.repositories.EmpresaRepository;
 import com.proyectobackend.rest.api.juegosapp.repositories.UsuarioRepository;
-import com.proyectobackend.rest.api.juegosapp.utils.FileUploadUtil;
 import com.proyectobackend.rest.api.juegosapp.utils.PasswordUtil;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -63,8 +62,9 @@ public class UsuarioService {
                 usuario.setAvatar(request.getAvatar());
                 usuario.setRol(request.getRol());
                 usuario.setEstado(EstadoUsuario.ACTIVO);
-                usuario.setCartera_saldo(new BigDecimal(0.00));
+                usuario.setCarteraSaldo(new BigDecimal(0.00));
                 usuario.setFechaCreacion(LocalDateTime.now());
+                usuario.setBibliotecaPublica(Boolean.TRUE);
 
                 // Guardar usuario
                 Usuario usuarioGuardado = usuarioRepository.save(conn, usuario);
@@ -235,8 +235,9 @@ public class UsuarioService {
             response.setRolEmpresa(usuarioEmpresa.getRol_empresa());
         }
         response.setEstado(usuario.getEstado());
-        response.setCartera_saldo(usuario.getCarteraSaldo());
+        response.setCarteraSaldo(usuario.getCarteraSaldo());
         response.setFechaCreacion(usuario.getFechaCreacion());
+        response.setBibliotecaPublica(usuario.getBibliotecaPublica());
 
         return response;
     }

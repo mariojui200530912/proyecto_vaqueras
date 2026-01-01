@@ -124,4 +124,14 @@ public class BibliotecaRepository {
         }
         return null; // Retorna null si no tiene el juego
     }
+
+    public void actualizarVisibilidadBiblioteca(Connection conn, int idUsuario, boolean esPublica) throws SQLException {
+        String sql = "UPDATE usuario SET biblioteca_publica = ? WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, esPublica);
+            ps.setInt(2, idUsuario);
+            ps.executeUpdate();
+        }
+    }
 }

@@ -88,7 +88,7 @@ public class PrestamoService {
                 throw new Exception("Este préstamo no te pertenece.");
             }
             // Volvemos el estado a NO_INSTALADO para liberar el cupo
-            prestamoRepo.actualizarEstado(conn, idPrestamo, "NO_INSTALADO");
+            prestamoRepo.actualizarEstado(conn, idPrestamo, "NO INSTALADO");
         }
     }
 

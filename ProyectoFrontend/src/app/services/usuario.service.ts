@@ -33,6 +33,10 @@ export class UsuarioService {
     });
   }
 
+  obtenerUsuarioPorId(id: number) {
+    return this.http.get<Usuario>(`${this.apiUrl}/${id}`);
+  }
+
   // REGISTRAR (POST con FormData)
   registrar(datos: any, avatar: File | null) {
     const formData = new FormData();
@@ -43,7 +47,7 @@ export class UsuarioService {
     formData.append('telefono', datos.telefono);
     formData.append('pais', datos.pais);
     formData.append('rol', datos.rol); // Solo Admin puede asignar rol al crear
-    
+
     if (avatar) {
       formData.append('avatar', avatar);
     }
@@ -61,7 +65,7 @@ export class UsuarioService {
     formData.append('fechaNacimiento', datos.fechaNacimiento);
     formData.append('telefono', datos.telefono);
     formData.append('pais', datos.pais);
-    
+
     // Solo Admin puede enviar estos campos en el PUT
     if (datos.rol) formData.append('rol', datos.rol);
     if (datos.estado) formData.append('estado', datos.estado);

@@ -36,6 +36,7 @@ public class UsuarioResponse {
     private LocalDateTime fechaCreacion;
     private Integer idEmpresa;
     private String rolEmpresa;
+    private boolean bibliotecaPublica;
 
     public Integer getId() {
         return id;
@@ -113,7 +114,7 @@ public class UsuarioResponse {
         return carteraSaldo;
     }
 
-    public void setCartera_saldo(BigDecimal carteraSaldo) {
+    public void setCarteraSaldo(BigDecimal carteraSaldo) {
         this.carteraSaldo = carteraSaldo;
     }
 
@@ -139,5 +140,13 @@ public class UsuarioResponse {
 
     public void setRolEmpresa(String rolEmpresa) {
         this.rolEmpresa = rolEmpresa;
+    }
+
+    public boolean getBibliotecaPublica() {
+        return bibliotecaPublica;
+    }
+
+    public void setBibliotecaPublica(boolean bibliotecaPublica) {
+        this.bibliotecaPublica = bibliotecaPublica;
     }
 }

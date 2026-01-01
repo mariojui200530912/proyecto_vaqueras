@@ -27,6 +27,7 @@ public class Usuario {
     private EstadoUsuario estado;
     private BigDecimal carteraSaldo;
     private LocalDateTime fechaCreacion;
+    private Boolean bibliotecaPublica;
 
     public Integer getId() {
         return id;
@@ -112,7 +113,7 @@ public class Usuario {
         return carteraSaldo;
     }
 
-    public void setCartera_saldo(BigDecimal carteraSaldo) {
+    public void setCarteraSaldo(BigDecimal carteraSaldo) {
         this.carteraSaldo = carteraSaldo;
     }
 
@@ -122,5 +123,13 @@ public class Usuario {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public Boolean getBibliotecaPublica() {
+        return bibliotecaPublica;
+    }
+
+    public void setBibliotecaPublica(Boolean bibliotecaPublica) {
+        this.bibliotecaPublica = bibliotecaPublica;
     }
 }

@@ -12,4 +12,5 @@ export interface Usuario {
   fechaCreacion: Date;
   idEmpresa?: number; // Solo para rol EMPRESA
   rolEmpresa?: 'ADMIN' | 'EMPLEADO'; // Solo para rol EMPRESA
+  bibliotecaPublica?: boolean; // Solo para rol GAMER
 }

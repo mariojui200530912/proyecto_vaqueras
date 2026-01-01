@@ -17,6 +17,7 @@ import { TransaccionComponent } from './pages/transaccion/transaccion.component'
 import { CartComponent } from './pages/cart/cart.component';
 import { BibliotecaComponent } from './pages/gamer/biblioteca/biblioteca.component';
 import { GrupoComponent } from './pages/gamer/grupo/grupo.component';
+import { PerfilComponent } from './pages/gamer/perfil/perfil.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -94,9 +95,15 @@ export const routes: Routes = [
         path: 'usuario/biblioteca',
         component: BibliotecaComponent,
         canActivate: [authGuard]
-    },{
+    },
+    {
         path: 'usuario/grupo',
         component: GrupoComponent,
         canActivate: [authGuard]
-    }
+    },
+    {
+        path: 'usuario/:id',
+        component: PerfilComponent,
+        canActivate: [authGuard]
+    },
 ];
