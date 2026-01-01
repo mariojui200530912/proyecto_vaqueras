@@ -28,6 +28,11 @@
               </a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" routerLink="/admin/usuarios" routerLinkActive="active">
+                <i class="bi bi-people"></i> Usuarios
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" routerLink="/admin/reportes" routerLinkActive="active">
                 <i class="bi bi-file-earmark-bar-graph"></i> Reportes
               </a>
@@ -36,12 +41,12 @@
 
           @if (user.rol === 'EMPRESA') {
             <li class="nav-item">
-              <a class="nav-link" routerLink="/empresa/dashboard" routerLinkActive="active">
+              <a class="nav-link" [routerLink]="['/empresa', user.id]" routerLinkActive="active">
                 <i class="bi bi-joystick"></i> Mis Juegos
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" routerLink="/empresa/nuevo-juego" routerLinkActive="active">
+              <a class="nav-link" routerLink="/empresa/juego/nuevo" routerLinkActive="active">
                 <i class="bi bi-plus-circle"></i> Publicar
               </a>
             </li>
@@ -54,8 +59,13 @@
 
           @if (user.rol === 'GAMER') {
             <li class="nav-item">
-              <a class="nav-link" routerLink="/biblioteca" routerLinkActive="active">
+              <a class="nav-link" routerLink="/usuario/biblioteca" routerLinkActive="active">
                 <i class="bi bi-collection-play"></i> Mi Biblioteca
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/usuario/grupo" routerLinkActive="active">
+                <i class="bi bi-people-fill"></i> Mi Grupo
               </a>
             </li>
           }
@@ -66,7 +76,7 @@
           <li class="nav-item dropdown ms-lg-3">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
               
-              <img [src]="user.avatar" 
+              <img [src]="user.avatar || 'assets/images/default-avatar.png'" 
                    class="rounded-circle border border-secondary" 
                    style="width: 35px; height: 35px; object-fit: cover;"
                    alt="Avatar">
@@ -88,10 +98,23 @@
               </li>
               <li><hr class="dropdown-divider"></li>
               
-              <li><a class="dropdown-item" routerLink="/perfil"><i class="bi bi-person-gear"></i> Mi Perfil</a></li>
+              <li>
+                <a class="dropdown-item" [routerLink]="['/usuario', user.id]">
+                  <i class="bi bi-person-gear"></i> Mi Perfil
+                </a>
+              </li>
               
               @if(user.rol === 'GAMER'){
-                <li><a class="dropdown-item" routerLink="/historial-compras"><i class="bi bi-receipt"></i> Compras</a></li>
+                <li>
+                  <a class="dropdown-item" routerLink="/transaccion">
+                    <i class="bi bi-receipt"></i> Recargas/Compras
+                  </a>
+                </li>
+                <li>
+                 <a class="dropdown-item" routerLink="/mi-perfil/reportes">
+                    <i class="bi bi-file-earmark-bar-graph"></i> Reportes
+                  </a>
+                </li>
               }
 
               <li><hr class="dropdown-divider"></li>
